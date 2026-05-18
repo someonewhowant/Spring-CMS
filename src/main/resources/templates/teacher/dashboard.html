@@ -3,26 +3,185 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layouts/main}">
 <head>
-    <title>Teacher Dashboard</title>
+    <title>Teacher Command Center - CodeBlog</title>
 </head>
 <body>
-    <div layout:fragment="content" class="container py-l" style="padding-top: 60px;">
-        <div class="card-glass" style="padding: 40px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius);">
-            <h1 class="text-green font-mono" th:text="${message}">Welcome message</h1>
-            <p style="margin-top: 20px; opacity: 0.8; font-family: var(--font-mono); color: var(--text-main);">
-                Добро пожаловать в личный кабинет преподавателя. Здесь вы сможете создавать курсы, управлять модулями, вопросами и квизами.
-            </p>
-            <div style="margin-top: 40px; display: flex; gap: 16px;">
-                <a th:href="@{/teacher/courses}" class="btn btn-outline btn-orange">
-                    <i class="bi bi-terminal"></i> manage_courses()
-                </a>
+    <div layout:fragment="content" class="container py-l fade-in">
+        <!-- Dashboard Terminal Header -->
+        <div class="admin-header">
+            <h1 class="text-green font-mono" th:text="${currentUser} + '@cabinet:~$'">teacher@cabinet:~$</h1>
+            <div class="admin-actions" style="display: flex; gap: 12px; align-items: center;">
+                <span class="profile-role-badge teacher" style="font-family: var(--font-mono); font-size: 0.75rem;">TEACHER_CONSOLE</span>
                 <form th:action="@{/logout}" method="POST" style="margin: 0;">
-                    <button type="submit" class="btn btn-outline">
+                    <button type="submit" class="btn btn-outline btn-xs" style="border-color: var(--border-subtle);" onmouseover="this.style.borderColor='var(--accent-red)'" onmouseout="this.style.borderColor='var(--border-subtle)'">
                         <i class="bi bi-box-arrow-right"></i> logout()
                     </button>
                 </form>
             </div>
         </div>
+
+        <!-- Welcome Banner / Teacher Profile -->
+        <div class="card-glass" style="padding: clamp(1.5rem, 4vw, 2.5rem); margin-bottom: 32px; background: linear-gradient(135deg, rgba(88, 166, 255, 0.03) 0%, rgba(188, 140, 255, 0.03) 100%); display: flex; gap: 28px; align-items: flex-start; flex-wrap: wrap;">
+            <!-- Profile Avatar Preview -->
+            <div style="flex-shrink: 0; text-align: center; width: 100px;">
+                <img th:if="${user != null and user.avatarUrl != null}" th:src="${user.avatarUrl}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent-blue); background: var(--bg-body); box-shadow: 0 0 20px rgba(88, 166, 255, 0.2);">
+                <div th:if="${user == null or user.avatarUrl == null}" class="avatar-circle" style="width: 100px; height: 100px; border-radius: 50%; font-size: 2.5rem; margin: 0 auto; display: flex; align-items: center; justify-content: center; border: 2px solid var(--border-subtle);" th:text="${#strings.substring(currentUser, 0, 1).toUpperCase()}">U</div>
+            </div>
+            
+            <div style="flex: 1; min-width: 250px;">
+                <h2 class="text-green font-mono" style="font-size: 1.6rem; margin: 0 0 4px;" th:text="${user != null and user.fullName != null and user.fullName != '' ? user.fullName : currentUser}">Teacher Full Name</h2>
+                <div th:if="${user != null and user.title != null and user.title != ''}" class="font-mono text-blue" style="font-size: 0.85rem; margin-bottom: 12px; font-weight: 500;" th:text="${user.title}">Senior LMS Architect</div>
+                
+                <p style="margin: 0 0 16px; opacity: 0.85; font-family: var(--font-mono); font-size: 0.9rem; color: var(--text-main); line-height: 1.6;" th:text="${user != null and user.bio != null and user.bio != '' ? user.bio : 'Добро пожаловать в личный кабинет преподавателя. Настройте свои персональные данные в настройках профиля, чтобы студенты могли ознакомиться с вашим профессиональным бэкграундом.'}">
+                    Добро пожаловать в командный центр преподавателя. Здесь вы можете создавать новые курсы, настраивать учебные модули, загружать лекции, составлять интерактивные квизы и контролировать процесс обучения студентов.
+                </p>
+                
+                <!-- Social media buttons for instructor -->
+                <div th:if="${user != null and ((user.githubUrl != null and user.githubUrl != '') or (user.linkedinUrl != null and user.linkedinUrl != '') or (user.email != null and user.email != ''))}" style="display: flex; gap: 12px; align-items: center;">
+                    <a th:if="${user.githubUrl != null and user.githubUrl != ''}" th:href="${user.githubUrl}" target="_blank" class="btn btn-outline btn-xs" style="border-color: var(--border-subtle);"><i class="bi bi-github"></i> github</a>
+                    <a th:if="${user.linkedinUrl != null and user.linkedinUrl != ''}" th:href="${user.linkedinUrl}" target="_blank" class="btn btn-outline btn-xs" style="border-color: var(--border-subtle);"><i class="bi bi-linkedin"></i> linkedin</a>
+                    <a th:if="${user.email != null and user.email != ''}" th:href="'mailto:' + ${user.email}" class="btn btn-outline btn-xs" style="border-color: var(--border-subtle);"><i class="bi bi-envelope"></i> contact_email</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <!-- Courses Stat -->
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="bi bi-journal-code"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value" th:text="${coursesCount}">0</span>
+                    <span class="stat-label">Courses Managed</span>
+                </div>
+            </div>
+
+            <!-- Quizzes Stat -->
+            <div class="stat-card">
+                <div class="stat-icon purple">
+                    <i class="bi bi-question-circle"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value" th:text="${quizzesCount}">0</span>
+                    <span class="stat-label">Quizzes Compiled</span>
+                </div>
+            </div>
+
+            <!-- Active User Role Stat -->
+            <div class="stat-card">
+                <div class="stat-icon orange">
+                    <i class="bi bi-person-badge"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value" style="font-size: 1.1rem; letter-spacing: 0.05em;" th:text="${currentUserRole}">ROLE_TEACHER</span>
+                    <span class="stat-label">Security Privilege</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Action Modules -->
+        <h3 class="font-mono text-dim" style="font-size: 0.85rem; text-transform: uppercase; margin-bottom: 20px; letter-spacing: 0.08em;">
+            <i class="bi bi-terminal"></i> executable_commands
+        </h3>
+        
+        <div class="courses-grid" style="margin-bottom: 32px;">
+            <!-- Course Management Card -->
+            <div class="card-glass course-card" style="padding: 24px;">
+                <div class="stat-icon orange" style="margin-bottom: 20px;">
+                    <i class="bi bi-folder-symlink"></i>
+                </div>
+                <h3 class="course-card__title" style="margin: 0 0 10px; font-size: 1.2rem; font-family: var(--font-mono);">manage_courses()</h3>
+                <p class="course-card__description" style="margin-bottom: 24px; font-size: 0.85rem;">
+                    Structure new learning syllabus, import articles from markdown, manage lesson plans, and bind interactive quizzes.
+                </p>
+                <a th:href="@{/teacher/courses}" class="btn btn-outline btn-orange w-full mt-auto">
+                    <i class="bi bi-arrow-right-short"></i> Open Course Builder
+                </a>
+            </div>
+
+            <!-- Profile Settings Card -->
+            <div class="card-glass course-card" style="padding: 24px;">
+                <div class="stat-icon" style="margin-bottom: 20px;">
+                    <i class="bi bi-sliders2"></i>
+                </div>
+                <h3 class="course-card__title" style="margin: 0 0 10px; font-size: 1.2rem; font-family: var(--font-mono);">profile_settings()</h3>
+                <p class="course-card__description" style="margin-bottom: 24px; font-size: 0.85rem;">
+                    Configure secure access credentials, reset passwords, change display username, and audit your authorization level.
+                </p>
+                <a th:href="@{/profile/settings}" class="btn btn-outline btn-blue w-full mt-auto">
+                    <i class="bi bi-arrow-right-short"></i> Open Profile Settings
+                </a>
+            </div>
+
+            <!-- Student View Card -->
+            <div class="card-glass course-card" style="padding: 24px;">
+                <div class="stat-icon green" style="margin-bottom: 20px;">
+                    <i class="bi bi-mortarboard"></i>
+                </div>
+                <h3 class="course-card__title" style="margin: 0 0 10px; font-size: 1.2rem; font-family: var(--font-mono);">view_academy()</h3>
+                <p class="course-card__description" style="margin-bottom: 24px; font-size: 0.85rem;">
+                    Access live student views, browse active courses, test interactive lesson flows, and inspect published syllabus states.
+                </p>
+                <a th:href="@{/courses}" class="btn btn-outline btn-green w-full mt-auto">
+                    <i class="bi bi-arrow-right-short"></i> Browse Student Academy
+                </a>
+            </div>
+        </div>
+
+        <!-- Terminal Diagnostics Widget -->
+        <div class="terminal-console">
+            <div class="terminal-console-header">
+                <div class="terminal-dots">
+                    <span class="terminal-dot red"></span>
+                    <span class="terminal-dot yellow"></span>
+                    <span class="terminal-dot green"></span>
+                </div>
+                <span class="font-mono">bash - cabinet_diagnostics.sh</span>
+                <span>tty1</span>
+            </div>
+            <div class="terminal-line">
+                <span class="terminal-prompt">guest@codeblog:~$</span>
+                <span class="terminal-command">ssh -T <span th:text="${currentUser}">teacher</span>@localhost</span>
+            </div>
+            <div class="terminal-line">
+                <span class="terminal-output">Welcome to CodeBlog Academy Command Panel!</span>
+                <span class="terminal-output">Last login: <span th:text="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd HH:mm')}">2026-05-18</span> from 127.0.0.1</span>
+                <span class="terminal-output" th:text="'User context initialized: [UID: 2048 | Role: ' + ${currentUserRole} + ' | Auth: SECURE]'">User context initialized: [UID: 2048 | Role: ROLE_TEACHER | Auth: SECURE]</span>
+            </div>
+            <div class="terminal-line">
+                <span class="terminal-prompt" th:text="${currentUser} + '@localhost:~$'">teacher@localhost:~$</span>
+                <span class="terminal-command">cat sys_status.log</span>
+            </div>
+            <div class="terminal-line">
+                <span class="terminal-output text-green">■ SYSTEM STATUS: ONLINE</span>
+                <span class="terminal-output" th:text="'■ MENTOR CONTEXT: ' + (${user != null and user.fullName != null and user.fullName != ''} ? ${user.fullName} : 'NOT_SET') + ' (' + (${user != null and user.title != null and user.title != ''} ? ${user.title} : 'NO_SPECIALIZATION') + ')'">■ MENTOR CONTEXT: NOT_SET</span>
+                <span class="terminal-output" th:text="'■ CONTACT PORTAL: ' + (${user != null and user.email != null and user.email != ''} ? ${user.email} : 'OFFLINE')">■ CONTACT PORTAL: OFFLINE</span>
+                <span class="terminal-output" th:text="'■ SOCIAL LINKS: GitHub=' + (${user != null and user.githubUrl != null and user.githubUrl != ''} ? ${user.githubUrl} : 'N/A') + ' | LinkedIn=' + (${user != null and user.linkedinUrl != null and user.linkedinUrl != ''} ? ${user.linkedinUrl} : 'N/A')">■ SOCIAL LINKS: N/A</span>
+                <span class="terminal-output" th:text="'■ ALLOCATED METRICS: ' + ${coursesCount} + ' courses, ' + ${quizzesCount} + ' quizzes loaded into context.'">■ ALLOCATED METRICS: 4 courses, 3 quizzes loaded into context.</span>
+                <span class="terminal-output">■ DEPLOYMENT ARCHITECTURE: SPRING SECURITY BLOCKED-FLOW ROUTING</span>
+            </div>
+            <div class="terminal-line">
+                <span class="terminal-prompt" th:text="${currentUser} + '@localhost:~$'">teacher@localhost:~$</span>
+                <span class="terminal-command"><span class="blink">_</span></span>
+            </div>
+        </div>
     </div>
+
+    <!-- Micro-animation script to simulate blinking terminal cursor -->
+    <th:block layout:fragment="scripts">
+        <style>
+            @keyframes blink {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0; }
+            }
+            .blink {
+                animation: blink 1s step-end infinite;
+                color: var(--accent-green);
+                font-weight: bold;
+            }
+        </style>
+    </th:block>
 </body>
 </html>

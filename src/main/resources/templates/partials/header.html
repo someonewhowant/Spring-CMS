@@ -13,6 +13,12 @@
                 <li th:if="${currentUserRole == 'ROLE_STUDENT'}"><a th:href="@{/student/dashboard}" th:classappend="${currentUri != null and currentUri.startsWith('/student')} ? 'active'">/cabinet</a></li>
                 <li th:if="${currentUser == null}"><a th:href="@{/admin/login}" th:classappend="${currentUri == '/admin/login'} ? 'active'">/login</a></li>
                 <li th:if="${currentUser != null}">
+                    <a th:href="@{/profile/settings}" th:classappend="${currentUri == '/profile/settings'} ? 'active'" style="display: inline-flex; align-items: center; gap: 8px;">
+                        <img th:if="${currentUserObj != null and currentUserObj.avatarUrl != null}" th:src="${currentUserObj.avatarUrl}" style="width: 18px; height: 18px; border-radius: 50%; object-fit: cover; border: 1px solid var(--accent-blue); vertical-align: middle;">
+                        <span>/settings</span>
+                    </a>
+                </li>
+                <li th:if="${currentUser != null}">
                     <form th:action="@{/logout}" method="POST" style="display: inline; margin: 0; padding: 0;">
                         <button type="submit" style="border: none; background: transparent; color: var(--text-dim); cursor: pointer; font-family: var(--font-mono); font-size: inherit; padding: 0; font-weight: inherit;" onmouseover="this.style.color='var(--accent-red)'" onmouseout="this.style.color='var(--text-dim)'">
                             /logout

@@ -1,5 +1,7 @@
 package com.example.blog.controller;
 
+import com.example.blog.entity.User;
+import com.example.blog.repository.UserRepository;
 import com.example.blog.service.PostService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +15,16 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 public class GlobalControllerAdvice {
 
     private final PostService postService;
+    private final UserRepository userRepository;
+
+    @ModelAttribute("currentUserObj")
+    public User currentUserObj() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && !auth.getPrincipal().equals("anonymousUser")) {
+            return userRepository.findByUsername(auth.getName()).orElse(null);
+        }
+        return null;
+    }
 
     @ModelAttribute("categories")
     public Object categories() {

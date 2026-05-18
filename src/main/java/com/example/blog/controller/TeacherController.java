@@ -13,6 +13,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import com.example.blog.repository.UserRepository;
+import java.security.Principal;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -27,11 +29,27 @@ public class TeacherController {
     private final CourseService courseService;
     private final QuizService quizService;
     private final FileStorageService fileStorageService;
+    private final UserRepository userRepository;
 
     @GetMapping("/dashboard")
-    public String dashboard(Model model) {
-        model.addAttribute("message", "Вы вошли как Преподаватель");
+    public String dashboard(Principal principal, Model model) {
+        if (principal == null) {
+            return "redirect:/admin/login";
+        }
+        com.example.blog.entity.User user = userRepository.findByUsername(principal.getName()).orElse(null);
+        model.addAttribute("user", user);
+
+        java.util.List<Course> courses = courseService.getAllCourses();
+        int totalCourses = courses.size();
+        int totalQuizzes = 0;
+        for (Course c : courses) {
+            totalQuizzes += quizService.getQuizzesByCourseId(c.getId()).size();
+        }
+
+        model.addAttribute("message", "Добро пожаловать в командный центр преподавателя!");
         model.addAttribute("title", "Teacher Cabinet");
+        model.addAttribute("coursesCount", totalCourses);
+        model.addAttribute("quizzesCount", totalQuizzes);
         return "teacher/dashboard";
     }
 
