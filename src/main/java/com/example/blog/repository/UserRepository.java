@@ -12,4 +12,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * Поиск пользователя по имени (необходим для аутентификации).
      */
     Optional<User> findByUsername(String username);
+
+    /**
+     * Поиск пользователей по роли (например, ROLE_STUDENT).
+     */
+    java.util.List<User> findByRole(com.example.blog.entity.Role role);
 }

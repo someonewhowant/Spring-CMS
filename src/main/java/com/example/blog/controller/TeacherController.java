@@ -14,6 +14,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.example.blog.repository.UserRepository;
+import com.example.blog.repository.UserQuizResultRepository;
 import java.security.Principal;
 
 import java.io.IOException;
@@ -30,6 +31,7 @@ public class TeacherController {
     private final QuizService quizService;
     private final FileStorageService fileStorageService;
     private final UserRepository userRepository;
+    private final UserQuizResultRepository userQuizResultRepository;
 
     @GetMapping("/dashboard")
     public String dashboard(Principal principal, Model model) {
@@ -46,10 +48,13 @@ public class TeacherController {
             totalQuizzes += quizService.getQuizzesByCourseId(c.getId()).size();
         }
 
+        int totalStudents = userRepository.findByRole(com.example.blog.entity.Role.STUDENT).size();
+
         model.addAttribute("message", "Добро пожаловать в командный центр преподавателя!");
         model.addAttribute("title", "Teacher Cabinet");
         model.addAttribute("coursesCount", totalCourses);
         model.addAttribute("quizzesCount", totalQuizzes);
+        model.addAttribute("studentsCount", totalStudents);
         return "teacher/dashboard";
     }
 
@@ -319,5 +324,70 @@ public class TeacherController {
     public String deleteQuestion(@PathVariable Long quizId, @PathVariable Long questionId) {
         quizService.deleteQuestion(questionId);
         return "redirect:/teacher/quizzes/" + quizId + "/questions";
+    }
+
+    /**
+     * Просмотр студентов Академии и метрик их успеваемости.
+     */
+    @GetMapping("/students")
+    public String browseStudents(Principal principal,
+                                 @RequestParam(value = "search", required = false) String search,
+                                 Model model) {
+        if (principal == null) {
+            return "redirect:/admin/login";
+        }
+        com.example.blog.entity.User user = userRepository.findByUsername(principal.getName()).orElse(null);
+        model.addAttribute("user", user);
+        model.addAttribute("currentUser", principal.getName());
+        model.addAttribute("currentUserRole", "ROLE_" + (user != null ? user.getRole().name() : "TEACHER"));
+        model.addAttribute("title", "Browse Students");
+
+        List<com.example.blog.entity.User> allStudents = userRepository.findByRole(com.example.blog.entity.Role.STUDENT);
+        List<StudentProgressDto> studentProgressList = new ArrayList<>();
+
+        for (com.example.blog.entity.User student : allStudents) {
+            // Фильтр поиска
+            if (search != null && !search.trim().isEmpty()) {
+                String searchLower = search.toLowerCase().trim();
+                boolean matchesName = student.getFullName() != null && student.getFullName().toLowerCase().contains(searchLower);
+                boolean matchesUsername = student.getUsername() != null && student.getUsername().toLowerCase().contains(searchLower);
+                boolean matchesEmail = student.getEmail() != null && student.getEmail().toLowerCase().contains(searchLower);
+                if (!matchesName && !matchesUsername && !matchesEmail) {
+                    continue;
+                }
+            }
+
+            List<com.example.blog.entity.UserQuizResult> results = userQuizResultRepository.findByUserId(student.getId());
+            int completedCount = results.size();
+            double avgScore = 0.0;
+            if (completedCount > 0) {
+                double total = 0.0;
+                for (com.example.blog.entity.UserQuizResult res : results) {
+                    total += res.getScore();
+                }
+                avgScore = Math.round((total / completedCount) * 10.0) / 10.0;
+            }
+            studentProgressList.add(new StudentProgressDto(student, completedCount, avgScore, results));
+        }
+
+        model.addAttribute("students", studentProgressList);
+        model.addAttribute("searchQuery", search);
+        return "teacher/students";
+    }
+
+    @lombok.Getter
+    @lombok.RequiredArgsConstructor
+    public static class StudentProgressDto {
+        private final com.example.blog.entity.User student;
+        private final int completedQuizzesCount;
+        private final double averageScore;
+        private final List<com.example.blog.entity.UserQuizResult> quizResults;
+
+        public String getPerformanceRating() {
+            if (completedQuizzesCount == 0) return "NO_SUBMISSIONS";
+            if (averageScore >= 4.5) return "ELITE_DEV";
+            if (averageScore >= 3.5) return "ADVANCED_CODER";
+            return "APPRENTICE";
+        }
     }
 }
