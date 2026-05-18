@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title th:text="${title}">Edit Module</title>
+</head>
+<body>
+    <div layout:fragment="content" class="container py-l">
+        <div class="admin-header">
+            <h1 th:text="'root@admin:~/courses/' + ${course.id} + '/modules/' + ${module.id} + '/edit$'">root@admin:~/courses/1/modules/1/edit$</h1>
+            <div class="admin-actions">
+                <a th:href="@{/admin/courses/{id}/modules(id=${course.id})}" class="btn btn-outline btn-orange">
+                    <i class="bi bi-arrow-left"></i> back_to_modules()
+                </a>
+            </div>
+        </div>
+
+        <div class="post-form-container fade-in mt-3xl">
+            <h2 class="mb-xl text-green font-mono text-l">
+                <i class="bi bi-pencil"></i> edit_module()
+            </h2>
+            <form th:action="@{/admin/courses/{courseId}/modules/{moduleId}/edit(courseId=${course.id}, moduleId=${module.id})}" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="title" class="form-label">// STRING: module_title</label>
+                    <input type="text" id="title" name="title" th:value="${module.title}" placeholder="Introduction to Spring Boot..." class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="file" class="form-label" style="color: var(--accent-blue);">// FILE: content_import (.md) - will overwrite current content</label>
+                    <input type="file" id="file" name="file" accept=".md" class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <label for="content" class="form-label" style="color: var(--accent-purple);">// TEXT: module_content (markdown)</label>
+                    <textarea id="content" name="content" th:text="${module.content}" rows="15" placeholder="## Welcome..." class="form-control"></textarea>
+                </div>
+
+                <div style="margin-top: 32px;">
+                    <button type="submit" class="btn btn-primary btn-large" style="width: 100%;">
+                        <i class="bi bi-terminal"></i> update_module()
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <th:block layout:fragment="scripts">
+        <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+        <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+        <script>
+            const easyMDE = new EasyMDE({
+                element: document.getElementById('content'),
+                spellChecker: false,
+                autosave: {
+                    enabled: true,
+                    uniqueId: "editModuleContent_" + [[${module.id}]],
+                    delay: 1000,
+                },
+                placeholder: "## Welcome...",
+                minHeight: "400px"
+            });
+        </script>
+        <style>
+            .EasyMDEContainer { background: var(--bg-dark); border-radius: var(--radius); margin-top: 8px; }
+            .editor-toolbar { border-color: var(--border-subtle) !important; background: var(--bg-surface) !important; border-radius: var(--radius) var(--radius) 0 0 !important; }
+            .editor-toolbar button { color: var(--text-main) !important; }
+            .editor-toolbar button:hover, .editor-toolbar button.active { background: var(--bg-dark) !important; border-color: var(--border-active) !important; }
+            .CodeMirror { background: var(--bg-dark) !important; color: var(--text-main) !important; border-color: var(--border-subtle) !important; border-radius: 0 0 var(--radius) var(--radius) !important; font-family: var(--font-mono) !important; }
+            .editor-preview-active { background: var(--bg-dark) !important; color: var(--text-main) !important; }
+            .editor-statusbar { color: var(--text-dim) !important; }
+        </style>
+    </th:block>
+</body>
+</html>

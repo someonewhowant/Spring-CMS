@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title th:text="${title}">Quiz</title>
+</head>
+<body>
+    <div layout:fragment="content" class="container py-l">
+        <div class="post">
+            <header class="post-header fade-in">
+                <div class="post-category">QUIZ</div>
+                <h1 class="post-title" th:text="${quiz.title}">Quiz Title</h1>
+                <div class="post-meta">
+                    <span th:text="${#lists.size(quiz.questions)} + ' questions'">0 questions</span>
+                </div>
+            </header>
+
+            <div class="reading-container">
+                <!-- Premium Quiz Form -->
+                <form th:if="${submitted == null}" th:action="@{/quiz/{id}/submit(id=${quiz.id})}" method="POST">
+                    <div th:each="question, qStat : ${quiz.questions}" class="quiz-question-modern reveal-on-scroll">
+                        <div class="flex gap-xl mb-xl">
+                            <span class="text-accent-mono text-blue font-bold text-xl" th:text="${#numbers.formatInteger(qStat.count, 2)}">01</span>
+                            <h3 class="font-sans text-main font-semibold leading-relaxed" th:text="${question.text}">Question text</h3>
+                        </div>
+                        
+                        <div class="quiz-options">
+                            <label th:each="option : ${question.options}" class="quiz-option-modern">
+                                <input type="radio" th:name="'question_' + ${question.id}" th:value="${option.id}" required>
+                                <div class="quiz-option-modern__content">
+                                    <div class="quiz-option-modern__indicator"></div>
+                                    <span th:text="${option.text}">Option text</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-3xl">
+                        <button type="submit" class="btn btn-primary btn-large min-w-280 btn-orange">
+                            <i class="bi bi-send-check-fill"></i> Submit Assessment
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Premium Results Section -->
+                <div th:if="${submitted != null}" class="quiz-results fade-in">
+                    <div class="score-summary-premium">
+                        <h2 class="font-mono mb-xl text-dim text-xs tracking-widest">// ASSESSMENT_SCORE</h2>
+                        
+                        <div class="score-visual" th:classappend="${isPassed} ? 'score-visual--pass' : 'score-visual--fail'">
+                            <span class="score-number" th:text="${score}">8</span>
+                            <span class="score-label" th:text="'of ' + ${total}">of 10</span>
+                        </div>
+
+                        <div th:if="${isPassed}" class="pass-badge mb-xl text-m">
+                            <i class="bi bi-patch-check-fill"></i> PASSED_UNLOCKED
+                        </div>
+                        <div th:unless="${isPassed}" class="fail-badge mb-xl text-m">
+                            <i class="bi bi-exclamation-triangle-fill"></i> FAILED_STILL_LOCKED
+                        </div>
+
+                        <p class="text-dim text-l max-w-450 leading-relaxed">
+                            <th:block th:if="${isPassed}">Congratulations! You've successfully passed the assessment and unlocked the next phase of the course.</th:block>
+                            <th:block th:unless="${isPassed}">You didn't reach the required passing score. Review the material and try again to unlock the next module.</th:block>
+                        </p>
+                        
+                        <div class="mt-2xl flex justify-center gap-xl">
+                            <a th:if="${moduleId != null}" th:href="@{/course/{courseId}/module/{mId}(courseId=${quiz.course.id}, mId=${moduleId})}" class="btn btn-outline">
+                                <i class="bi bi-arrow-left"></i> Back to Module
+                            </a>
+                            <a th:unless="${moduleId != null}" th:href="@{/course/{id}(id=${quiz.course.id})}" class="btn btn-outline">
+                                <i class="bi bi-arrow-left"></i> Course Map
+                            </a>
+                            
+                            <a th:if="${not isPassed}" th:href="@{/quiz/{id}(id=${quiz.id}, moduleId=${moduleId})}" class="btn btn-primary btn-orange py-m px-xl">
+                                <i class="bi bi-arrow-clockwise"></i> Retake Assessment
+                            </a>
+                            
+                            <a th:if="${isPassed and nextModule != null}" th:href="@{/course/{courseId}/module/{mId}(courseId=${courseId}, mId=${nextModule.id})}" class="btn btn-primary btn-green py-m px-xl">
+                                Continue to Next Module <i class="bi bi-arrow-right"></i>
+                            </a>
+                            <a th:if="${isPassed and nextModule == null and moduleId != null}" th:href="@{/course/{id}(id=${quiz.course.id})}" class="btn btn-primary btn-green py-m px-xl">
+                                Finish Course <i class="bi bi-check2-circle"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="detailed-results mt-3xl">
+                        <h3 class="font-mono mb-2xl text-blue text-l">// DETAILED_REVIEW</h3>
+                        <div th:each="res, rStat : ${results}" class="result-card-premium" th:classappend="${res.isCorrect} ? 'correct' : 'incorrect'">
+                            <div class="flex gap-xl">
+                                <span class="font-mono opacity-50 font-bold" th:text="${#numbers.formatInteger(rStat.count, 2)}">01</span>
+                                <div class="flex-1">
+                                    <h4 th:text="${res.question}" class="mb-xl font-semibold leading-relaxed">Question?</h4>
+                                    
+                                    <div class="grid grid-2 gap-3xl">
+                                        <div class="bg-surface-subtle p-m rounded">
+                                            <div class="text-dim text-3xs font-mono uppercase mb-xs">Your Choice</div>
+                                            <div th:text="${res.selected}" th:classappend="${res.isCorrect} ? 'text-green font-semibold' : 'text-red font-semibold'">Answer</div>
+                                        </div>
+                                        <div th:if="${not res.isCorrect}" class="bg-green-faded p-m rounded border-green-faded">
+                                            <div class="text-dim text-3xs font-mono uppercase mb-xs text-green">Correct Answer</div>
+                                            <div th:text="${res.correct}" class="text-green font-semibold">Correct Answer</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-xl">
+                                    <i th:if="${res.isCorrect}" class="bi bi-check-circle-fill text-green"></i>
+                                    <i th:unless="${res.isCorrect}" class="bi bi-x-circle-fill text-red"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="scripts">
+        <style>
+            .quiz-option-modern:last-child { margin-bottom: 0; }
+            .text-success { color: var(--accent-green); }
+            .text-dim { color: var(--text-dim); }
+            .detailed-results { margin-top: 80px; }
+        </style>
+    </th:block>
+</body>
+</html>

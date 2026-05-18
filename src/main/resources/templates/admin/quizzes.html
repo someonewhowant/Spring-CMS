@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title th:text="${title}">Manage Quizzes</title>
+</head>
+<body>
+    <div layout:fragment="content" class="container py-l">
+        <div class="admin-header">
+            <h1 th:text="'root@admin:~/courses/' + ${course.id} + '/quizzes$'">root@admin:~/courses/1/quizzes$</h1>
+            <div class="admin-actions">
+                <a th:href="@{/admin/courses}" class="btn btn-outline btn-orange">
+                    <i class="bi bi-arrow-left"></i> back_to_courses()
+                </a>
+            </div>
+        </div>
+
+        <div class="admin-table-wrapper" style="margin-bottom: 40px;">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>QUIZ_TITLE</th>
+                        <th>QUESTIONS_COUNT</th>
+                        <th style="text-align: right;">ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="quiz : ${quizzes}">
+                        <td th:text="${quiz.id}">1</td>
+                        <td th:text="${quiz.title}">Quiz Title</td>
+                        <td th:text="${#lists.size(quiz.questions)}">0</td>
+                        <td>
+                            <div class="admin-actions" style="justify-content: flex-end;">
+                                <a th:href="@{/admin/quizzes/{id}/questions(id=${quiz.id})}" class="btn btn-outline btn-green btn-xs">
+                                    <i class="bi bi-list-check"></i> QUESTIONS
+                                </a>
+                                <a th:href="@{/admin/delete-quiz/{courseId}/{quizId}(courseId=${course.id}, quizId=${quiz.id})}" 
+                                   class="btn btn-outline btn-delete btn-xs" 
+                                   onclick="return confirm('rm -rf this_quiz?')">
+                                    <i class="bi bi-trash3"></i> DELETE
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(quizzes)}">
+                        <td colspan="4" class="text-center py-2xl text-dim">
+                            No quizzes found. Use the form below to create_quiz().
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="post-form-container fade-in">
+            <h2 class="section-title text-orange font-mono text-m mb-xl">
+                <i class="bi bi-plus-lg"></i> create_new_quiz()
+            </h2>
+            <form th:action="@{/admin/courses/{id}/quizzes(id=${course.id})}" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="title" class="form-label">// STRING: quiz_title (optional if using file)</label>
+                    <input type="text" id="title" name="title" placeholder="Spring Boot Basics Quiz..." class="form-control">
+                </div>
+
+                <div class="form-group mt-xl">
+                    <label for="file" class="form-label">// FILE: import_from_file (.md, .gift)</label>
+                    <input type="file" id="file" name="file" class="form-control" accept=".md,.gift">
+                </div>
+
+                <div class="mt-2xl">
+                    <button type="submit" class="btn btn-primary btn-large btn-orange w-full">
+                        <i class="bi bi-terminal"></i> deploy_quiz()
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

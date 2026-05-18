@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title>Edit Post</title>
+    <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+    <style>
+        .EasyMDEContainer { background: var(--bg-dark); border-radius: var(--radius); margin-top: 8px; }
+        .editor-toolbar { border-color: var(--border-subtle) !important; background: var(--bg-surface) !important; border-radius: var(--radius) var(--radius) 0 0 !important; }
+        .editor-toolbar button { color: var(--text-main) !important; }
+        .editor-toolbar button:hover, .editor-toolbar button.active { background: var(--bg-dark) !important; border-color: var(--border-active) !important; }
+        .CodeMirror { background: var(--bg-dark) !important; color: var(--text-main) !important; border-color: var(--border-subtle) !important; border-radius: 0 0 var(--radius) var(--radius) !important; font-family: var(--font-mono) !important; }
+        .editor-preview-active { background: var(--bg-dark) !important; color: var(--text-main) !important; }
+        .editor-statusbar { color: var(--text-dim) !important; }
+    </style>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="admin-header">
+            <h1>edit_post.py</h1>
+            <a th:href="@{/admin/dashboard}" class="btn btn-outline btn-orange">
+                <i class="bi bi-x-lg"></i> discard_changes()
+            </a>
+        </div>
+        
+        <div class="form-card mt-xl">
+            <form th:action="@{/admin/edit-post/{id}(id=${post.id})}" method="POST" enctype="multipart/form-data">
+                
+                <div class="form-group">
+                    <label for="title" class="form-label">// STRING: title</label>
+                    <input type="text" id="title" name="title" th:value="${post.title}" placeholder="Post Title" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="image" class="form-label text-orange">// FILE: image (leave empty to keep current)</label>
+                    <input type="file" id="image" name="image" accept="image/*" class="form-control">
+                    <div th:if="${post.imageUrl}" class="mt-m flex items-center gap-m">
+                        <img th:src="${post.imageUrl}" class="rounded border-active" style="max-width: 120px;">
+                        <span class="hero-label m-0">Current asset path</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="markdownFile" class="form-label text-blue">// FILE: markdown_import (.md)</label>
+                    <input type="file" id="markdownFile" name="markdownFile" accept=".md" class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <label for="category" class="form-label">// SELECT: category</label>
+                    <select id="category" name="category.id" class="form-control">
+                        <option value="">-- No Category --</option>
+                        <option th:each="cat : ${categories}" 
+                                th:value="${cat.id}" 
+                                th:text="${cat.name}"
+                                th:selected="${post.category != null and post.category.id == cat.id}"></option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">// MULTI_SELECT: tags</label>
+                    <div class="tag-selector">
+                        <div th:each="tag : ${tags}" class="tag-option">
+                            <input type="checkbox" name="tagIds" th:value="${tag.id}" th:id="'tag-' + ${tag.id}"
+                                   th:checked="${post.tags != null and #lists.contains(post.tags.![id], tag.id)}">
+                            <label th:for="'tag-' + ${tag.id}" th:text="${tag.name}"></label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="body" class="form-label" style="color: var(--accent-purple);">// TEXT: body (markdown)</label>
+                    <textarea id="body" name="body" th:text="${post.body}" rows="15" placeholder="Content..." class="form-control"></textarea>
+                </div>
+
+                <div style="margin-top: 32px;">
+                    <button type="submit" class="btn btn-primary btn-large" style="width: 100%;">
+                        <i class="bi bi-check-lg"></i> push_updates()
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <th:block layout:fragment="scripts">
+        <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+        <script>
+            const easyMDE = new EasyMDE({
+                element: document.getElementById('body'),
+                spellChecker: false,
+                status: false,
+                minHeight: "400px",
+                toolbar: ["bold", "italic", "heading", "|", "quote", "unordered-list", "ordered-list", "|", "link", "image", "|", "preview", "side-by-side", "fullscreen", "|", "guide"]
+            });
+
+            // Markdown File Import
+            document.getElementById('markdownFile').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const content = e.target.result;
+                    easyMDE.value(content);
+                };
+                reader.readAsText(file);
+            });
+        </script>
+    </th:block>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/main}">
+
+<head>
+    <title th:text="${title}">Home</title>
+</head>
+
+<body>
+
+    <div layout:fragment="content">
+        <section class="hero-minimal container">
+            <span class="hero-label">/dev/academy/intro</span>
+            <h1 class="author__heading">Accelerate Your Dev Journey</h1>
+            <p class="author__body">High-quality courses and deep technical articles for engineers who want to master
+                <span class="text-accent-mono">system architecture</span> and <span class="text-accent-mono">backend
+                    engineering</span>.
+            </p>
+        </section>
+
+        <section class="articles container py-l">
+            <h2 class="section-title">
+                <i class="bi bi-journal-code"></i> latest_insights
+            </h2>
+
+            <nav th:replace="~{partials/fragments :: categoryNav(@{/})}"></nav>
+
+            <ul class="article-grid">
+                <li th:each="post : ${data}" class="article-card">
+                    <div class="article-card__image-container">
+                        <img th:if="${post.imageUrl}" th:src="${post.imageUrl}" th:alt="${post.title}"
+                            class="article-card__image" loading="lazy">
+                        <div th:unless="${post.imageUrl}" class="article-card__placeholder"></div>
+                    </div>
+                    <div class="article-card__content">
+                        <div class="article-card__meta">
+                            <span class="article-card__date"
+                                th:text="${#temporals.format(post.createdAt, 'MMMM dd, yyyy')}">Date</span>
+                            <span th:if="${post.category}" class="article-card__separator">•</span>
+                            <th:block
+                                th:replace="~{partials/fragments :: categoryBadge(${post.category}, 'article-card__category')}">
+                            </th:block>
+                        </div>
+                        <h3 class="article-card__title">
+                            <a th:href="@{/post/{id}(id=${post.id})}" th:text="${post.title}"
+                                class="stretched-link">Post Title</a>
+                        </h3>
+                        <p class="article-card__excerpt" th:text="${#strings.abbreviate(post.body, 120)}"></p>
+
+                        <div class="article-card__footer">
+                            <span class="read-more">read_insight <i class="bi bi-arrow-right"></i></span>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+
+            <div class="text-center mt-l">
+                <a th:href="@{/articles}" class="btn btn-outline">
+                    <i class="bi bi-archive"></i> view_all_articles()
+                </a>
+            </div>
+        </section>
+
+        <section class="recent-courses container mt-3xl py-2xl border-top">
+            <h2 class="section-title">
+                <i class="bi bi-mortarboard"></i> recent_courses
+            </h2>
+
+            <div class="courses-grid mt-l">
+                <div th:each="course : ${recentCourses}" class="card-glass course-card">
+                    <div class="course-card__icon"
+                        th:classappend="${course.level == 'Beginner'} ? 'level-beginner' : (${course.level == 'Advanced'} ? 'level-advanced' : 'level-intermediate')">
+                        <i
+                            th:class="${course.level == 'Beginner'} ? 'bi bi-code-slash' : (${course.level == 'Advanced'} ? 'bi bi-layers-half' : 'bi bi-lightning-charge')"></i>
+                    </div>
+                    <h3 class="course-card__title" th:text="${course.title}">Course Title</h3>
+                    <p class="course-card__description" th:text="${#strings.abbreviate(course.description, 100)}">
+                        Description</p>
+                    <div class="course-card__meta">
+                        <span><i class="bi bi-clock"></i> <span th:text="${course.duration}">12 Hours</span></span>
+                        <span><i class="bi bi-bar-chart"></i> <span th:text="${course.level}">Level</span></span>
+                    </div>
+                    <a th:href="@{/course/{id}(id=${course.id})}" class="btn btn-outline w-full mt-m">Start Learning</a>
+                </div>
+            </div>
+
+            <div class="text-center mt-2xl">
+                <a th:href="@{/courses}" class="btn btn-primary btn-large">
+                    Get Started <i class="bi bi-arrow-right" style="margin-left: 8px;"></i>
+                </a>
+            </div>
+        </section>
+    </div>
+
+</body>
+
+</html>

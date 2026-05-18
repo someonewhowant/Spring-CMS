@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Helper for category icon mapping -->
+<th:block th:fragment="categoryIcon(slug)">
+    <i class="bi" th:classappend="${
+        slug == 'java' ? 'bi-cup-hot' :
+        (slug == 'javascript' ? 'bi-filetype-js' :
+        (slug == 'python' ? 'bi-filetype-py' :
+        (slug == 'docker' ? 'bi-box-seam' :
+        (slug == 'aws' ? 'bi-cloud' :
+        (slug == 'spring' ? 'bi-leaf' : 
+        (slug == 'database' || slug == 'sql' ? 'bi-database' :
+        (slug == 'architecture' ? 'bi-diagram-3' : 
+        (slug == 'frontend' ? 'bi-window-sidebar' :
+        (slug == 'backend' ? 'bi-terminal' :
+        (slug == 'devops' ? 'bi-infinity' :
+        (slug == 'security' ? 'bi-shield-lock' :
+        (slug == 'git' ? 'bi-git' :
+        (slug == 'linux' ? 'bi-ubuntu' : 
+        (slug == 'mobile' ? 'bi-phone' : 'bi-tag'))))))))))))))
+    }"></i>
+</th:block>
+
+<nav th:fragment="categoryNav(allUrl)" class="category-nav">
+    <div class="category-nav__scroll-container">
+        <ul class="category-list">
+            <li>
+                <a th:href="${allUrl}" 
+                   class="category-link" 
+                   th:classappend="${currentCategory == null} ? 'active'">
+                    <i class="bi bi-grid-fill"></i>
+                    <span>Все</span>
+                </a>
+            </li>
+            <li th:each="cat : ${categories}">
+                <a th:href="@{/category/{slug}(slug=${cat.slug})}" 
+                   class="category-link" 
+                   th:classappend="${currentCategory == cat.slug} ? 'active'">
+                    <th:block th:replace="~{::categoryIcon(${cat.slug})}"></th:block>
+                    <span th:text="${cat.name}">Category</span>
+                    <span th:if="${cat.posts != null and not #sets.isEmpty(cat.posts)}" 
+                          class="category-count" 
+                          th:text="${#sets.size(cat.posts)}">0</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+    <!-- Scroll indicator arrow -->
+    <button class="category-nav__scroll-hint" aria-label="Scroll down">
+        <i class="bi bi-chevron-down"></i>
+    </button>
+</nav>
+
+<th:block th:fragment="categoryBadge(cat, badgeClass)">
+    <span th:if="${cat != null}" th:class="${badgeClass}">
+        <th:block th:replace="~{::categoryIcon(${cat.slug})}"></th:block>
+        <span th:text="${cat.name}">Category</span>
+    </span>
+</th:block>
+
+
+</body>
+</html>

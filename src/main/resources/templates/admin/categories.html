@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title>Categories</title>
+</head>
+<body>
+    <div layout:fragment="content" class="container py-l">
+        <div class="admin-header">
+            <h1>root@admin:~/categories$</h1>
+            <div class="admin-actions">
+                <a th:href="@{/admin/dashboard}" class="btn btn-outline btn-orange">
+                    <i class="bi bi-arrow-left"></i> back_to_dashboard()
+                </a>
+            </div>
+        </div>
+
+        <div class="card-glass mb-xl p-m">
+            <h2 class="section-title mt-0"><i class="bi bi-plus-square"></i> create_new_category()</h2>
+            <form th:action="@{/admin/categories}" method="POST" class="grid gap-m items-end" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) auto;">
+                <div class="form-group mb-0">
+                    <label for="name" class="form-label">category_name</label>
+                    <input type="text" id="name" name="name" class="form-control" placeholder="Enter category name..." required>
+                </div>
+                <div class="form-group mb-0">
+                    <label for="slug" class="form-label">slug (optional)</label>
+                    <input type="text" id="slug" name="slug" class="form-control" placeholder="auto-generated-if-empty">
+                </div>
+                <button type="submit" class="btn btn-primary" style="height: 48px; padding: 0 clamp(1rem, 5vw, 2rem);">
+                    <i class="bi bi-check2"></i> save()
+                </button>
+            </form>
+        </div>
+        
+        <div class="admin-table-wrapper">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>NAME</th>
+                        <th>SLUG</th>
+                        <th style="text-align: right;">ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="category : ${categories}">
+                        <td th:text="${category.id}" class="text-accent-mono" style="color: var(--accent-orange);">1</td>
+                        <td th:text="${category.name}">General</td>
+                        <td th:text="${category.slug}" class="text-accent-mono opacity-70">general</td>
+                        <td>
+                            <div class="admin-actions" style="justify-content: flex-end;">
+                                <a th:href="@{/admin/delete-category/{id}(id=${category.id})}" 
+                                   class="btn btn-outline btn-delete btn-xs" 
+                                   onclick="return confirm('rm -rf this_category?')">
+                                    <i class="bi bi-trash3"></i> DELETE
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

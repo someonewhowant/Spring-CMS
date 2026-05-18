@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title th:text="${title}">Manage Questions</title>
+</head>
+<body>
+    <div layout:fragment="content" class="container py-l">
+        <div class="admin-header">
+            <h1 th:text="'root@admin:~/quizzes/' + ${quiz.id} + '/questions$'">root@admin:~/quizzes/1/questions$</h1>
+            <div class="admin-actions">
+                <a th:href="@{/admin/courses/{id}/quizzes(id=${quiz.course.id})}" class="btn btn-outline btn-orange">
+                    <i class="bi bi-arrow-left"></i> back_to_quizzes()
+                </a>
+            </div>
+        </div>
+
+        <div class="questions-list mb-3xl">
+            <div th:each="question, qStat : ${quiz.questions}" class="post-form-container mb-xl p-xl border-active">
+                <div class="flex justify-between items-start mb-xl">
+                    <h3 th:text="${qStat.count} + '. ' + ${question.text}" class="m-0 text-blue">Question text</h3>
+                    <a th:href="@{/admin/delete-question/{quizId}/{questionId}(quizId=${quiz.id}, questionId=${question.id})}" 
+                       class="btn btn-outline btn-delete btn-xs" 
+                       onclick="return confirm('rm -rf this_question?')">
+                        <i class="bi bi-trash3"></i> DELETE
+                    </a>
+                </div>
+                <ul class="list-none p-0">
+                    <li th:each="option : ${question.options}" class="mb-s flex items-center">
+                        <i th:class="${option.isCorrect} ? 'bi bi-check-circle-fill text-green' : 'bi bi-circle text-dim'" class="mr-m"></i>
+                        <span th:text="${option.text}" th:classappend="${option.isCorrect} ? 'text-green' : ''">Option text</span>
+                    </li>
+                </ul>
+            </div>
+            
+            <div th:if="${#lists.isEmpty(quiz.questions)}" class="text-center py-3xl text-dim border-active border-dashed rounded">
+                No questions found. Use the form below to add_question().
+            </div>
+        </div>
+
+        <div class="grid grid-2 gap-xl fade-in">
+            <!-- Single Question Form -->
+            <div class="post-form-container">
+                <h2 class="section-title text-green font-mono text-m mb-xl">
+                    <i class="bi bi-plus-lg"></i> add_new_question()
+                </h2>
+                <form th:action="@{/admin/quizzes/{id}/questions(id=${quiz.id})}" method="POST">
+                    <div class="form-group">
+                        <label for="text" class="form-label">// STRING: question_text</label>
+                        <textarea id="text" name="text" rows="3" placeholder="What is the main advantage of Spring Boot?" class="form-control" required></textarea>
+                    </div>
+
+                    <div class="options-container">
+                        <label class="form-label">// OPTIONS: (mark the correct one)</label>
+                        <div th:each="i : ${#numbers.sequence(0, 3)}" class="form-group flex items-center gap-m mb-m">
+                            <input type="radio" name="correctOptionIndex" th:value="${i}" th:checked="${i == 0}" required>
+                            <input type="text" name="optionText" th:placeholder="'Option ' + (${i} + 1)" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="mt-2xl">
+                        <button type="submit" class="btn btn-primary btn-large w-full">
+                            <i class="bi bi-terminal"></i> deploy_question()
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Bulk Import Form -->
+            <div class="post-form-container">
+                <h2 class="section-title text-orange font-mono text-m mb-xl">
+                    <i class="bi bi-file-earmark-arrow-up"></i> bulk_import_questions()
+                </h2>
+                <form th:action="@{/admin/quizzes/{id}/questions(id=${quiz.id})}" method="POST" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="file" class="form-label">// FILE: import_from_file (.md, .gift)</label>
+                        <input type="file" id="file" name="file" class="form-control" accept=".md,.gift" required>
+                        
+                        <div class="grid grid-2 gap-m mt-s">
+                            <div class="form-help text-dim font-mono text-xs" style="border: 1px dashed var(--border-subtle); padding: 10px; border-radius: 4px; background: rgba(0,0,0,0.1);">
+                                <div class="mb-s text-blue">// MARKDOWN_FORMAT (.md):</div>
+                                ## Question Text<br>
+                                - [ ] Wrong Option<br>
+                                - [x] Correct Option
+                            </div>
+                            <div class="form-help text-dim font-mono text-xs" style="border: 1px dashed var(--border-subtle); padding: 10px; border-radius: 4px; background: rgba(0,0,0,0.1);">
+                                <div class="mb-s text-blue">// GIFT_FORMAT (.gift):</div>
+                                Question Name {<br>
+                                &nbsp;&nbsp;~Wrong Option<br>
+                                &nbsp;&nbsp;=Correct Option<br>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-2xl">
+                        <button type="submit" class="btn btn-primary btn-large btn-orange w-full">
+                            <i class="bi bi-terminal"></i> deploy_bulk_questions()
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

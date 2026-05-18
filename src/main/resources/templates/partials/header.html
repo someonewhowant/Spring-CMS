@@ -1,0 +1,50 @@
+<header class="header" th:fragment="header">
+    <div class="container">
+        <a th:href="@{/}" class="header__logo"><span>{</span> code_blog <span>}</span></a>
+        
+        <nav class="header__nav">
+            <ul>
+                <li><a th:href="@{/}" th:classappend="${currentUri == '/' or currentUri == ''} ? 'active'">/home</a></li>
+                <li><a th:href="@{/articles}" th:classappend="${currentUri != null and currentUri.startsWith('/articles')} ? 'active'">/articles</a></li>
+                <li><a th:href="@{/courses}" th:classappend="${currentUri == '/courses'} ? 'active'">/courses</a></li>
+                <li><a th:href="@{/about}" th:classappend="${currentUri == '/about'} ? 'active'">/about</a></li>
+                <li th:if="${currentUserRole == 'ROLE_ADMIN'}"><a th:href="@{/admin/dashboard}" th:classappend="${currentUri != null and currentUri.startsWith('/admin')} ? 'active'">/admin</a></li>
+                <li th:if="${currentUserRole == 'ROLE_TEACHER'}"><a th:href="@{/teacher/dashboard}" th:classappend="${currentUri != null and currentUri.startsWith('/teacher')} ? 'active'">/teacher</a></li>
+                <li th:if="${currentUserRole == 'ROLE_STUDENT'}"><a th:href="@{/student/dashboard}" th:classappend="${currentUri != null and currentUri.startsWith('/student')} ? 'active'">/cabinet</a></li>
+                <li th:if="${currentUser == null}"><a th:href="@{/admin/login}" th:classappend="${currentUri == '/admin/login'} ? 'active'">/login</a></li>
+                <li th:if="${currentUser != null}">
+                    <form th:action="@{/logout}" method="POST" style="display: inline; margin: 0; padding: 0;">
+                        <button type="submit" style="border: none; background: transparent; color: var(--text-dim); cursor: pointer; font-family: var(--font-mono); font-size: inherit; padding: 0; font-weight: inherit;" onmouseover="this.style.color='var(--accent-red)'" onmouseout="this.style.color='var(--text-dim)'">
+                            /logout
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="header__actions">
+            <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">
+                <i class="bi bi-moon-stars"></i>
+                <i class="bi bi-sun"></i>
+            </button>
+            <button class="searchBtn" aria-expanded="false" aria-label="Search">
+                <i class="bi bi-search"></i>
+                <span>Search</span>
+            </button>
+            <button id="mobileMenuToggle" class="mobile-menu-toggle" aria-label="Toggle navigation">
+                <i class="bi bi-list"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Search Bar Slide-down -->
+    <div class="searchBar">
+        <div class="container">
+            <i class="bi bi-search search-icon-large"></i>
+            <form th:action="@{/search}" method="GET" role="search" style="flex-grow: 1;">
+                <input type="search" name="searchTerm" id="searchInput" placeholder="Search for insights..." autocomplete="off">
+            </form>
+            <div id="searchClose" class="search-close">CLOSE (ESC)</div>
+        </div>
+    </div>
+</header>

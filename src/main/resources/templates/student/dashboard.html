@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title>Student Dashboard</title>
+</head>
+<body>
+    <div layout:fragment="content" class="container" style="padding-top: 60px;">
+        <div class="card-glass" style="padding: 40px;">
+            <h1 th:text="${message}">Welcome message</h1>
+            <p style="margin-top: 20px; opacity: 0.8;">
+                Добро пожаловать в личный кабинет студента. Здесь вы сможете отслеживать свой прогресс и проходить курсы.
+            </p>
+            <div style="margin-top: 40px; display: flex; gap: 16px;">
+                <a th:href="@{/courses}" class="btn btn-primary">Посмотреть курсы</a>
+                <form th:action="@{/logout}" method="POST" style="margin: 0;">
+                    <button type="submit" class="btn btn-outline">Выйти</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

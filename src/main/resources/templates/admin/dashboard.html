@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title>Dashboard</title>
+</head>
+<body>
+    <div layout:fragment="content" class="container py-l">
+        <div class="admin-header">
+            <h1>root@admin:~/posts$</h1>
+            <div class="admin-actions">
+                <a th:href="@{/admin/categories}" class="btn btn-outline btn-green">
+                    <i class="bi bi-folder2"></i> manage_categories()
+                </a>
+                <a th:href="@{/admin/courses}" class="btn btn-outline btn-blue">
+                    <i class="bi bi-book"></i> manage_courses()
+                </a>
+                <a th:href="@{/admin/add-post}" class="btn btn-primary">
+                    <i class="bi bi-plus-lg"></i> new_post()
+                </a>
+                <form th:action="@{/logout}" method="POST" class="m-0">
+                    <button type="submit" class="btn btn-outline btn-orange">
+                        <i class="bi bi-power"></i> exit()
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="admin-table-wrapper">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ENTRY_TITLE</th>
+                        <th>CATEGORY</th>
+                        <th>CREATED_AT</th>
+                        <th style="text-align: right;">ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="post : ${data}">
+                        <td th:text="${post.title}">Title</td>
+                        <td>
+                            <span th:if="${post.category}" 
+                                  th:text="${post.category.name}" 
+                                  class="badge badge-success">Category</span>
+                            <span th:unless="${post.category}" class="text-dim" style="font-family: var(--font-mono); font-size: 0.75rem;">none</span>
+                        </td>
+                        <td th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}">Date</td>
+                        <td>
+                            <div class="admin-actions" style="justify-content: flex-end;">
+                                <a th:href="@{/admin/edit-post/{id}(id=${post.id})}" class="btn btn-outline btn-xs">
+                                    <i class="bi bi-pencil"></i> EDIT
+                                </a>
+                                <a th:href="@{/admin/delete-post/{id}(id=${post.id})}" 
+                                   class="btn btn-outline btn-delete btn-xs" 
+                                   onclick="return confirm('rm -rf this_post?')">
+                                    <i class="bi bi-trash3"></i> DELETE
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

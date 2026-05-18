@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title>Manage Courses</title>
+</head>
+<body>
+    <div layout:fragment="content" class="container py-l">
+        <div class="admin-header">
+            <h1>root@admin:~/courses$</h1>
+            <div class="admin-actions">
+                <a th:href="@{/admin/dashboard}" class="btn btn-outline btn-orange">
+                    <i class="bi bi-arrow-left"></i> back_to_posts()
+                </a>
+                <a th:href="@{/admin/add-course}" class="btn btn-primary">
+                    <i class="bi bi-plus-lg"></i> new_course()
+                </a>
+            </div>
+        </div>
+        
+        <div class="admin-table-wrapper">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>COURSE_TITLE</th>
+                        <th>LEVEL</th>
+                        <th>DURATION</th>
+                        <th class="text-right">ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="course : ${courses}">
+                        <td th:text="${course.title}">Title</td>
+                        <td>
+                            <span th:text="${course.level}" class="badge-tag">Level</span>
+                        </td>
+                        <td th:text="${course.duration}">Duration</td>
+                        <td>
+                            <div class="admin-actions justify-end">
+                                <a th:href="@{/admin/courses/{id}/modules(id=${course.id})}" class="btn btn-outline btn-xs btn-blue">
+                                    <i class="bi bi-stack"></i> MODULES
+                                </a>
+                                <a th:href="@{/admin/courses/{id}/quizzes(id=${course.id})}" class="btn btn-outline btn-xs btn-orange">
+                                    <i class="bi bi-question-circle"></i> QUIZZES
+                                </a>
+                                <a th:href="@{/admin/edit-course/{id}(id=${course.id})}" class="btn btn-outline btn-xs">
+                                    <i class="bi bi-pencil"></i> EDIT
+                                </a>
+                                <a th:href="@{/admin/delete-course/{id}(id=${course.id})}" 
+                                   class="btn btn-outline btn-delete btn-xs" 
+                                   onclick="return confirm('rm -rf this_course?')">
+                                    <i class="bi bi-trash3"></i> DELETE
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(courses)}">
+                        <td colspan="4" class="text-center py-2xl text-dim">
+                            No courses found. Run <span class="text-blue">new_course()</span> to get started.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

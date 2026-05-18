@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title>Admin Login</title>
+</head>
+<body>
+    <div layout:fragment="content" class="login-container" style="max-width: 460px; margin: 0 auto; padding-top: 60px;">
+        <div class="card-glass" style="padding: 56px;">
+            <div class="login-header" style="text-align: center; margin-bottom: 48px;">
+                <div class="header__logo" style="font-size: 2.5rem; margin-bottom: 8px;"><span>{</span> code_blog <span>}</span></div>
+                <h1 class="login-subtitle">
+                    <i class="bi bi-shield-lock"></i> sudo authenticate
+                </h1>
+            </div>
+            
+            <div th:if="${param.error}" class="alert alert-error">
+                ERROR: Authentication failed. Incorrect credentials.
+            </div>
+
+            <form th:action="@{/admin/login}" method="POST">
+                <div class="form-group">
+                    <label class="form-label" style="color: var(--accent-blue);">// USERNAME</label>
+                    <input type="text" name="username" placeholder="user" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" style="color: var(--accent-purple);">// ACCESS_KEY</label>
+                    <input type="password" name="password" placeholder="••••••••" class="form-control" required>
+                </div>
+                <div style="margin-top: 16px;">
+                    <button type="submit" class="btn btn-primary" style="width: 100%; height: 56px;">
+                        init_session()
+                    </button>
+                </div>
+                <div style="margin-top: 16px; text-align: center;">
+                    <a th:href="@{/register}" style="opacity: 0.7; text-decoration: none;">Don't have an account? register_now()</a>
+                </div>
+            </form>
+            
+            <div style="margin-top: 40px; text-align: center;">
+                <a th:href="@{/}" class="btn btn-outline" style="border: none;">
+                    <i class="bi bi-arrow-left"></i> back_to_home
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+    </div>
+    </div>
+</body>
+</html>

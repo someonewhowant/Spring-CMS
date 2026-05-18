@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title th:text="${title}">Manage Courses</title>
+</head>
+<body>
+    <div layout:fragment="content" class="container py-l">
+        <div class="admin-header">
+            <h1 class="text-green font-mono">teacher@cabinet:~/courses$</h1>
+            <div class="admin-actions">
+                <a th:href="@{/teacher/add-course}" class="btn btn-outline btn-orange">
+                    <i class="bi bi-plus-lg"></i> create_new_course()
+                </a>
+            </div>
+        </div>
+
+        <div class="admin-table-wrapper">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>IMAGE</th>
+                        <th>TITLE</th>
+                        <th>LEVEL</th>
+                        <th>DURATION</th>
+                        <th style="text-align: right;">ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="course : ${courses}">
+                        <td>
+                            <div class="course-thumbnail" style="width: 80px; height: 50px; border-radius: var(--radius-s); overflow: hidden; background: var(--bg-dark); border: 1px solid var(--border-subtle);">
+                                <img th:if="${course.imageUrl}" th:src="${course.imageUrl}" alt="Course Thumbnail" style="width: 100%; height: 100%; object-fit: cover;">
+                                <div th:unless="${course.imageUrl}" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--text-dim);">
+                                    <i class="bi bi-code-slash"></i>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <a th:href="@{/courses/{id}(id=${course.id})}" th:text="${course.title}" class="link-hover text-bold" style="color: var(--text-main);">Course Title</a>
+                        </td>
+                        <td>
+                            <span class="badge" th:classappend="'badge-' + ${#strings.toLowerCase(course.level)}" th:text="${course.level}">Beginner</span>
+                        </td>
+                        <td th:text="${course.duration}">10 hours</td>
+                        <td style="text-align: right;">
+                            <div style="display: inline-flex; gap: 8px;">
+                                <a th:href="@{/teacher/courses/{id}/modules(id=${course.id})}" class="btn btn-outline btn-xs btn-blue">
+                                    <i class="bi bi-journal-text"></i> MODULES
+                                </a>
+                                <a th:href="@{/teacher/courses/{id}/quizzes(id=${course.id})}" class="btn btn-outline btn-xs btn-purple">
+                                    <i class="bi bi-question-circle"></i> QUIZZES
+                                </a>
+                                <a th:href="@{/teacher/edit-course/{id}(id=${course.id})}" class="btn btn-outline btn-xs btn-orange">
+                                    <i class="bi bi-pencil"></i> EDIT
+                                </a>
+                                <a th:href="@{/teacher/delete-course/{id}(id=${course.id})}" class="btn btn-outline btn-delete btn-xs" onclick="return confirm('rm -rf this_course?')">
+                                    <i class="bi bi-trash3"></i> DELETE
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(courses)}">
+                        <td colspan="5" style="text-align: center; padding: 40px; color: var(--text-dim);">
+                            No courses found. Use the button above to create_new_course().
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

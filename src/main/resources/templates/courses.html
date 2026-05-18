@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title>Courses</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <section class="hero-minimal container">
+            <span class="hero-label">courses</span>
+            <h1 class="author__heading">/dev/academy</h1>
+            <p class="author__body">
+                Structured learning paths to master <span class="text-accent-mono">system architecture</span> and <span class="text-accent-mono">modern backend engineering</span>. Professional grade courses for the next generation of engineers.
+            </p>
+        </section>
+
+        <div class="courses-grid container">
+            <!-- Dynamic Course Cards -->
+            <div th:each="course : ${courses}" class="card-glass course-card">
+                <div class="course-card__icon" 
+                     th:classappend="${course.level == 'Beginner'} ? 'level-beginner' : (${course.level == 'Advanced'} ? 'level-advanced' : 'level-intermediate')">
+                    <i th:class="${course.level == 'Beginner'} ? 'bi bi-database-check' : (${course.level == 'Advanced'} ? 'bi bi-layers-half' : 'bi bi-lightning-charge')"></i>
+                </div>
+                <h3 class="course-card__title" th:text="${course.title}">Course Title</h3>
+                <p class="course-card__description" th:text="${course.description}">
+                    Description goes here...
+                </p>
+                <div class="course-card__meta">
+                    <span><i class="bi bi-clock"></i> <span th:text="${course.duration}">12 Hours</span></span>
+                    <span><i class="bi bi-bar-chart"></i> <span th:text="${course.level}">Level</span></span>
+                </div>
+                <a th:href="@{/course/{id}(id=${course.id})}" class="btn btn-outline w-full mt-m">Start Learning</a>
+            </div>
+
+            <!-- Empty State -->
+            <div th:if="${#lists.isEmpty(courses)}" class="col-span-full text-center py-2xl w-full text-dim">
+                <i class="bi bi-inbox mb-m block text-3xl"></i>
+                <p>No courses are currently available. Check back soon!</p>
+            </div>
+        </div>
+
+        <section class="card-glass container mt-3xl py-2xl text-center">
+            <h2 class="section-title mt-0 mx-auto justify-center">Want a custom workshop?</h2>
+            <p class="mb-xl text-dim max-w-600 mx-auto">
+                We offer tailored training sessions for corporate teams focusing on specific technologies and architectural challenges.
+            </p>
+            <a href="/about" class="btn btn-primary">Get in Touch</a>
+        </section>
+    </div>
+</body>
+</html>

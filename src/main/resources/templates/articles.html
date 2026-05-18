@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title th:text="${title}">Articles</title>
+</head>
+<body>
+
+    <div layout:fragment="content">
+        <section class="main container py-l">
+            <h2 class="section-title">
+                <i class="bi bi-journal-text"></i> technical_insights
+            </h2>
+
+            <nav th:replace="~{partials/fragments :: categoryNav(@{/articles})}"></nav>
+
+            <ul class="article-grid">
+                <li th:each="post : ${data}" class="article-card">
+                    <div class="article-card__image-container">
+                        <img th:if="${post.imageUrl}" 
+                             th:src="${post.imageUrl}" 
+                             th:alt="${post.title}" 
+                             class="article-card__image"
+                             loading="lazy">
+                        <div th:unless="${post.imageUrl}" class="article-card__placeholder"></div>
+                    </div>
+                    <div class="article-card__content">
+                        <div class="article-card__meta">
+                            <span class="article-card__date" th:text="${#temporals.format(post.createdAt, 'MMMM dd, yyyy')}">Date</span>
+                            <span th:if="${post.category}" class="article-card__separator">•</span>
+                            <th:block th:replace="~{partials/fragments :: categoryBadge(${post.category}, 'article-card__category')}"></th:block>
+                        </div>
+                        <h3 class="article-card__title">
+                            <a th:href="@{/post/{id}(id=${post.id})}" th:text="${post.title}" class="stretched-link">Post Title</a>
+                        </h3>
+                        <p class="article-card__excerpt" th:text="${#strings.abbreviate(post.body, 150)}"></p>
+                        
+                        <div class="article-card__footer">
+                            <span class="read-more">read_more <i class="bi bi-arrow-right"></i></span>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+
+            <div class="pagination">
+                <a th:if="${currentPage > 1}" 
+                   th:href="@{/articles(page=${currentPage - 1})}" 
+                   class="pagination-btn">&larr; Newer</a>
+                   
+                <a th:if="${currentPage < totalPages}" 
+                   th:href="@{/articles(page=${currentPage + 1})}" 
+                   class="pagination-btn">Older &rarr;</a>
+            </div>
+        </section>
+    </div>
+
+</body>
+</html>

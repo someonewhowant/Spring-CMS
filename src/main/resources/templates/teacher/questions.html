@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title th:text="${title}">Manage Questions</title>
+</head>
+<body>
+    <div layout:fragment="content" class="container py-l">
+        <div class="admin-header mb-xl">
+            <div>
+                <h1 class="text-green font-mono" th:text="'teacher@cabinet:~/quizzes/' + ${quiz.id} + '/questions$'">teacher@cabinet:~/quizzes/1/questions$</h1>
+                <p class="text-dim mt-xs" th:text="'Quiz: ' + ${quiz.title} + ' (Course: ' + ${quiz.course.title} + ')'">Quiz Info</p>
+            </div>
+            <div class="admin-actions">
+                <a th:href="@{/teacher/courses/{id}/quizzes(id=${quiz.course.id})}" class="btn btn-outline btn-orange">
+                    <i class="bi bi-arrow-left"></i> back_to_quizzes()
+                </a>
+            </div>
+        </div>
+
+        <div class="questions-list mb-2xl">
+            <div th:each="question, qStat : ${quiz.questions}" class="card-glass mb-l p-l border-active" style="border: 1px solid var(--border-subtle); padding: 24px; margin-bottom: 24px; border-radius: var(--radius); background: var(--bg-surface);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                    <h3 th:text="${qStat.count} + '. ' + ${question.text}" class="m-0 text-l text-blue font-mono" style="color: var(--accent-blue);">Question text</h3>
+                    <a th:href="@{/teacher/delete-question/{quizId}/{questionId}(quizId=${quiz.id}, questionId=${question.id})}" 
+                       class="btn btn-outline btn-delete btn-xs" 
+                       onclick="return confirm('Delete this question?')">
+                        <i class="bi bi-trash3"></i> DELETE
+                    </a>
+                </div>
+                <ul class="list-none p-0" style="list-style: none; padding-left: 0;">
+                    <li th:each="option : ${question.options}" class="mb-s" style="margin-bottom: 8px; display: flex; align-items: center; gap: 12px;">
+                        <i th:class="${option.isCorrect} ? 'bi bi-check-circle-fill' : 'bi bi-circle'" 
+                           th:style="${option.isCorrect} ? 'color: var(--accent-green);' : 'color: var(--text-dim);'"></i>
+                        <span th:text="${option.text}" th:style="${option.isCorrect} ? 'color: var(--accent-green); font-weight: bold;' : 'color: var(--text-main);'">Option text</span>
+                    </li>
+                </ul>
+            </div>
+            
+            <div th:if="${#lists.isEmpty(quiz.questions)}" style="text-align: center; padding: 40px; color: var(--text-dim); border: 1px dashed var(--border-subtle); border-radius: var(--radius);">
+                No questions found. Use the forms below to add questions.
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 48px;">
+            <!-- Single Question Form -->
+            <div class="post-form-container fade-in" style="background: var(--bg-surface); padding: 32px; border-radius: var(--radius); border: 1px solid var(--border-subtle);">
+                <h2 class="mb-xl text-green font-mono text-l">
+                    <i class="bi bi-plus-lg"></i> add_new_question()
+                </h2>
+                <form th:action="@{/teacher/quizzes/{id}/questions(id=${quiz.id})}" method="POST">
+                    <div class="form-group mb-m">
+                        <label class="form-label">// STRING: question_text</label>
+                        <textarea name="text" rows="3" placeholder="What is the result of 2 + 2?" class="form-control" required></textarea>
+                    </div>
+
+                    <div class="options-container" style="margin-top: 20px;">
+                        <label class="form-label">// OPTIONS: choose_correct_option</label>
+                        <div th:each="i : ${#numbers.sequence(0, 3)}" class="form-group" style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                            <input type="radio" name="correctOptionIndex" th:value="${i}" th:checked="${i == 0}" required style="accent-color: var(--accent-green); width: 18px; height: 18px;">
+                            <input type="text" name="optionText" th:placeholder="'Option ' + (${i} + 1)" class="form-control" required style="flex-grow: 1;">
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 32px;">
+                        <button type="submit" class="btn btn-primary btn-large" style="width: 100%;">
+                            <i class="bi bi-plus-lg"></i> add_question()
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Bulk Import Form -->
+            <div class="post-form-container fade-in" style="background: var(--bg-surface); padding: 32px; border-radius: var(--radius); border: 1px solid var(--border-subtle);">
+                <h2 class="mb-xl text-orange font-mono text-l">
+                    <i class="bi bi-file-earmark-arrow-up"></i> bulk_import_questions()
+                </h2>
+                <form th:action="@{/teacher/quizzes/{id}/questions(id=${quiz.id})}" method="POST" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label class="form-label">// FILE: questions_file (.md, .gift)</label>
+                        <input type="file" name="file" class="form-control" accept=".md,.gift" required>
+                        
+                        <div class="mt-m p-m border-dashed rounded text-xs bg-dark" style="margin-top: 16px; padding: 16px; background: var(--bg-dark); border: 1px dashed var(--border-subtle); border-radius: var(--radius-s); font-family: var(--font-mono); color: var(--text-dim); line-height: 1.6;">
+                            <div class="mb-s text-blue font-bold" style="color: var(--accent-blue); margin-bottom: 8px;">Markdown Format (.md):</div>
+                            ## Question Text<br>
+                            - [ ] Wrong Option<br>
+                            - [x] Correct Option
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 32px;">
+                        <button type="submit" class="btn btn-primary btn-large btn-orange" style="width: 100%; background: var(--accent-orange); border-color: var(--accent-orange);">
+                            <i class="bi bi-terminal"></i> import_questions()
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

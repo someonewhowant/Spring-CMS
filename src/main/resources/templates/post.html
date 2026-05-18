@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title th:text="${post.title}">Post</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <article class="post reading-container">
+            <header class="post-header">
+                <div>
+                    <a th:if="${post.category}" th:href="@{/category/{slug}(slug=${post.category.slug})}" style="text-decoration: none;">
+                        <th:block th:replace="~{partials/fragments :: categoryBadge(${post.category}, 'post-category')}"></th:block>
+                    </a>
+                </div>
+                <h1 class="post-title" th:text="${post.title}">Title</h1>
+                <div class="post-meta">
+                    <span><i class="bi bi-calendar3"></i> <span th:text="${#temporals.format(post.createdAt, 'MMMM dd, yyyy')}">Date</span></span>
+                    <span class="meta-sep">|</span>
+                    <span><i class="bi bi-person"></i> code_admin</span>
+                </div>
+            </header>
+
+            <div th:if="${post.imageUrl}" class="post-cover fade-in">
+                <img th:src="${post.imageUrl}" th:alt="${post.title}" decoding="async">
+            </div>
+            
+            <div class="post-content" th:utext="${post.body}">
+                Content
+            </div>
+
+            <div th:if="${post.tags != null and not #sets.isEmpty(post.tags)}" class="post-tags">
+                <span class="post-tags__label"><i class="bi bi-tags"></i> tags:</span>
+                <a th:each="tag : ${post.tags}" 
+                   th:href="@{/tag/{slug}(slug=${tag.slug})}" 
+                   th:text="'#' + ${tag.name}"
+                   class="badge-tag">#tag</a>
+            </div>
+            
+            <footer class="post-footer mt-3xl">
+                <a th:href="@{/}" class="btn btn-outline">
+                    <i class="bi bi-chevron-left"></i> cd ..
+                </a>
+                <div class="footer-socials">
+                    <a href="#" class="social-link"><i class="bi bi-github"></i></a>
+                    <a href="#" class="social-link ml-m"><i class="bi bi-twitter-x"></i></a>
+                </div>
+            </footer>
+        </article>
+    </div>
+</body>
+</html>

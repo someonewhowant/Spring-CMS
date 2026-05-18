@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/main}">
+
+<head>
+    <title>About</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <section class="hero-minimal container">
+            <span class="hero-label">about</span>
+            <h1 class="author__heading">/dev/academy/about</h1>
+            <p class="author__body">
+                CodeBlog Academy is more than just a technical blog. It's a structured learning platform designed for engineers who want to go beyond the basics and master <span class="text-accent-mono">complex system architecture</span> and <span class="text-accent-mono">performance engineering</span>.
+            </p>
+        </section>
+
+        <section class="container">
+            <div class="card-glass overflow-hidden">
+                <div class="terminal-header">
+                    <span class="terminal-header__dot"></span>
+                    <span class="terminal-header__dot"></span>
+                    <span class="terminal-header__dot"></span>
+                    <span class="terminal-header__title">system.init()</span>
+                </div>
+                <div class="p-l">
+                    <div class="terminal-body p-0">
+                        <p class="terminal-line"><span class="terminal-prompt">$</span> cat mission.md</p>
+                        <p class="terminal-text mb-0">
+                            The mission of CodeBlog Academy is to bridge the gap between academic theory and production-grade engineering. We provide deep technical insights, architectural case studies, and structured learning paths for modern developers.
+                        </p>
+                    </div>
+
+                    <div class="about-grid mt-2xl">
+                        <div class="about-card">
+                            <div class="about-card__step">01 // ANALYZE</div>
+                            <h3 class="about-card__title">Deep Architecture</h3>
+                            <p class="about-card__text">Exploring the internals of distributed systems and database engines.</p>
+                        </div>
+                        <div class="about-card">
+                            <div class="about-card__step text-green">02 // OPTIMIZE</div>
+                            <h3 class="about-card__title">Performance First</h3>
+                            <p class="about-card__text">Practical guides on squeezing every millisecond out of the critical path.</p>
+                        </div>
+                        <div class="about-card">
+                            <div class="about-card__step text-purple">03 // SCALE</div>
+                            <h3 class="about-card__title">Cloud Native</h3>
+                            <p class="about-card__text">Designing for horizontal scale and zero-downtime deployments.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="container">
+            <h2 class="section-title">
+                <i class="bi bi-patch-check"></i> Academy Philosophy
+            </h2>
+            <div class="grid grid-2 gap-m">
+                <div class="card-glass philosophy-card">
+                    <h4 class="philosophy-card__label text-blue">01 // PRODUCTION_READY</h4>
+                    <p class="text-dim leading-relaxed">Every article and course is based on real-world production experience. We don't just show you "Hello World" - we show you how to build systems that handle traffic, failures, and scale.</p>
+                </div>
+                <div class="card-glass philosophy-card">
+                    <h4 class="philosophy-card__label text-green">02 // STRUCTURED_PATH</h4>
+                    <p class="text-dim leading-relaxed">Our courses are designed as logical progressions. From understanding memory management to designing distributed databases, we guide you through the learning curve.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="container">
+            <h2 class="section-title">
+                <i class="bi bi-layers"></i> The Stack
+            </h2>
+            <p class="text-dim max-w-450 mb-l">
+                Our core architectural pillars and tools used for building modern applications.
+            </p>
+            <div class="tech-grid">
+                <div class="tech-item">
+                    <i class="bi bi-cup-hot"></i>
+                    <span>Java / Spring</span>
+                </div>
+                <div class="tech-item">
+                    <i class="bi bi-database"></i>
+                    <span>PostgreSQL/MySQL</span>
+                </div>
+                <div class="tech-item">
+                    <i class="bi bi-code-slash"></i>
+                    <span>JavaScript</span>
+                </div>
+                <div class="tech-item">
+                    <i class="bi bi-box-seam"></i>
+                    <span>Docker</span>
+                </div>
+                <div class="tech-item">
+                    <i class="bi bi-cloud-arrow-up"></i>
+                    <span>AWS / Cloud</span>
+                </div>
+                <div class="tech-item">
+                    <i class="bi bi-git"></i>
+                    <span>Git Ops</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="text-center py-2xl container border-top mt-3xl">
+            <div class="mb-3xl">
+                <a th:href="@{/courses}" class="btn btn-primary btn-large">
+                    Explore Academy <i class="bi bi-arrow-right" style="margin-left: 8px;"></i>
+                </a>
+            </div>
+
+            <h2 class="social-connect-title">Connect with the developer</h2>
+            <div class="footer-socials justify-center">
+                <a href="#"><i class="bi bi-github"></i></a>
+                <a href="#"><i class="bi bi-twitter-x"></i></a>
+                <a href="#"><i class="bi bi-linkedin"></i></a>
+                <a href="#"><i class="bi bi-envelope-at"></i></a>
+            </div>
+        </section>
+    </div>
+</body>
+
+</html>

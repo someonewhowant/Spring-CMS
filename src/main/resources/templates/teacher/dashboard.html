@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title>Teacher Dashboard</title>
+</head>
+<body>
+    <div layout:fragment="content" class="container py-l" style="padding-top: 60px;">
+        <div class="card-glass" style="padding: 40px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius);">
+            <h1 class="text-green font-mono" th:text="${message}">Welcome message</h1>
+            <p style="margin-top: 20px; opacity: 0.8; font-family: var(--font-mono); color: var(--text-main);">
+                Добро пожаловать в личный кабинет преподавателя. Здесь вы сможете создавать курсы, управлять модулями, вопросами и квизами.
+            </p>
+            <div style="margin-top: 40px; display: flex; gap: 16px;">
+                <a th:href="@{/teacher/courses}" class="btn btn-outline btn-orange">
+                    <i class="bi bi-terminal"></i> manage_courses()
+                </a>
+                <form th:action="@{/logout}" method="POST" style="margin: 0;">
+                    <button type="submit" class="btn btn-outline">
+                        <i class="bi bi-box-arrow-right"></i> logout()
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title th:text="${title}">Course Detail</title>
+</head>
+<body>
+    <div layout:fragment="content" class="container py-l">
+        <div>
+            <!-- Breadcrumbs -->
+            <nav class="course-breadcrumbs">
+                <a th:href="@{/}">Home</a>
+                <i class="bi bi-chevron-right"></i>
+                <a th:href="@{/courses}">Courses</a>
+                <i class="bi bi-chevron-right"></i>
+                <a th:href="@{/course/{id}(id=${course.id})}" th:text="${course.title}">Course Title</a>
+                <th:block th:if="${not isOverview}">
+                    <i class="bi bi-chevron-right"></i>
+                    <span th:text="${module.title}">Module Title</span>
+                </th:block>
+            </nav>
+
+            <div class="course-layout">
+                <!-- Sidebar: Course Map -->
+                <aside class="course-sidebar">
+                    <div class="course-map">
+                        <span class="course-map__title">// COURSE_MAP</span>
+                        <ul class="course-map__list">
+                            <li class="course-map__item" th:classappend="${isOverview} ? 'active' : ''">
+                                <a th:href="@{/course/{id}(id=${course.id})}">
+                                    <i class="bi bi-info-circle"></i> Overview
+                                </a>
+                            </li>
+                            <li th:each="m : ${course.modules}" 
+                                class="course-map__item" 
+                                th:classappend="${!isOverview and m.id == module.id} ? 'active' : ''">
+                                <a th:href="@{/course/{courseId}/module/{moduleId}(courseId=${course.id}, moduleId=${m.id})}">
+                                    <div class="flex flex-column">
+                                        <div class="flex items-center gap-m">
+                                            <i class="bi" th:classappend="${m.quiz != null} ? 'bi-patch-question' : 'bi-journal-text'"></i>
+                                            <span th:text="${m.title}">Module Title</span>
+                                            <i th:if="${m.orderIndex > 0 and module != null and m.orderIndex > module.orderIndex}" class="bi bi-lock-fill sidebar-lock"></i>
+                                        </div>
+                                        <div class="module-status" th:if="${m.quiz != null}">
+                                            <span class="module-status--quiz"><i class="bi bi-lightning-fill"></i> QUIZ_REQUIRED</span>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                        </ul>
+                        
+                        <div class="course-progress-info" th:if="${not isOverview}">
+                            <i class="bi bi-lightning-charge"></i>
+                            <span>Keep going! You're doing great.</span>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Main Content -->
+                <main class="course-main">
+                    <article class="post">
+                        <header class="post-header">
+                            <div class="post-category" th:text="${isOverview ? course.level : 'MODULE ' + (module.orderIndex + 1)}">LEVEL / MODULE X</div>
+                            <h1 class="post-title" th:text="${isOverview ? course.title : module.title}">Title</h1>
+                            <div class="post-meta" th:if="${isOverview}">
+                                <span><i class="bi bi-clock"></i> <span th:text="${course.duration}">12 Hours</span></span>
+                                <span><i class="bi bi-calendar3"></i> <span th:text="${#temporals.format(course.createdAt, 'dd MMMM yyyy')}">Date</span></span>
+                            </div>
+                        </header>
+
+                        <div class="post-cover" th:if="${isOverview and course.imageUrl != null}">
+                            <img th:src="${course.imageUrl}" th:alt="${course.title}">
+                        </div>
+
+                        <!-- Premium Locked Content Warning -->
+                        <div th:if="${isLocked}" class="locked-content-premium fade-in">
+                            <div class="locked-icon-wrapper">
+                                <i class="bi bi-lock-fill"></i>
+                            </div>
+                            <h2 class="locked-title">// MODULE_LOCKED</h2>
+                            <p class="locked-reason" th:text="${lockReason}">Reason for the lock...</p>
+                            <a th:if="${prevModule != null and prevModule.quiz != null}" 
+                               th:href="@{/quiz/{id}(id=${prevModule.quiz.id}, moduleId=${prevModule.id})}" 
+                               class="btn btn-primary btn-orange">
+                                <i class="bi bi-play-fill"></i> Take Required Quiz
+                            </a>
+                        </div>
+
+                        <div class="post-content" th:if="${not isLocked}" th:utext="${htmlContent}">
+                            Content goes here...
+                        </div>
+
+                        <!-- Module Quiz Link -->
+                        <div class="module-quiz-section reveal-on-scroll mt-3xl p-xl glass rounded-l border-active relative overflow-hidden" 
+                             th:if="${not isOverview and not isLocked and module.quiz != null}"
+                             th:classappend="${isCurrentQuizPassed} ? 'border-green-faded' : ''">
+                            <div class="quiz-bg-icon">
+                                <i class="bi bi-patch-question"></i>
+                            </div>
+                            <h3 class="font-mono mb-xl text-blue text-xs tracking-widest" th:text="${isCurrentQuizPassed} ? '// MODULE_QUIZ_COMPLETED' : '// MODULE_QUIZ'">// MODULE_QUIZ</h3>
+                            <div class="flex items-center justify-between relative z-10">
+                                <div>
+                                    <h4 th:text="${module.quiz.title}" class="text-xl mb-xs font-bold">Quiz Title</h4>
+                                    <p th:if="${not isCurrentQuizPassed}" class="text-dim max-w-400 leading-relaxed">Complete this assessment with at least <span class="text-orange font-bold">3 points</span> to finalize this module and unlock the next one.</p>
+                                    <p th:if="${isCurrentQuizPassed}" class="text-green max-w-400 leading-relaxed"><i class="bi bi-check-circle-fill"></i> You have successfully passed this assessment! You can retake it to improve your score.</p>
+                                </div>
+                                <a th:href="@{/quiz/{id}(id=${module.quiz.id}, moduleId=${module.id})}" 
+                                   class="btn btn-primary btn-large"
+                                   th:classappend="${isCurrentQuizPassed} ? 'btn-outline' : ''">
+                                    <i class="bi" th:classappend="${isCurrentQuizPassed} ? 'bi-arrow-clockwise' : 'bi-play-fill'"></i> 
+                                    <span th:text="${isCurrentQuizPassed} ? 'Retake Assessment' : 'Start Assessment'">Start Assessment</span>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Module Navigation -->
+                        <div class="course-navigation mt-3xl">
+                            <a th:if="${prevModule}" 
+                               th:href="@{/course/{courseId}/module/{moduleId}(courseId=${course.id}, moduleId=${prevModule.id})}" 
+                               class="nav-btn">
+                                <span class="nav-btn__label"><i class="bi bi-arrow-left"></i> Previous</span>
+                                <span class="nav-btn__title" th:text="${prevModule.title}">Previous Module</span>
+                            </a>
+                            <div th:unless="${prevModule}" style="flex: 1;"></div>
+                            
+                            <th:block th:if="${nextModule}">
+                                <a th:if="${not isNextLocked}" 
+                                   th:href="@{/course/{courseId}/module/{moduleId}(courseId=${course.id}, moduleId=${nextModule.id})}" 
+                                   class="nav-btn nav-btn--next">
+                                    <span class="nav-btn__label">Next <i class="bi bi-arrow-right"></i></span>
+                                    <span class="nav-btn__title" th:text="${nextModule.title}">Next Module</span>
+                                </a>
+                                <a th:if="${isNextLocked}" 
+                                   th:href="@{/quiz/{id}(id=${module.quiz.id}, moduleId=${module.id})}" 
+                                   class="nav-btn nav-btn--next btn-orange-faded">
+                                    <span class="nav-btn__label text-orange">Next: Quiz <i class="bi bi-patch-question"></i></span>
+                                    <span class="nav-btn__title" th:text="${module.quiz.title}">Quiz Title</span>
+                                </a>
+                            </th:block>
+                            
+                            <a th:unless="${nextModule}" 
+                               th:href="@{/courses}" 
+                               class="nav-btn nav-btn--next">
+                                <span class="nav-btn__label">Finish <i class="bi bi-check2-circle"></i></span>
+                                <span class="nav-btn__title">Back to Courses</span>
+                            </a>
+                        </div>
+
+                        <!-- Quizzes section -->
+                        <div class="course-quizzes reveal-on-scroll mt-3xl" th:if="${isOverview and not #lists.isEmpty(course.quizzes)}">
+                            <h2 class="font-mono mb-xl text-orange">// COURSE_QUIZZES</h2>
+                            <div th:each="quiz : ${course.quizzes}" class="quiz-item mb-m border-l-2-orange pl-l flex items-center justify-between">
+                                <div>
+                                    <h3 th:text="${quiz.title}" class="text-orange mb-0">Quiz Title</h3>
+                                    <span class="text-dim text-xs" th:text="${#lists.size(quiz.questions)} + ' questions'">0 questions</span>
+                                </div>
+                                <a th:href="@{/quiz/{id}(id=${quiz.id})}" class="btn btn-outline btn-orange py-xs px-m">
+                                    <i class="bi bi-play-fill"></i> Take Quiz
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Footer for Overview -->
+                        <div class="post-footer" th:if="${isOverview}">
+                            <a th:href="@{/courses}" class="btn btn-outline">
+                                <i class="bi bi-arrow-left"></i> All Courses
+                            </a>
+                            <a th:if="${not #lists.isEmpty(course.modules)}" 
+                               th:href="@{/course/{courseId}/module/{moduleId}(courseId=${course.id}, moduleId=${course.modules[0].id})}" 
+                               class="btn btn-primary">
+                                Start Course <i class="bi bi-play-fill"></i>
+                            </a>
+                        </div>
+                    </article>
+                </main>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

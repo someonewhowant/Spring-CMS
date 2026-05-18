@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title>Edit Course</title>
+    <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+    <style>
+        .EasyMDEContainer { background: var(--bg-dark); border-radius: var(--radius); margin-top: 8px; }
+        .editor-toolbar { border-color: var(--border-subtle) !important; background: var(--bg-surface) !important; border-radius: var(--radius) var(--radius) 0 0 !important; }
+        .editor-toolbar button { color: var(--text-main) !important; }
+        .editor-toolbar button:hover, .editor-toolbar button.active { background: var(--bg-dark) !important; border-color: var(--border-active) !important; }
+        .CodeMirror { background: var(--bg-dark) !important; color: var(--text-main) !important; border-color: var(--border-subtle) !important; border-radius: 0 0 var(--radius) var(--radius) !important; font-family: var(--font-mono) !important; }
+        .editor-preview-active { background: var(--bg-dark) !important; color: var(--text-main) !important; }
+        .editor-statusbar { color: var(--text-dim) !important; }
+    </style>
+</head>
+<body>
+    <div layout:fragment="content" class="container py-l">
+        <div class="admin-header">
+            <h1 th:text="'edit_course(' + ${course.id} + ').sh'">edit_course.sh</h1>
+            <a th:href="@{/admin/courses}" class="btn btn-outline btn-orange">
+                <i class="bi bi-x-lg"></i> abort()
+            </a>
+        </div>
+        
+        <div class="form-card">
+            <form th:action="@{/admin/edit-course/{id}(id=${course.id})}" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="title" class="form-label">// STRING: title</label>
+                    <input type="text" id="title" name="title" th:value="${course.title}" placeholder="Course title..." class="form-control" required>
+                </div>
+
+                <div class="form-row flex gap-xl">
+                    <div class="form-group flex-1">
+                        <label for="level" class="form-label">// ENUM: level</label>
+                        <select id="level" name="level" class="form-control" required>
+                            <option value="Beginner" th:selected="${course.level == 'Beginner'}">Beginner</option>
+                            <option value="Intermediate" th:selected="${course.level == 'Intermediate'}">Intermediate</option>
+                            <option value="Advanced" th:selected="${course.level == 'Advanced'}">Advanced</option>
+                        </select>
+                    </div>
+                    <div class="form-group flex-1">
+                        <label for="duration" class="form-label">// STRING: duration</label>
+                        <input type="text" id="duration" name="duration" th:value="${course.duration}" placeholder="e.g. 12 Hours" class="form-control" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="image" class="form-label text-orange">// FILE: cover_image</label>
+                    <div th:if="${course.imageUrl}" class="mb-s">
+                        <img th:src="${course.imageUrl}" class="rounded border-subtle" style="height: 100px;">
+                    </div>
+                    <input type="file" id="image" name="image" accept="image/*" class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <label for="description" class="form-label">// TEXT: short_description</label>
+                    <textarea id="description" name="description" rows="3" th:text="${course.description}" placeholder="Brief overview of the course..." class="form-control" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="markdownFile" class="form-label text-blue">// FILE: content_import (.md)</label>
+                    <input type="file" id="markdownFile" name="markdownFile" accept=".md" class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <label for="content" class="form-label text-purple">// TEXT: course_materials (markdown)</label>
+                    <textarea id="content" name="content" rows="15" th:text="${course.content}" placeholder="## Module 1..." class="form-control"></textarea>
+                </div>
+
+                <div class="mt-2xl">
+                    <button type="submit" class="btn btn-primary btn-large w-full">
+                        <i class="bi bi-terminal"></i> update_course()
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <th:block layout:fragment="scripts">
+        <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+        <script>
+            const easyMDE = new EasyMDE({
+                element: document.getElementById('content'),
+                spellChecker: false,
+                status: false,
+                minHeight: "400px",
+                placeholder: "## Course Content...",
+                toolbar: ["bold", "italic", "heading", "|", "quote", "unordered-list", "ordered-list", "|", "link", "image", "|", "preview", "side-by-side", "fullscreen", "|", "guide"]
+            });
+
+            // Markdown File Import
+            document.getElementById('markdownFile').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const content = e.target.result;
+                    easyMDE.value(content);
+                };
+                reader.readAsText(file);
+            });
+        </script>
+    </th:block>
+</body>
+</html>

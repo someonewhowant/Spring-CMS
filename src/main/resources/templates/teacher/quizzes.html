@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title th:text="${title}">Manage Quizzes</title>
+</head>
+<body>
+    <div layout:fragment="content" class="container py-l">
+        <div class="admin-header mb-xl">
+            <div>
+                <h1 class="text-green font-mono" th:text="'teacher@cabinet:~/courses/' + ${course.id} + '/quizzes$'">teacher@cabinet:~/courses/1/quizzes$</h1>
+                <p class="text-dim mt-xs" th:text="${course.title}">Course Title</p>
+            </div>
+            <div class="admin-actions">
+                <a th:href="@{/teacher/courses}" class="btn btn-outline btn-orange">
+                    <i class="bi bi-arrow-left"></i> back_to_courses()
+                </a>
+            </div>
+        </div>
+
+        <div class="card-glass p-xl mb-2xl">
+            <h2 class="text-l mb-l text-orange font-mono">// Existing Quizzes</h2>
+            <div class="admin-table-wrapper">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>QUIZ TITLE</th>
+                            <th>QUESTIONS</th>
+                            <th style="text-align: right;">ACTIONS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="quiz : ${quizzes}">
+                            <td th:text="${quiz.id}" class="font-mono text-dim">1</td>
+                            <td th:text="${quiz.title}" class="font-bold">Quiz Title</td>
+                            <td th:text="${#lists.size(quiz.questions)}">0</td>
+                            <td style="text-align: right;">
+                                <div style="display: inline-flex; gap: 8px;">
+                                    <a th:href="@{/teacher/quizzes/{id}/questions(id=${quiz.id})}" class="btn btn-outline btn-xs btn-blue" title="Manage Questions">
+                                        <i class="bi bi-list-check"></i> QUESTIONS
+                                    </a>
+                                    <a th:href="@{/teacher/delete-quiz/{courseId}/{quizId}(courseId=${course.id}, quizId=${quiz.id})}" 
+                                       class="btn btn-outline btn-delete btn-xs" title="Delete Quiz"
+                                       onclick="return confirm('Delete this quiz and all its questions?')">
+                                        <i class="bi bi-trash3"></i> DELETE
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(quizzes)}">
+                            <td colspan="4" style="text-align: center; padding: 40px; color: var(--text-dim);">
+                                No quizzes found. Use the form below to create one.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="post-form-container fade-in mt-3xl">
+            <h2 class="mb-xl text-green font-mono text-l">
+                <i class="bi bi-plus-lg"></i> create_new_quiz()
+            </h2>
+            <form th:action="@{/teacher/courses/{id}/quizzes(id=${course.id})}" method="POST" enctype="multipart/form-data">
+                <div class="form-group mb-m">
+                    <label class="form-label">// STRING: quiz_title</label>
+                    <input type="text" name="title" placeholder="e.g. Final Exam: Module 1" class="form-control" required>
+                </div>
+
+                <div class="form-group mb-m">
+                    <label class="form-label" style="color: var(--accent-blue);">// FILE: bulk_import (Optional, .md or .gift)</label>
+                    <input type="file" name="file" class="form-control" accept=".md,.gift">
+                    <p class="text-xs text-dim mt-xs" style="margin-top: 8px;">Supports GIFT format (.gift) or Markdown headers (.md)</p>
+                </div>
+
+                <div style="margin-top: 32px;">
+                    <button type="submit" class="btn btn-primary btn-large" style="width: 100%;">
+                        <i class="bi bi-terminal"></i> create_quiz()
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
