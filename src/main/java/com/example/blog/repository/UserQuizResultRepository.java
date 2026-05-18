@@ -6,4 +6,5 @@ import java.util.Optional;
 
 public interface UserQuizResultRepository extends JpaRepository<UserQuizResult, Long> {
     Optional<UserQuizResult> findByUserIdAndQuizId(Long userId, Long quizId);
+    java.util.List<UserQuizResult> findByUserId(Long userId);
 }

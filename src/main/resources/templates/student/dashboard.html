@@ -3,20 +3,165 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layouts/main}">
 <head>
-    <title>Student Dashboard</title>
+    <title>Student Cabinet - CodeBlog</title>
 </head>
 <body>
-    <div layout:fragment="content" class="container" style="padding-top: 60px;">
-        <div class="card-glass" style="padding: 40px;">
-            <h1 th:text="${message}">Welcome message</h1>
-            <p style="margin-top: 20px; opacity: 0.8;">
-                Добро пожаловать в личный кабинет студента. Здесь вы сможете отслеживать свой прогресс и проходить курсы.
-            </p>
-            <div style="margin-top: 40px; display: flex; gap: 16px;">
-                <a th:href="@{/courses}" class="btn btn-primary">Посмотреть курсы</a>
+    <div layout:fragment="content" class="container py-l fade-in">
+        <!-- Dashboard Terminal Header -->
+        <div class="admin-header">
+            <h1 class="text-green font-mono" th:text="${currentUser} + '@student:~$'">student@cabinet:~$</h1>
+            <div class="admin-actions" style="display: flex; gap: 12px; align-items: center;">
+                <span class="profile-role-badge student" style="font-family: var(--font-mono); font-size: 0.75rem; background: rgba(56, 139, 253, 0.15); color: var(--accent-blue); padding: 4px 10px; border-radius: 4px; border: 1px solid rgba(56, 139, 253, 0.3);">STUDENT_CONSOLE</span>
                 <form th:action="@{/logout}" method="POST" style="margin: 0;">
-                    <button type="submit" class="btn btn-outline">Выйти</button>
+                    <button type="submit" class="btn btn-outline btn-xs" style="border-color: var(--border-subtle);" onmouseover="this.style.borderColor='var(--accent-red)'" onmouseout="this.style.borderColor='var(--border-subtle)'">
+                        <i class="bi bi-box-arrow-right"></i> logout()
+                    </button>
                 </form>
+            </div>
+        </div>
+
+        <!-- Welcome Banner / Student Profile -->
+        <div class="card-glass" style="padding: clamp(1.5rem, 4vw, 2.5rem); margin-bottom: 32px; background: linear-gradient(135deg, rgba(88, 166, 255, 0.03) 0%, rgba(188, 140, 255, 0.03) 100%); display: flex; gap: 28px; align-items: flex-start; flex-wrap: wrap;">
+            <!-- Profile Avatar Preview -->
+            <div style="flex-shrink: 0; text-align: center; width: 100px;">
+                <img th:if="${user != null and user.avatarUrl != null}" th:src="${user.avatarUrl}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent-blue); background: var(--bg-body); box-shadow: 0 0 20px rgba(88, 166, 255, 0.2);">
+                <div th:if="${user == null or user.avatarUrl == null}" class="avatar-circle" style="width: 100px; height: 100px; border-radius: 50%; font-size: 2.5rem; margin: 0 auto; display: flex; align-items: center; justify-content: center; border: 2px solid var(--border-subtle);" th:text="${#strings.substring(currentUser, 0, 1).toUpperCase()}">U</div>
+            </div>
+            
+            <div style="flex: 1; min-width: 250px;">
+                <h2 class="text-green font-mono" style="font-size: 1.6rem; margin: 0 0 4px;" th:text="${user != null and user.fullName != null and user.fullName != '' ? user.fullName : currentUser}">Student Full Name</h2>
+                <div th:if="${user != null and user.title != null and user.title != ''}" class="font-mono text-blue" style="font-size: 0.85rem; margin-bottom: 12px; font-weight: 500;" th:text="${user.title}">Full-Stack Engineering Path Student</div>
+                
+                <p style="margin: 0 0 16px; opacity: 0.85; font-family: var(--font-mono); font-size: 0.9rem; color: var(--text-main); line-height: 1.6;" th:text="${user != null and user.bio != null and user.bio != '' ? user.bio : 'Добро пожаловать в личный кабинет студента. Настройте свой профиль, заполните информацию о ваших целях обучения и загрузите фотографию, чтобы ваши менторы могли узнать вас поближе.'}">
+                    Добро пожаловать в личный кабинет студента. Настройте свой профиль, заполните информацию о ваших целях обучения и загрузите фотографию, чтобы ваши менторы могли узнать вас поближе.
+                </p>
+                
+                <!-- Social media buttons for student -->
+                <div th:if="${user != null and ((user.githubUrl != null and user.githubUrl != '') or (user.linkedinUrl != null and user.linkedinUrl != '') or (user.email != null and user.email != ''))}" style="display: flex; gap: 12px; align-items: center;">
+                    <a th:if="${user.githubUrl != null and user.githubUrl != ''}" th:href="${user.githubUrl}" target="_blank" class="btn btn-outline btn-xs" style="border-color: var(--border-subtle);"><i class="bi bi-github"></i> github</a>
+                    <a th:if="${user.linkedinUrl != null and user.linkedinUrl != ''}" th:href="${user.linkedinUrl}" target="_blank" class="btn btn-outline btn-xs" style="border-color: var(--border-subtle);"><i class="bi bi-linkedin"></i> linkedin</a>
+                    <a th:if="${user.email != null and user.email != ''}" th:href="'mailto:' + ${user.email}" class="btn btn-outline btn-xs" style="border-color: var(--border-subtle);"><i class="bi bi-envelope"></i> contact_email</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <!-- Platform Courses Available -->
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="bi bi-book-half"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value" th:text="${totalCoursesCount}">0</span>
+                    <span class="stat-label">Courses Catalog</span>
+                </div>
+            </div>
+
+            <!-- Quizzes Completed/Attempted -->
+            <div class="stat-card">
+                <div class="stat-icon purple">
+                    <i class="bi bi-patch-check"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value" th:text="${completedQuizzesCount}">0</span>
+                    <span class="stat-label">Quizzes Completed</span>
+                </div>
+            </div>
+
+            <!-- Average Knowledge Score -->
+            <div class="stat-card">
+                <div class="stat-icon orange">
+                    <i class="bi bi-star"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value" th:text="${averageScore} + ' / 5'">0 / 5</span>
+                    <span class="stat-label">Average Score</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions & Syllabus Shortcuts Grid -->
+        <div class="grid grid-2" style="margin-top: 32px; gap: 32px;">
+            <!-- Explore Courses Shortcut Card -->
+            <div class="card-glass course-card" style="padding: 24px;">
+                <div class="stat-icon" style="margin-bottom: 20px;">
+                    <i class="bi bi-journal-code"></i>
+                </div>
+                <h3 class="course-card__title" style="margin: 0 0 10px; font-size: 1.2rem; font-family: var(--font-mono);">explore_syllabus()</h3>
+                <p class="course-card__description" style="margin-bottom: 24px; font-size: 0.85rem;">
+                    Browse active curricula, select specialized programming pathways, learn theoretical modules, and unlock interactive tests.
+                </p>
+                <a th:href="@{/courses}" class="btn btn-primary w-full mt-auto">
+                    <i class="bi bi-arrow-right-short"></i> Browse Course Catalog
+                </a>
+            </div>
+
+            <!-- Update Settings Shortcut Card -->
+            <div class="card-glass course-card" style="padding: 24px;">
+                <div class="stat-icon purple" style="margin-bottom: 20px;">
+                    <i class="bi bi-gear"></i>
+                </div>
+                <h3 class="course-card__title" style="margin: 0 0 10px; font-size: 1.2rem; font-family: var(--font-mono);">profile_settings()</h3>
+                <p class="course-card__description" style="margin-bottom: 24px; font-size: 0.85rem;">
+                    Configure personal full names, specialized bios, link GitHub repositories, sync LinkedIn, and customize profile avatar picture.
+                </p>
+                <a th:href="@{/profile/settings}" class="btn btn-outline w-full mt-auto">
+                    <i class="bi bi-sliders"></i> Adjust Settings
+                </a>
+            </div>
+        </div>
+
+        <!-- Simulated Student Progress Console Terminal -->
+        <div class="terminal-console" style="margin-top: 32px;">
+            <div class="terminal-console-header">
+                <div class="terminal-dots">
+                    <span class="terminal-dot red"></span>
+                    <span class="terminal-dot yellow"></span>
+                    <span class="terminal-dot green"></span>
+                </div>
+                <span class="font-mono">bash - student_progress.sh</span>
+                <span>tty2</span>
+            </div>
+            <div class="terminal-line">
+                <span class="terminal-prompt">guest@codeblog:~$</span>
+                <span class="terminal-command">ssh -T <span th:text="${currentUser}">student</span>@localhost</span>
+            </div>
+            <div class="terminal-line">
+                <span class="terminal-output">Authentication key accepted. Welcome to CodeBlog LMS Academy!</span>
+                <span class="terminal-output">Last compiled report: <span th:text="${#dates.format(#dates.createNow(), 'yyyy-MM-dd HH:mm')}">2026-05-18</span> from localhost</span>
+                <span class="terminal-output" th:text="'Terminal shell active: [Session: active | Role: ' + ${currentUserRole} + ']'">Terminal shell active: [Session: active | Role: ROLE_STUDENT]</span>
+            </div>
+            <div class="terminal-line">
+                <span class="terminal-prompt" th:text="${currentUser} + '@localhost:~$'">student@localhost:~$</span>
+                <span class="terminal-command">./student_progress.sh --verbose</span>
+            </div>
+            
+            <!-- Real-time Dynamic Quiz Progress Console Output -->
+            <div class="terminal-line">
+                <span class="terminal-output text-green">■ INITIALIZING LOG EXTRACTION: SUCCESS</span>
+                <span class="terminal-output" th:text="'■ PLATFORM CATALOG CONTEXT: ' + ${totalCoursesCount} + ' courses available, ' + ${totalQuizzesCount} + ' interactive checkpoints configured.'">■ PLATFORM CATALOG CONTEXT: 4 courses available.</span>
+                <span class="terminal-output">■ QUIZ RESULTS RETRIEVED FROM DATABASE LOGS:</span>
+                
+                <!-- Display message if student took zero quizzes -->
+                <span th:if="${#lists.isEmpty(quizResults)}" class="terminal-output text-purple" style="padding-left: 20px; font-style: italic;">
+                    ↳ [WARNING]: No quiz records found in context! Visit '/courses' to complete checkpoints and track achievements.
+                </span>
+                
+                <!-- Loop through quiz attempt history if present -->
+                <span th:each="result : ${quizResults}" class="terminal-output" style="padding-left: 20px;">
+                    ↳ <span class="text-blue" th:text="${result.quiz.title}">Java Syntax Basics</span>: 
+                    SCORE=[<span th:text="${result.score}">0</span> / 5] | 
+                    ACCURACY=<span th:text="${result.score * 20} + '%'">0%</span> | 
+                    STATUS=<span th:class="${result.score >= 3} ? 'text-green' : 'text-purple'" th:text="${result.score >= 3} ? 'PASSED' : 'RETRY_RECOMMENDED'">PASSED</span>
+                </span>
+                
+                <span class="terminal-output" style="margin-top: 8px;" th:text="'■ COMPLETED METRICS: ' + ${completedQuizzesCount} + ' quizzes passed. Cumulative accuracy rating: ' + ${averageScore} + ' / 5.0.'">■ COMPLETED METRICS: 0 quizzes passed. Cumulative accuracy rating: 0.0.</span>
+            </div>
+            
+            <div class="terminal-line">
+                <span class="terminal-prompt" th:text="${currentUser} + '@localhost:~$'">student@localhost:~$</span>
+                <span class="terminal-command"><span class="blink">_</span></span>
             </div>
         </div>
     </div>

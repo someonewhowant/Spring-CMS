@@ -147,7 +147,7 @@
             </div>
             <div class="terminal-line">
                 <span class="terminal-output">Welcome to CodeBlog Academy Command Panel!</span>
-                <span class="terminal-output">Last login: <span th:text="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd HH:mm')}">2026-05-18</span> from 127.0.0.1</span>
+                <span class="terminal-output">Last login: <span th:text="${#dates.format(#dates.createNow(), 'yyyy-MM-dd HH:mm')}">2026-05-18</span> from 127.0.0.1</span>
                 <span class="terminal-output" th:text="'User context initialized: [UID: 2048 | Role: ' + ${currentUserRole} + ' | Auth: SECURE]'">User context initialized: [UID: 2048 | Role: ROLE_TEACHER | Auth: SECURE]</span>
             </div>
             <div class="terminal-line">

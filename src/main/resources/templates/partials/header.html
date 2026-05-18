@@ -1,42 +1,83 @@
 <header class="header" th:fragment="header">
     <div class="container">
-        <a th:href="@{/}" class="header__logo"><span>{</span> code_blog <span>}</span></a>
+        <!-- Premium LMS Brand Logo -->
+        <a th:href="@{/}" class="header__logo">
+            <span>{</span> code_blog <span>}</span>
+            <span class="lms-badge font-mono">ACADEMY</span>
+        </a>
         
+        <!-- Standard LMS Navigation Links -->
         <nav class="header__nav">
             <ul>
                 <li><a th:href="@{/}" th:classappend="${currentUri == '/' or currentUri == ''} ? 'active'">/home</a></li>
-                <li><a th:href="@{/articles}" th:classappend="${currentUri != null and currentUri.startsWith('/articles')} ? 'active'">/articles</a></li>
                 <li><a th:href="@{/courses}" th:classappend="${currentUri == '/courses'} ? 'active'">/courses</a></li>
+                <li><a th:href="@{/articles}" th:classappend="${currentUri != null and currentUri.startsWith('/articles')} ? 'active'">/articles</a></li>
                 <li><a th:href="@{/about}" th:classappend="${currentUri == '/about'} ? 'active'">/about</a></li>
-                <li th:if="${currentUserRole == 'ROLE_ADMIN'}"><a th:href="@{/admin/dashboard}" th:classappend="${currentUri != null and currentUri.startsWith('/admin')} ? 'active'">/admin</a></li>
-                <li th:if="${currentUserRole == 'ROLE_TEACHER'}"><a th:href="@{/teacher/dashboard}" th:classappend="${currentUri != null and currentUri.startsWith('/teacher')} ? 'active'">/teacher</a></li>
-                <li th:if="${currentUserRole == 'ROLE_STUDENT'}"><a th:href="@{/student/dashboard}" th:classappend="${currentUri != null and currentUri.startsWith('/student')} ? 'active'">/cabinet</a></li>
-                <li th:if="${currentUser == null}"><a th:href="@{/admin/login}" th:classappend="${currentUri == '/admin/login'} ? 'active'">/login</a></li>
-                <li th:if="${currentUser != null}">
-                    <a th:href="@{/profile/settings}" th:classappend="${currentUri == '/profile/settings'} ? 'active'" style="display: inline-flex; align-items: center; gap: 8px;">
-                        <img th:if="${currentUserObj != null and currentUserObj.avatarUrl != null}" th:src="${currentUserObj.avatarUrl}" style="width: 18px; height: 18px; border-radius: 50%; object-fit: cover; border: 1px solid var(--accent-blue); vertical-align: middle;">
-                        <span>/settings</span>
-                    </a>
-                </li>
-                <li th:if="${currentUser != null}">
-                    <form th:action="@{/logout}" method="POST" style="display: inline; margin: 0; padding: 0;">
-                        <button type="submit" style="border: none; background: transparent; color: var(--text-dim); cursor: pointer; font-family: var(--font-mono); font-size: inherit; padding: 0; font-weight: inherit;" onmouseover="this.style.color='var(--accent-red)'" onmouseout="this.style.color='var(--text-dim)'">
-                            /logout
-                        </button>
-                    </form>
-                </li>
             </ul>
         </nav>
 
+        <!-- Right Side Header Controls -->
         <div class="header__actions">
-            <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">
-                <i class="bi bi-moon-stars"></i>
-                <i class="bi bi-sun"></i>
-            </button>
+            <!-- Search & Theme Switcher Buttons -->
             <button class="searchBtn" aria-expanded="false" aria-label="Search">
                 <i class="bi bi-search"></i>
                 <span>Search</span>
             </button>
+            <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">
+                <i class="bi bi-moon-stars"></i>
+                <i class="bi bi-sun"></i>
+            </button>
+
+            <!-- Anonymous Guest Login CTA -->
+            <a th:if="${currentUser == null}" th:href="@{/admin/login}" class="btn btn-primary btn-sm" style="font-family: var(--font-mono); font-size: 0.8rem; padding: 6px 14px; border-radius: 6px; display: inline-flex; align-items: center; gap: 8px;">
+                <i class="bi bi-box-arrow-in-right"></i> login
+            </a>
+
+            <!-- Unified Avatar Profile Dropdown -->
+            <div th:if="${currentUser != null}" class="lms-dropdown">
+                <button class="lms-dropdown-trigger" aria-label="Open User Menu">
+                    <img th:if="${currentUserObj != null and currentUserObj.avatarUrl != null}" th:src="${currentUserObj.avatarUrl}" class="lms-avatar" alt="Avatar">
+                    <div th:if="${currentUserObj == null or currentUserObj.avatarUrl == null}" class="lms-avatar-fallback" th:text="${currentUser != null and #strings.length(currentUser) > 0 ? #strings.substring(currentUser, 0, 1).toUpperCase() : 'U'}">U</div>
+                    <i class="bi bi-chevron-down" style="font-size: 0.75rem; color: var(--text-dim); margin-left: 2px;"></i>
+                </button>
+                
+                <div class="lms-dropdown-menu">
+                    <div class="lms-dropdown-header">
+                        <div class="lms-dropdown-user-name" th:text="${currentUserObj != null and currentUserObj.fullName != null and currentUserObj.fullName != '' ? currentUserObj.fullName : currentUser}">Alex Student</div>
+                        <span th:class="'lms-role-badge ' + ${currentUserRole != null and #strings.contains(currentUserRole, 'ROLE_') ? #strings.toLowerCase(#strings.substringAfter(currentUserRole, 'ROLE_')) : 'guest'}" 
+                              th:text="${currentUserRole != null and #strings.contains(currentUserRole, 'ROLE_') ? #strings.substringAfter(currentUserRole, 'ROLE_') : 'GUEST'}">STUDENT</span>
+                    </div>
+                    
+                    <div class="lms-dropdown-divider"></div>
+                    
+                    <!-- Dynamic Dashboard cabinet routes -->
+                    <a th:if="${currentUserRole == 'ROLE_STUDENT'}" th:href="@{/student/dashboard}" class="lms-dropdown-item">
+                        <i class="bi bi-speedometer2" style="color: var(--accent-blue);"></i> /cabinet
+                    </a>
+                    <a th:if="${currentUserRole == 'ROLE_TEACHER'}" th:href="@{/teacher/dashboard}" class="lms-dropdown-item">
+                        <i class="bi bi-speedometer2" style="color: var(--accent-purple);"></i> /teacher
+                    </a>
+                    <a th:if="${currentUserRole == 'ROLE_ADMIN'}" th:href="@{/admin/dashboard}" class="lms-dropdown-item">
+                        <i class="bi bi-shield-lock" style="color: var(--accent-green);"></i> /admin
+                    </a>
+                    
+                    <!-- Profile settings direct trigger -->
+                    <a th:href="@{/profile/settings}" class="lms-dropdown-item">
+                        <i class="bi bi-gear" style="color: var(--text-dim);"></i> /settings
+                    </a>
+                    
+                    <div class="lms-dropdown-divider"></div>
+                    
+                    <!-- Sign Out Action -->
+                    <form th:action="@{/logout}" method="POST" style="margin: 0; padding: 0; width: 100%;">
+                        <button type="submit" class="lms-dropdown-item logout-btn">
+                            <i class="bi bi-box-arrow-right"></i> /logout
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Hamburger menu toggle for smaller screens -->
             <button id="mobileMenuToggle" class="mobile-menu-toggle" aria-label="Toggle navigation">
                 <i class="bi bi-list"></i>
             </button>
