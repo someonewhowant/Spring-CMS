@@ -45,72 +45,209 @@
             </div>
         </div>
 
-        <!-- Stats Grid -->
-        <div class="stats-grid">
-            <!-- Platform Courses Available -->
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="bi bi-book-half"></i>
+        <!-- Stats Grid / Performance Overview -->
+        <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; margin-bottom: 32px;">
+            <!-- Knowledge Score Widget -->
+            <div class="card-glass" style="padding: 24px; border-left: 4px solid var(--accent-blue);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                    <div class="stat-icon" style="background: rgba(88, 166, 255, 0.1); color: var(--accent-blue); width: 42px; height: 42px; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-graph-up-arrow"></i>
+                    </div>
+                    <span class="font-mono" style="font-size: 0.7rem; color: var(--text-dim); background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 4px;" th:text="${performanceRating}">JUNIOR_ENG</span>
                 </div>
-                <div class="stat-info">
-                    <span class="stat-value" th:text="${totalCoursesCount}">0</span>
-                    <span class="stat-label">Courses Catalog</span>
+                <h4 style="margin: 0 0 4px; font-size: 0.85rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 0.05em;">Performance Index</h4>
+                <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 12px;">
+                    <span style="font-size: 2rem; font-weight: 700; color: var(--text-main);" th:text="${averageScore}">0.0</span>
+                    <span style="font-size: 1rem; color: var(--text-dim);">/ 5.0</span>
                 </div>
+                <div style="width: 100%; height: 4px; background: rgba(255,255,255,0.05); border-radius: 2px; overflow: hidden;">
+                    <div th:style="'width: ' + (${averageScore} * 20) + '%; height: 100%; background: var(--accent-blue); transition: width 1s ease;'"></div>
+                </div>
+                <p style="margin: 8px 0 0; font-size: 0.75rem; color: var(--text-dim);">
+                    Based on <span class="text-blue" th:text="${totalAttempts}">0</span> quiz attempts
+                </p>
             </div>
 
-            <!-- Quizzes Completed/Attempted -->
-            <div class="stat-card">
-                <div class="stat-icon purple">
-                    <i class="bi bi-patch-check"></i>
+            <!-- Achievement Points Widget -->
+            <div class="card-glass" style="padding: 24px; border-left: 4px solid #bc8cff;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                    <div class="stat-icon" style="background: rgba(188, 140, 255, 0.1); color: #bc8cff; width: 42px; height: 42px; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-lightning-charge"></i>
+                    </div>
+                    <span class="font-mono" style="font-size: 0.7rem; color: var(--text-dim); background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 4px;">XP_SYSTEM</span>
                 </div>
-                <div class="stat-info">
-                    <span class="stat-value" th:text="${completedQuizzesCount}">0</span>
-                    <span class="stat-label">Quizzes Completed</span>
+                <h4 style="margin: 0 0 4px; font-size: 0.85rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 0.05em;">Academy Points</h4>
+                <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 12px;">
+                    <span style="font-size: 2rem; font-weight: 700; color: #bc8cff;" th:text="${totalPoints}">0</span>
+                    <span style="font-size: 1rem; color: var(--text-dim);">pts</span>
                 </div>
+                <p style="margin: 0; font-size: 0.75rem; color: var(--text-dim);">
+                    <i class="bi bi-patch-check"></i> <span th:text="${passedQuizzesCount}">0</span> quizzes successfully passed
+                </p>
             </div>
 
-            <!-- Average Knowledge Score -->
-            <div class="stat-card">
-                <div class="stat-icon orange">
-                    <i class="bi bi-star"></i>
+            <!-- Course Progress Overview -->
+            <div class="card-glass" style="padding: 24px; border-left: 4px solid var(--accent-green);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                    <div class="stat-icon" style="background: rgba(46, 160, 67, 0.1); color: var(--accent-green); width: 42px; height: 42px; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-journal-check"></i>
+                    </div>
+                    <span class="font-mono" style="font-size: 0.7rem; color: var(--text-dim); background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 4px;" 
+                          th:text="${#lists.size(completedCourses)} + '/' + ${totalCoursesCount}">0/0</span>
                 </div>
-                <div class="stat-info">
-                    <span class="stat-value" th:text="${averageScore} + ' / 5'">0 / 5</span>
-                    <span class="stat-label">Average Score</span>
+                <h4 style="margin: 0 0 4px; font-size: 0.85rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 0.05em;">Curriculum Mastery</h4>
+                <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 12px;">
+                    <span style="font-size: 2rem; font-weight: 700; color: var(--accent-green);" 
+                          th:text="${totalCoursesCount > 0 ? (#lists.size(completedCourses) * 100 / totalCoursesCount) : 0}">0</span>
+                    <span style="font-size: 1rem; color: var(--text-dim);">%</span>
+                </div>
+                <div style="display: flex; gap: 4px;">
+                    <div th:each="i : ${#numbers.sequence(1, totalCoursesCount > 0 ? totalCoursesCount : 1)}" 
+                         style="flex: 1; height: 6px; border-radius: 3px;"
+                         th:styleappend="${i <= #lists.size(completedCourses)} ? 'background: var(--accent-green);' : 'background: rgba(255,255,255,0.1);'"></div>
                 </div>
             </div>
         </div>
 
-        <!-- Actions & Syllabus Shortcuts Grid -->
-        <div class="grid grid-2" style="margin-top: 32px; gap: 32px;">
-            <!-- Explore Courses Shortcut Card -->
-            <div class="card-glass course-card" style="padding: 24px;">
-                <div class="stat-icon" style="margin-bottom: 20px;">
-                    <i class="bi bi-journal-code"></i>
-                </div>
-                <h3 class="course-card__title" style="margin: 0 0 10px; font-size: 1.2rem; font-family: var(--font-mono);">explore_syllabus()</h3>
-                <p class="course-card__description" style="margin-bottom: 24px; font-size: 0.85rem;">
-                    Browse active curricula, select specialized programming pathways, learn theoretical modules, and unlock interactive tests.
-                </p>
-                <a th:href="@{/courses}" class="btn btn-primary w-full mt-auto">
-                    <i class="bi bi-arrow-right-short"></i> Browse Course Catalog
-                </a>
+        <!-- Continue Learning Widget -->
+        <div th:if="${lastCourse != null}" class="card-glass continue-learning-widget" style="padding: 24px; margin-bottom: 40px; background: linear-gradient(135deg, rgba(88, 166, 255, 0.08) 0%, rgba(188, 140, 255, 0.08) 100%); border: 1px solid rgba(88, 166, 255, 0.2); position: relative; overflow: hidden; border-radius: 12px;">
+            <!-- Decorative background element -->
+            <div style="position: absolute; right: -20px; top: -20px; font-size: 120px; opacity: 0.05; color: var(--accent-blue); pointer-events: none;">
+                <i class="bi bi-code-square"></i>
             </div>
-
-            <!-- Update Settings Shortcut Card -->
-            <div class="card-glass course-card" style="padding: 24px;">
-                <div class="stat-icon purple" style="margin-bottom: 20px;">
-                    <i class="bi bi-gear"></i>
+            
+            <div style="display: flex; gap: 28px; align-items: center; flex-wrap: wrap; position: relative; z-index: 1;">
+                <div class="stat-icon" style="width: 64px; height: 64px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: var(--accent-blue); color: white; font-size: 2rem; box-shadow: 0 4px 15px rgba(88, 166, 255, 0.3);">
+                    <i class="bi bi-play-fill"></i>
                 </div>
-                <h3 class="course-card__title" style="margin: 0 0 10px; font-size: 1.2rem; font-family: var(--font-mono);">profile_settings()</h3>
-                <p class="course-card__description" style="margin-bottom: 24px; font-size: 0.85rem;">
-                    Configure personal full names, specialized bios, link GitHub repositories, sync LinkedIn, and customize profile avatar picture.
-                </p>
-                <a th:href="@{/profile/settings}" class="btn btn-outline w-full mt-auto">
-                    <i class="bi bi-sliders"></i> Adjust Settings
-                </a>
+                <div style="flex: 1; min-width: 300px;">
+                    <span class="font-mono" style="font-size: 0.75rem; color: var(--accent-blue); text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 8px;">Resume Learning Session</span>
+                    <h3 style="margin: 0 0 8px; font-size: 1.5rem; font-family: var(--font-mono); color: var(--text-main);" th:text="${lastCourse.title}">Course Title</h3>
+                    
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                        <p style="margin: 0; font-size: 0.9rem; color: var(--text-dim);" th:if="${lastModule != null}">
+                            Current: <span class="text-blue font-mono" th:text="${lastModule.title}">Lesson Title</span>
+                        </p>
+                        <p style="margin: 0; font-size: 0.9rem; color: var(--text-dim);" th:if="${lastModule == null}">
+                            Status: <span class="text-blue font-mono">Introductory Overview</span>
+                        </p>
+                        <span style="width: 4px; height: 4px; border-radius: 50%; background: var(--border-subtle);"></span>
+                        <span class="font-mono" style="font-size: 0.8rem; color: var(--text-dim);" th:text="${lastCourse.level}">Beginner</span>
+                    </div>
+
+                    <!-- Progress bar in Continue Learning widget -->
+                    <div th:each="progress : ${activeCourses}" th:if="${progress.course.id == lastCourse.id}" style="max-width: 400px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.75rem; font-family: var(--font-mono);">
+                            <span class="text-dim">Overall Completion</span>
+                            <span class="text-blue" th:text="${progress.progressPercentage} + '%'">50%</span>
+                        </div>
+                        <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden;">
+                            <div th:style="'width: ' + ${progress.progressPercentage} + '%; height: 100%; background: linear-gradient(90deg, var(--accent-blue) 0%, #bc8cff 100%); border-radius: 4px;'"></div>
+                        </div>
+                    </div>
+                </div>
+                <div style="flex-shrink: 0;">
+                    <a th:href="${lastModule != null} ? @{/course/{cId}/module/{mId}(cId=${lastCourse.id}, mId=${lastModule.id})} : @{/course/{cId}(cId=${lastCourse.id})}" 
+                       class="btn btn-blue font-mono" style="padding: 14px 32px; border-radius: 8px; display: flex; align-items: center; gap: 8px; font-weight: 600;">
+                        RESUME_LAB <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
             </div>
         </div>
+
+        <!-- Active Courses Section -->
+        <div th:if="${!#lists.isEmpty(activeCourses)}" style="margin-top: 32px;">
+            <h3 class="font-mono text-blue" style="font-size: 1rem; text-transform: uppercase; margin-bottom: 20px; letter-spacing: 0.08em;">
+                <i class="bi bi-play-fill"></i> active_courses()
+            </h3>
+            <div class="courses-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; margin-bottom: 32px;">
+                <div th:each="progress : ${activeCourses}" class="card-glass course-card" style="padding: 24px; display: flex; flex-direction: column; border-radius: 8px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                        <span class="font-mono text-dim" style="font-size: 0.75rem;" th:text="${progress.course.level}">Beginner</span>
+                        <span class="font-mono text-dim" style="font-size: 0.75rem;" th:text="${progress.course.duration}">10 Hours</span>
+                    </div>
+                    <h4 class="course-card__title" style="margin: 0 0 12px; font-size: 1.15rem; font-family: var(--font-mono); color: var(--accent-blue);" th:text="${progress.course.title}">Course Title</h4>
+                    <p class="course-card__description" style="margin-bottom: 20px; font-size: 0.85rem; line-height: 1.5; min-height: 48px; color: var(--text-dim);" th:text="${progress.course.description}">Short description...</p>
+                    
+                    <!-- Progress Bar Widget -->
+                    <div style="margin-bottom: 24px; margin-top: auto;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; font-family: var(--font-mono); margin-bottom: 6px;">
+                            <span class="text-dim">Progress:</span>
+                            <span class="text-blue" th:text="${progress.progressPercentage} + '%'">50%</span>
+                        </div>
+                        <div style="width: 100%; height: 6px; background: rgba(255, 255, 255, 0.08); border-radius: 4px; overflow: hidden;">
+                            <div th:style="'width: ' + ${progress.progressPercentage} + '%; height: 100%; background: linear-gradient(90deg, var(--accent-blue) 0%, #bc8cff 100%); border-radius: 4px; transition: width 0.5s ease;'"></div>
+                        </div>
+                        <div style="font-size: 0.7rem; font-family: var(--font-mono); color: var(--text-dim); margin-top: 6px;" th:if="${progress.totalQuizzesCount > 0}">
+                            <i class="bi bi-patch-check"></i> <span th:text="${progress.passedQuizzesCount} + ' / ' + ${progress.totalQuizzesCount} + ' quizzes passed'">2 / 4 quizzes passed</span>
+                        </div>
+                    </div>
+                    
+                    <a th:href="@{/course/{id}(id=${progress.course.id})}" class="btn btn-outline btn-blue w-full font-mono">
+                        <i class="bi bi-arrow-right-short"></i> continue_course()
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Available Courses Section -->
+        <div th:if="${!#lists.isEmpty(availableCourses)}" style="margin-top: 32px;">
+            <h3 class="font-mono text-purple" style="font-size: 1rem; text-transform: uppercase; margin-bottom: 20px; letter-spacing: 0.08em;">
+                <i class="bi bi-journal-album"></i> available_courses()
+            </h3>
+            <div class="courses-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; margin-bottom: 32px;">
+                <div th:each="progress : ${availableCourses}" class="card-glass course-card" style="padding: 24px; display: flex; flex-direction: column; border-radius: 8px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                        <span class="font-mono text-dim" style="font-size: 0.75rem;" th:text="${progress.course.level}">Beginner</span>
+                        <span class="font-mono text-dim" style="font-size: 0.75rem;" th:text="${progress.course.duration}">10 Hours</span>
+                    </div>
+                    <h4 class="course-card__title" style="margin: 0 0 12px; font-size: 1.15rem; font-family: var(--font-mono);" th:text="${progress.course.title}">Course Title</h4>
+                    <p class="course-card__description" style="margin-bottom: 20px; font-size: 0.85rem; line-height: 1.5; min-height: 48px; color: var(--text-dim);" th:text="${progress.course.description}">Short description...</p>
+                    
+                    <div style="margin-top: auto; display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; font-family: var(--font-mono); margin-bottom: 20px; color: var(--text-dim);" th:if="${progress.totalQuizzesCount > 0}">
+                        <span>Interactive checkpoints:</span>
+                        <span class="text-purple" th:text="${progress.totalQuizzesCount} + ' quizzes'">4 quizzes</span>
+                    </div>
+                    
+                    <a th:href="@{/course/{id}(id=${progress.course.id})}" class="btn btn-outline w-full font-mono" style="border-color: var(--border-subtle);">
+                        <i class="bi bi-box-arrow-in-right"></i> start_course()
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Completed Courses Section -->
+        <div th:if="${!#lists.isEmpty(completedCourses)}" style="margin-top: 32px;">
+            <h3 class="font-mono text-green" style="font-size: 1rem; text-transform: uppercase; margin-bottom: 20px; letter-spacing: 0.08em;">
+                <i class="bi bi-award"></i> completed_courses()
+            </h3>
+            <div class="courses-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; margin-bottom: 32px;">
+                <div th:each="progress : ${completedCourses}" class="card-glass course-card" style="padding: 24px; display: flex; flex-direction: column; background: linear-gradient(135deg, rgba(46, 160, 67, 0.02) 0%, rgba(255,255,255,0.01) 100%); border-color: rgba(46, 160, 67, 0.25); border-radius: 8px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                        <span class="font-mono text-dim" style="font-size: 0.75rem;" th:text="${progress.course.level}">Beginner</span>
+                        <span class="profile-role-badge" style="background: rgba(46, 160, 67, 0.15); color: #3fb950; border: 1px solid rgba(46, 160, 67, 0.4); font-size: 0.65rem; font-family: var(--font-mono); font-weight: 600; padding: 1px 6px; border-radius: 4px;">COMPLETED</span>
+                    </div>
+                    <h4 class="course-card__title" style="margin: 0 0 12px; font-size: 1.15rem; font-family: var(--font-mono); color: #3fb950;" th:text="${progress.course.title}">Course Title</h4>
+                    <p class="course-card__description" style="margin-bottom: 20px; font-size: 0.85rem; line-height: 1.5; min-height: 48px; color: var(--text-dim);" th:text="${progress.course.description}">Short description...</p>
+                    
+                    <!-- Progress Bar Widget (100%) -->
+                    <div style="margin-bottom: 24px; margin-top: auto;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; font-family: var(--font-mono); margin-bottom: 6px;">
+                            <span class="text-dim">Progress:</span>
+                            <span class="text-green">100%</span>
+                        </div>
+                        <div style="width: 100%; height: 6px; background: rgba(255, 255, 255, 0.08); border-radius: 4px; overflow: hidden;">
+                            <div style="width: 100%; height: 100%; background: #3fb950; border-radius: 4px;"></div>
+                        </div>
+                    </div>
+                    
+                    <a th:href="@{/course/{id}(id=${progress.course.id})}" class="btn btn-outline btn-green w-full font-mono">
+                        <i class="bi bi-eye"></i> review_materials()
+                    </a>
+                </div>
+            </div>
+        </div>
+
 
         <!-- Simulated Student Progress Console Terminal -->
         <div class="terminal-console" style="margin-top: 32px;">

@@ -92,51 +92,69 @@
             </div>
         </div>
 
-        <!-- Dashboard Action Modules -->
-        <h3 class="font-mono text-dim" style="font-size: 0.85rem; text-transform: uppercase; margin-bottom: 20px; letter-spacing: 0.08em;">
-            <i class="bi bi-terminal"></i> executable_commands
-        </h3>
-        
-        <div class="courses-grid" style="margin-bottom: 32px;">
-            <!-- Course Management Card -->
-            <div class="card-glass course-card" style="padding: 24px;">
-                <div class="stat-icon orange" style="margin-bottom: 20px;">
-                    <i class="bi bi-folder-symlink"></i>
+        <!-- Top Performing Students & Dashboard Action Modules -->
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 32px; margin-bottom: 32px; align-items: start; flex-wrap: wrap;">
+            <div>
+                <h3 class="font-mono text-dim" style="font-size: 0.85rem; text-transform: uppercase; margin-bottom: 20px; letter-spacing: 0.08em;">
+                    <i class="bi bi-terminal"></i> executable_commands
+                </h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+                    <!-- Course Management Card -->
+                    <div class="card-glass course-card" style="padding: 24px; height: 100%;">
+                        <div class="stat-icon orange" style="margin-bottom: 20px; width: 42px; height: 42px; font-size: 1.2rem;">
+                            <i class="bi bi-folder-symlink"></i>
+                        </div>
+                        <h3 class="course-card__title" style="margin: 0 0 10px; font-size: 1.1rem; font-family: var(--font-mono);">manage_courses()</h3>
+                        <p class="course-card__description" style="margin-bottom: 24px; font-size: 0.8rem; color: var(--text-dim);">
+                            Structure syllabus, import articles, manage lessons, and bind quizzes.
+                        </p>
+                        <a th:href="@{/teacher/courses}" class="btn btn-outline btn-orange btn-xs font-mono">
+                            BUILD_CURRICULUM <i class="bi bi-arrow-right-short"></i>
+                        </a>
+                    </div>
+
+                    <!-- Student View Card -->
+                    <div class="card-glass course-card" style="padding: 24px; height: 100%;">
+                        <div class="stat-icon green" style="margin-bottom: 20px; width: 42px; height: 42px; font-size: 1.2rem;">
+                            <i class="bi bi-mortarboard"></i>
+                        </div>
+                        <h3 class="course-card__title" style="margin: 0 0 10px; font-size: 1.1rem; font-family: var(--font-mono);">browse_students()</h3>
+                        <p class="course-card__description" style="margin-bottom: 24px; font-size: 0.8rem; color: var(--text-dim);">
+                            Audit individual progress, view completed quizzes and performance.
+                        </p>
+                        <a th:href="@{/teacher/students}" class="btn btn-outline btn-green btn-xs font-mono">
+                            AUDIT_REPORTS <i class="bi bi-arrow-right-short"></i>
+                        </a>
+                    </div>
                 </div>
-                <h3 class="course-card__title" style="margin: 0 0 10px; font-size: 1.2rem; font-family: var(--font-mono);">manage_courses()</h3>
-                <p class="course-card__description" style="margin-bottom: 24px; font-size: 0.85rem;">
-                    Structure new learning syllabus, import articles from markdown, manage lesson plans, and bind interactive quizzes.
-                </p>
-                <a th:href="@{/teacher/courses}" class="btn btn-outline btn-orange w-full mt-auto">
-                    <i class="bi bi-arrow-right-short"></i> Open Course Builder
-                </a>
             </div>
 
-            <!-- Profile Settings Card -->
-            <div class="card-glass course-card" style="padding: 24px;">
-                <div class="stat-icon" style="margin-bottom: 20px;">
-                    <i class="bi bi-sliders2"></i>
+            <!-- Top Students Widget -->
+            <div class="card-glass" style="padding: 24px; border: 1px solid rgba(188, 140, 255, 0.2);">
+                <h3 class="font-mono text-purple" style="font-size: 0.85rem; text-transform: uppercase; margin-bottom: 20px; letter-spacing: 0.08em; display: flex; align-items: center; gap: 8px;">
+                    <i class="bi bi-star-fill"></i> top_performers
+                </h3>
+                
+                <div th:if="${#lists.isEmpty(topStudents)}" class="text-center py-m">
+                    <p class="font-mono text-dim" style="font-size: 0.75rem;">■ NO SIGNALS DETECTED</p>
                 </div>
-                <h3 class="course-card__title" style="margin: 0 0 10px; font-size: 1.2rem; font-family: var(--font-mono);">profile_settings()</h3>
-                <p class="course-card__description" style="margin-bottom: 24px; font-size: 0.85rem;">
-                    Configure secure access credentials, reset passwords, change display username, and audit your authorization level.
-                </p>
-                <a th:href="@{/profile/settings}" class="btn btn-outline btn-blue w-full mt-auto">
-                    <i class="bi bi-arrow-right-short"></i> Open Profile Settings
-                </a>
-            </div>
-
-            <!-- Student View Card -->
-            <div class="card-glass course-card" style="padding: 24px;">
-                <div class="stat-icon green" style="margin-bottom: 20px;">
-                    <i class="bi bi-mortarboard"></i>
+                
+                <div th:each="studentDto : ${topStudents}" style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <div style="flex-shrink: 0;">
+                        <img th:if="${studentDto.student.avatarUrl != null}" th:src="${studentDto.student.avatarUrl}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
+                        <div th:if="${studentDto.student.avatarUrl == null}" class="avatar-circle" style="width: 32px; height: 32px; border-radius: 50%; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; background: rgba(88,166,255,0.1); border: 1px solid rgba(88,166,255,0.3);" th:text="${#strings.substring(studentDto.student.username, 0, 1).toUpperCase()}">U</div>
+                    </div>
+                    <div style="flex: 1; overflow: hidden;">
+                        <div class="font-mono" style="font-size: 0.85rem; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" th:text="${studentDto.student.fullName != null and studentDto.student.fullName != '' ? studentDto.student.fullName : studentDto.student.username}">Name</div>
+                        <div class="font-mono text-dim" style="font-size: 0.7rem;" th:text="${studentDto.averageScore} + ' AVG_SCORE'">4.8 AVG_SCORE</div>
+                    </div>
+                    <div class="text-purple font-mono" style="font-size: 0.75rem; font-weight: bold;">
+                        <i class="bi bi-trophy"></i>
+                    </div>
                 </div>
-                <h3 class="course-card__title" style="margin: 0 0 10px; font-size: 1.2rem; font-family: var(--font-mono);">browse_students()</h3>
-                <p class="course-card__description" style="margin-bottom: 24px; font-size: 0.85rem;">
-                    Inspect enrolled academy students, audit individual progress diagnostics, view completed quizzes and performance accuracy.
-                </p>
-                <a th:href="@{/teacher/students}" class="btn btn-outline btn-green w-full mt-auto">
-                    <i class="bi bi-arrow-right-short"></i> Browse Student Academy
+                
+                <a th:href="@{/teacher/students}" class="btn btn-outline btn-xs w-full font-mono mt-s" style="border-color: rgba(188, 140, 255, 0.3); color: #bc8cff;">
+                    VIEW_ALL_STUDENTS()
                 </a>
             </div>
         </div>

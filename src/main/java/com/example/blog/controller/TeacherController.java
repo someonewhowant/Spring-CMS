@@ -48,13 +48,36 @@ public class TeacherController {
             totalQuizzes += quizService.getQuizzesByCourseId(c.getId()).size();
         }
 
-        int totalStudents = userRepository.findByRole(com.example.blog.entity.Role.STUDENT).size();
+        List<com.example.blog.entity.User> allStudents = userRepository.findByRole(com.example.blog.entity.Role.STUDENT);
+        int totalStudents = allStudents.size();
+
+        // Fetch top students
+        List<StudentProgressDto> topStudents = new ArrayList<>();
+        for (com.example.blog.entity.User student : allStudents) {
+            List<com.example.blog.entity.UserQuizResult> results = userQuizResultRepository.findByUserId(student.getId());
+            if (!results.isEmpty()) {
+                double total = 0.0;
+                for (com.example.blog.entity.UserQuizResult res : results) {
+                    total += res.getScore();
+                }
+                double avg = Math.round((total / results.size()) * 10.0) / 10.0;
+                topStudents.add(new StudentProgressDto(student, results.size(), avg, results));
+            }
+        }
+        topStudents.sort((a, b) -> Double.compare(b.getAverageScore(), a.getAverageScore()));
+        if (topStudents.size() > 5) {
+            topStudents = topStudents.subList(0, 5);
+        }
+        model.addAttribute("topStudents", topStudents);
 
         model.addAttribute("message", "Добро пожаловать в командный центр преподавателя!");
         model.addAttribute("title", "Teacher Cabinet");
         model.addAttribute("coursesCount", totalCourses);
         model.addAttribute("quizzesCount", totalQuizzes);
         model.addAttribute("studentsCount", totalStudents);
+        model.addAttribute("currentUser", principal.getName());
+        model.addAttribute("currentUserRole", "ROLE_" + (user != null ? user.getRole().name() : "TEACHER"));
+        
         return "teacher/dashboard";
     }
 
@@ -385,8 +408,8 @@ public class TeacherController {
 
         public String getPerformanceRating() {
             if (completedQuizzesCount == 0) return "NO_SUBMISSIONS";
-            if (averageScore >= 4.5) return "ELITE_DEV";
-            if (averageScore >= 3.5) return "ADVANCED_CODER";
+            if (completedQuizzesCount >= 5 && averageScore >= 4.5) return "ELITE_DEV";
+            if (completedQuizzesCount >= 3 && averageScore >= 3.5) return "ADVANCED_CODER";
             return "APPRENTICE";
         }
     }

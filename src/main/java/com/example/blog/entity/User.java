@@ -46,4 +46,11 @@ public class User {
 
     @Column(name = "avatar_url")
     private String avatarUrl;
+
+    @Column(name = "last_opened_course_id")
+    private Long lastOpenedCourseId;
+
+    @Column(name = "last_opened_module_id")
+    private Long lastOpenedModuleId;
 }
+

@@ -154,9 +154,17 @@ public class MainController {
     }
 
     @GetMapping("/course/{id}")
-    public String courseDetail(@PathVariable Long id, Model model) {
+    public String courseDetail(@PathVariable Long id, Principal principal, Model model) {
         Course course = courseService.getCourseById(id);
         String htmlContent = markdownService.convertToHtml(course.getContent());
+
+        if (principal != null) {
+            userRepository.findByUsername(principal.getName()).ifPresent(user -> {
+                user.setLastOpenedCourseId(id);
+                user.setLastOpenedModuleId(null);
+                userRepository.save(user);
+            });
+        }
         
         model.addAttribute("course", course);
         model.addAttribute("htmlContent", htmlContent);
@@ -202,6 +210,14 @@ public class MainController {
                 if (i < modules.size() - 1) nextModule = modules.get(i + 1);
                 break;
             }
+        }
+
+        if (principal != null && !isLocked) {
+            userRepository.findByUsername(principal.getName()).ifPresent(user -> {
+                user.setLastOpenedCourseId(courseId);
+                user.setLastOpenedModuleId(moduleId);
+                userRepository.save(user);
+            });
         }
         
         boolean isNextLocked = false;
