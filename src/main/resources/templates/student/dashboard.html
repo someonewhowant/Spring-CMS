@@ -109,6 +109,25 @@
             </div>
         </div>
 
+        <!-- Notifications & System Alerts -->
+        <div th:if="${!#lists.isEmpty(notifications)}" class="terminal-console" style="margin-bottom: 32px; border-color: rgba(88, 166, 255, 0.3);">
+            <div class="terminal-console-header" style="background: rgba(88, 166, 255, 0.05);">
+                <div class="terminal-dots">
+                    <span class="terminal-dot red"></span>
+                    <span class="terminal-dot yellow"></span>
+                    <span class="terminal-dot green"></span>
+                </div>
+                <span class="font-mono text-blue">bash - inbox_alerts.sh --unread=<span th:text="${unreadNotificationsCount}">0</span></span>
+            </div>
+            <div class="terminal-line" style="display: block; padding: 16px;">
+                <div th:each="note : ${notifications}" class="terminal-output" style="margin-bottom: 12px; border-left: 2px solid var(--accent-blue); padding-left: 12px;">
+                    <span class="text-dim" style="font-size: 0.75rem;" th:text="'[' + ${#temporals.format(note.createdAt, 'HH:mm:ss')} + '] '"></span>
+                    <span th:text="${note.message}">Notification message</span>
+                    <a th:if="${note.link != null}" th:href="${note.link}" class="text-blue" style="font-size: 0.8rem; margin-left: 8px;">[OPEN_RESOURCE]</a>
+                </div>
+            </div>
+        </div>
+
         <!-- Continue Learning Widget -->
         <div th:if="${lastCourse != null}" class="card-glass continue-learning-widget" style="padding: 24px; margin-bottom: 40px; background: linear-gradient(135deg, rgba(88, 166, 255, 0.08) 0%, rgba(188, 140, 255, 0.08) 100%); border: 1px solid rgba(88, 166, 255, 0.2); position: relative; overflow: hidden; border-radius: 12px;">
             <!-- Decorative background element -->
@@ -293,7 +312,7 @@
                     STATUS=<span th:class="${result.score >= 3} ? 'text-green' : 'text-purple'" th:text="${result.score >= 3} ? 'PASSED' : 'RETRY_RECOMMENDED'">PASSED</span>
                 </span>
                 
-                <span class="terminal-output" style="margin-top: 8px;" th:text="'■ COMPLETED METRICS: ' + ${completedQuizzesCount} + ' quizzes passed. Cumulative accuracy rating: ' + ${averageScore} + ' / 5.0.'">■ COMPLETED METRICS: 0 quizzes passed. Cumulative accuracy rating: 0.0.</span>
+                <span class="terminal-output" style="margin-top: 8px;" th:text="'■ COMPLETED METRICS: ' + ${passedQuizzesCount} + ' quizzes passed. Cumulative accuracy rating: ' + ${averageScore} + ' / 5.0.'">■ COMPLETED METRICS: 0 quizzes passed. Cumulative accuracy rating: 0.0.</span>
             </div>
             
             <div class="terminal-line">

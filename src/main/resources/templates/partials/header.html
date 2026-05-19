@@ -2,16 +2,19 @@
     <div class="container">
         <!-- Premium LMS Brand Logo -->
         <a th:href="@{/}" class="header__logo">
-            <span>{</span> code_blog <span>}</span>
-            <span class="lms-badge font-mono">ACADEMY</span>
+            <span>{</span> CS <span>}</span>
+            <span class="lms-badge font-mono">SCHOOL</span>
         </a>
-        
+
         <!-- Standard LMS Navigation Links -->
         <nav class="header__nav">
             <ul>
-                <li><a th:href="@{/}" th:classappend="${currentUri == '/' or currentUri == ''} ? 'active'">/home</a></li>
+                <li><a th:href="@{/}" th:classappend="${currentUri == '/' or currentUri == ''} ? 'active'">/home</a>
+                </li>
                 <li><a th:href="@{/courses}" th:classappend="${currentUri == '/courses'} ? 'active'">/courses</a></li>
-                <li><a th:href="@{/articles}" th:classappend="${currentUri != null and currentUri.startsWith('/articles')} ? 'active'">/articles</a></li>
+                <li><a th:href="@{/articles}"
+                        th:classappend="${currentUri != null and currentUri.startsWith('/articles')} ? 'active'">/articles</a>
+                </li>
                 <li><a th:href="@{/about}" th:classappend="${currentUri == '/about'} ? 'active'">/about</a></li>
             </ul>
         </nav>
@@ -29,45 +32,94 @@
             </button>
 
             <!-- Anonymous Guest Login CTA -->
-            <a th:if="${currentUser == null}" th:href="@{/admin/login}" class="btn btn-primary btn-sm" style="font-family: var(--font-mono); font-size: 0.8rem; padding: 6px 14px; border-radius: 6px; display: inline-flex; align-items: center; gap: 8px;">
+            <a th:if="${currentUser == null}" th:href="@{/admin/login}" class="btn btn-primary btn-sm"
+                style="font-family: var(--font-mono); font-size: 0.8rem; padding: 6px 14px; border-radius: 6px; display: inline-flex; align-items: center; gap: 8px;">
                 <i class="bi bi-box-arrow-in-right"></i> login
             </a>
 
             <!-- Unified Avatar Profile Dropdown -->
+            <div th:if="${currentUser != null}" class="lms-dropdown" style="margin-right: 8px;">
+                <button class="lms-dropdown-trigger" aria-label="Notifications" style="padding: 8px; position: relative;">
+                    <i class="bi bi-bell" style="font-size: 1.2rem; color: var(--text-dim);"></i>
+                    <span th:if="${unreadNotificationsCount > 0}" 
+                          style="position: absolute; top: 2px; right: 2px; background: var(--accent-red); color: white; font-size: 0.65rem; padding: 2px 5px; border-radius: 50%; min-width: 18px; text-align: center; border: 2px solid var(--bg-surface);" 
+                          th:text="${unreadNotificationsCount}">0</span>
+                </button>
+                <div class="lms-dropdown-menu" style="width: 320px; right: 0;">
+                    <div class="lms-dropdown-header">
+                        <div class="lms-dropdown-user-name font-mono" style="font-size: 0.85rem;">■ SYSTEM_NOTIFICATIONS</div>
+                        <span class="lms-role-badge guest" style="font-size: 0.65rem;" th:text="${unreadNotificationsCount} + ' unread'">0 unread</span>
+                    </div>
+                    <div class="lms-dropdown-divider"></div>
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        <div th:if="${#lists.isEmpty(recentNotifications)}" class="lms-dropdown-item text-dim font-mono" style="font-size: 0.8rem; text-align: center; padding: 20px;">
+                            ↳ NO_PENDING_ALERTS
+                        </div>
+                        <a th:each="note : ${recentNotifications}" th:href="${note.link != null ? note.link : '#'}" class="lms-dropdown-item" style="padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.03); display: block;">
+                            <div style="display: flex; gap: 12px; align-items: flex-start;">
+                                <div th:class="${note.read ? 'text-dim' : 'text-blue'}" style="padding-top: 3px;">
+                                    <i th:class="${note.read ? 'bi bi-envelope-open' : 'bi bi-envelope-fill'}"></i>
+                                </div>
+                                <div style="flex: 1;">
+                                    <p th:text="${note.message}" th:class="${note.read ? 'text-dim' : 'text-main'}" style="margin: 0 0 4px; font-size: 0.85rem; line-height: 1.4;"></p>
+                                    <span class="font-mono text-dim" style="font-size: 0.7rem;" th:text="${#temporals.format(note.createdAt, 'MMM dd, HH:mm')}">Time</span>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="lms-dropdown-divider"></div>
+                    <a href="#" class="lms-dropdown-item text-center font-mono" style="font-size: 0.75rem; color: var(--accent-blue);">
+                        VIEW_ALL_LOGS()
+                    </a>
+                </div>
+            </div>
+
+            <!-- Unified Avatar Profile Dropdown -->
             <div th:if="${currentUser != null}" class="lms-dropdown">
                 <button class="lms-dropdown-trigger" aria-label="Open User Menu">
-                    <img th:if="${currentUserObj != null and currentUserObj.avatarUrl != null}" th:src="${currentUserObj.avatarUrl}" class="lms-avatar" alt="Avatar">
-                    <div th:if="${currentUserObj == null or currentUserObj.avatarUrl == null}" class="lms-avatar-fallback" th:text="${currentUser != null and #strings.length(currentUser) > 0 ? #strings.substring(currentUser, 0, 1).toUpperCase() : 'U'}">U</div>
-                    <i class="bi bi-chevron-down" style="font-size: 0.75rem; color: var(--text-dim); margin-left: 2px;"></i>
+                    <img th:if="${currentUserObj != null and currentUserObj.avatarUrl != null}"
+                        th:src="${currentUserObj.avatarUrl}" class="lms-avatar" alt="Avatar">
+                    <div th:if="${currentUserObj == null or currentUserObj.avatarUrl == null}"
+                        class="lms-avatar-fallback"
+                        th:text="${currentUser != null and #strings.length(currentUser) > 0 ? #strings.substring(currentUser, 0, 1).toUpperCase() : 'U'}">
+                        U</div>
+                    <i class="bi bi-chevron-down"
+                        style="font-size: 0.75rem; color: var(--text-dim); margin-left: 2px;"></i>
                 </button>
-                
+
                 <div class="lms-dropdown-menu">
                     <div class="lms-dropdown-header">
-                        <div class="lms-dropdown-user-name" th:text="${currentUserObj != null and currentUserObj.fullName != null and currentUserObj.fullName != '' ? currentUserObj.fullName : currentUser}">Alex Student</div>
-                        <span th:class="'lms-role-badge ' + ${currentUserRole != null and #strings.contains(currentUserRole, 'ROLE_') ? #strings.toLowerCase(#strings.substringAfter(currentUserRole, 'ROLE_')) : 'guest'}" 
-                              th:text="${currentUserRole != null and #strings.contains(currentUserRole, 'ROLE_') ? #strings.substringAfter(currentUserRole, 'ROLE_') : 'GUEST'}">STUDENT</span>
+                        <div class="lms-dropdown-user-name"
+                            th:text="${currentUserObj != null and currentUserObj.fullName != null and currentUserObj.fullName != '' ? currentUserObj.fullName : currentUser}">
+                            Alex Student</div>
+                        <span
+                            th:class="'lms-role-badge ' + ${currentUserRole != null and #strings.contains(currentUserRole, 'ROLE_') ? #strings.toLowerCase(#strings.substringAfter(currentUserRole, 'ROLE_')) : 'guest'}"
+                            th:text="${currentUserRole != null and #strings.contains(currentUserRole, 'ROLE_') ? #strings.substringAfter(currentUserRole, 'ROLE_') : 'GUEST'}">STUDENT</span>
                     </div>
-                    
+
                     <div class="lms-dropdown-divider"></div>
-                    
+
                     <!-- Dynamic Dashboard cabinet routes -->
-                    <a th:if="${currentUserRole == 'ROLE_STUDENT'}" th:href="@{/student/dashboard}" class="lms-dropdown-item">
+                    <a th:if="${currentUserRole == 'ROLE_STUDENT'}" th:href="@{/student/dashboard}"
+                        class="lms-dropdown-item">
                         <i class="bi bi-speedometer2" style="color: var(--accent-blue);"></i> /cabinet
                     </a>
-                    <a th:if="${currentUserRole == 'ROLE_TEACHER'}" th:href="@{/teacher/dashboard}" class="lms-dropdown-item">
+                    <a th:if="${currentUserRole == 'ROLE_TEACHER'}" th:href="@{/teacher/dashboard}"
+                        class="lms-dropdown-item">
                         <i class="bi bi-speedometer2" style="color: var(--accent-purple);"></i> /teacher
                     </a>
-                    <a th:if="${currentUserRole == 'ROLE_ADMIN'}" th:href="@{/admin/dashboard}" class="lms-dropdown-item">
+                    <a th:if="${currentUserRole == 'ROLE_ADMIN'}" th:href="@{/admin/dashboard}"
+                        class="lms-dropdown-item">
                         <i class="bi bi-shield-lock" style="color: var(--accent-green);"></i> /admin
                     </a>
-                    
+
                     <!-- Profile settings direct trigger -->
                     <a th:href="@{/profile/settings}" class="lms-dropdown-item">
                         <i class="bi bi-gear" style="color: var(--text-dim);"></i> /settings
                     </a>
-                    
+
                     <div class="lms-dropdown-divider"></div>
-                    
+
                     <!-- Sign Out Action -->
                     <form th:action="@{/logout}" method="POST" style="margin: 0; padding: 0; width: 100%;">
                         <button type="submit" class="lms-dropdown-item logout-btn">
@@ -89,7 +141,8 @@
         <div class="container">
             <i class="bi bi-search search-icon-large"></i>
             <form th:action="@{/search}" method="GET" role="search" style="flex-grow: 1;">
-                <input type="search" name="searchTerm" id="searchInput" placeholder="Search for insights..." autocomplete="off">
+                <input type="search" name="searchTerm" id="searchInput" placeholder="Search for insights..."
+                    autocomplete="off">
             </form>
             <div id="searchClose" class="search-close">CLOSE (ESC)</div>
         </div>

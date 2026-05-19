@@ -1,13 +1,19 @@
 package com.example.blog.controller;
 
+import com.example.blog.dto.StudentCourseProgressDto;
 import com.example.blog.entity.Course;
 import com.example.blog.entity.CourseModule;
 import com.example.blog.entity.Question;
 import com.example.blog.entity.QuestionOption;
 import com.example.blog.entity.Quiz;
+import com.example.blog.entity.UserQuizResult;
+import com.example.blog.entity.Role;
+import com.example.blog.repository.CourseRepository;
+import com.example.blog.repository.QuizRepository;
 import com.example.blog.service.CourseService;
 import com.example.blog.service.FileStorageService;
 import com.example.blog.service.QuizService;
+import com.example.blog.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -32,6 +38,9 @@ public class TeacherController {
     private final FileStorageService fileStorageService;
     private final UserRepository userRepository;
     private final UserQuizResultRepository userQuizResultRepository;
+    private final CourseRepository courseRepository;
+    private final QuizRepository quizRepository;
+    private final NotificationService notificationService;
 
     @GetMapping("/dashboard")
     public String dashboard(Principal principal, Model model) {
@@ -48,16 +57,16 @@ public class TeacherController {
             totalQuizzes += quizService.getQuizzesByCourseId(c.getId()).size();
         }
 
-        List<com.example.blog.entity.User> allStudents = userRepository.findByRole(com.example.blog.entity.Role.STUDENT);
+        List<com.example.blog.entity.User> allStudents = userRepository.findByRole(Role.STUDENT);
         int totalStudents = allStudents.size();
 
         // Fetch top students
         List<StudentProgressDto> topStudents = new ArrayList<>();
         for (com.example.blog.entity.User student : allStudents) {
-            List<com.example.blog.entity.UserQuizResult> results = userQuizResultRepository.findByUserId(student.getId());
+            List<UserQuizResult> results = userQuizResultRepository.findByUserId(student.getId());
             if (!results.isEmpty()) {
                 double total = 0.0;
-                for (com.example.blog.entity.UserQuizResult res : results) {
+                for (UserQuizResult res : results) {
                     total += res.getScore();
                 }
                 double avg = Math.round((total / results.size()) * 10.0) / 10.0;
@@ -78,6 +87,12 @@ public class TeacherController {
         model.addAttribute("currentUser", principal.getName());
         model.addAttribute("currentUserRole", "ROLE_" + (user != null ? user.getRole().name() : "TEACHER"));
         
+        // Add notifications
+        if (user != null) {
+            model.addAttribute("notifications", notificationService.getRecentNotifications(user.getId(), 5));
+            model.addAttribute("unreadNotificationsCount", notificationService.getUnreadCount(user.getId()));
+        }
+
         return "teacher/dashboard";
     }
 
@@ -195,7 +210,15 @@ public class TeacherController {
             module.setContent(content);
         }
         
-        courseService.addModule(id, module);
+        CourseModule savedModule = courseService.addModule(id, module);
+        
+        // Notify all students about the new module
+        String message = "New module added to course: " + savedModule.getCourse().getTitle() + " - " + title;
+        String link = "/course/" + id + "/module/" + savedModule.getId();
+        userRepository.findByRole(Role.STUDENT).forEach(student -> 
+            notificationService.createNotification(student, message, link)
+        );
+        
         return "redirect:/teacher/courses/" + id + "/modules";
     }
 
@@ -262,23 +285,31 @@ public class TeacherController {
     public String addQuiz(@PathVariable Long id, 
                           @ModelAttribute Quiz quiz,
                           @RequestParam(value = "file", required = false) MultipartFile file) throws IOException {
+        Quiz savedQuiz;
         if (file != null && !file.isEmpty()) {
             String content = new String(file.getBytes(), StandardCharsets.UTF_8);
             String fileName = file.getOriginalFilename();
-            Quiz importedQuiz;
             if (fileName != null && fileName.toLowerCase().endsWith(".gift")) {
-                importedQuiz = quizService.importQuizFromGift(id, content);
+                savedQuiz = quizService.importQuizFromGift(id, content);
             } else {
-                importedQuiz = quizService.importQuizFromMarkdown(id, content);
+                savedQuiz = quizService.importQuizFromMarkdown(id, content);
             }
             
             if (quiz.getTitle() != null && !quiz.getTitle().isEmpty()) {
-                importedQuiz.setTitle(quiz.getTitle());
-                quizService.updateQuiz(importedQuiz.getId(), importedQuiz);
+                savedQuiz.setTitle(quiz.getTitle());
+                quizService.updateQuiz(savedQuiz.getId(), savedQuiz);
             }
         } else {
-            quizService.createQuiz(id, quiz);
+            savedQuiz = quizService.createQuiz(id, quiz);
         }
+
+        // Notify all students about the new quiz
+        String message = "New interactive quiz available in course: " + savedQuiz.getCourse().getTitle() + " - " + savedQuiz.getTitle();
+        String link = "/course/" + id;
+        userRepository.findByRole(Role.STUDENT).forEach(student -> 
+            notificationService.createNotification(student, message, link)
+        );
+
         return "redirect:/teacher/courses/" + id + "/quizzes";
     }
 
@@ -349,6 +380,78 @@ public class TeacherController {
         return "redirect:/teacher/quizzes/" + quizId + "/questions";
     }
 
+    @GetMapping("/students/{id}")
+    public String viewStudentProfile(@PathVariable Long id, Principal principal, Model model) {
+        if (principal == null) {
+            return "redirect:/admin/login";
+        }
+        com.example.blog.entity.User teacher = userRepository.findByUsername(principal.getName()).orElse(null);
+        com.example.blog.entity.User student = userRepository.findById(id).orElseThrow(() -> new RuntimeException("Student not found"));
+
+        model.addAttribute("user", teacher);
+        model.addAttribute("student", student);
+        model.addAttribute("currentUser", principal.getName());
+        model.addAttribute("currentUserRole", "ROLE_" + (teacher != null ? teacher.getRole().name() : "TEACHER"));
+        model.addAttribute("title", "Student Profile: " + student.getFullName());
+
+        List<UserQuizResult> quizResults = userQuizResultRepository.findByUserId(student.getId());
+        model.addAttribute("quizResults", quizResults);
+
+        // Calculate detailed course progress summary
+        List<StudentCourseProgressDto> courseProgress = new ArrayList<>();
+        List<Course> allCourses = courseService.getAllCourses();
+
+        for (Course course : allCourses) {
+            List<Quiz> courseQuizzes = quizRepository.findByCourseId(course.getId());
+            int totalCourseQuizzes = courseQuizzes.size();
+            int passedInCourse = 0;
+            boolean hasAttemptsInCourse = false;
+            
+            for (Quiz q : courseQuizzes) {
+                for (UserQuizResult res : quizResults) {
+                    if (res.getQuiz().getId().equals(q.getId())) {
+                        hasAttemptsInCourse = true;
+                        if (res.getScore() >= 3) {
+                            passedInCourse++;
+                        }
+                        break;
+                    }
+                }
+            }
+            
+            int pct = 0;
+            String status = "AVAILABLE";
+            
+            if (totalCourseQuizzes > 0) {
+                pct = (passedInCourse * 100) / totalCourseQuizzes;
+                if (pct == 100) status = "COMPLETED";
+                else if (hasAttemptsInCourse || (student.getLastOpenedCourseId() != null && student.getLastOpenedCourseId().equals(course.getId()))) status = "ACTIVE";
+            } else {
+                if (student.getLastOpenedCourseId() != null && student.getLastOpenedCourseId().equals(course.getId())) {
+                    List<CourseModule> modules = course.getModules();
+                    if (!modules.isEmpty() && student.getLastOpenedModuleId() != null) {
+                        if (student.getLastOpenedModuleId().equals(modules.get(modules.size() - 1).getId())) {
+                            pct = 100;
+                            status = "COMPLETED";
+                        } else {
+                            pct = 50;
+                            status = "ACTIVE";
+                        }
+                    } else {
+                        pct = 10;
+                        status = "ACTIVE";
+                    }
+                }
+            }
+            
+            courseProgress.add(new StudentCourseProgressDto(course, pct, status, passedInCourse, totalCourseQuizzes));
+        }
+
+        model.addAttribute("courseProgress", courseProgress);
+
+        return "teacher/student-profile";
+    }
+
     /**
      * Просмотр студентов Академии и метрик их успеваемости.
      */
@@ -365,7 +468,7 @@ public class TeacherController {
         model.addAttribute("currentUserRole", "ROLE_" + (user != null ? user.getRole().name() : "TEACHER"));
         model.addAttribute("title", "Browse Students");
 
-        List<com.example.blog.entity.User> allStudents = userRepository.findByRole(com.example.blog.entity.Role.STUDENT);
+        List<com.example.blog.entity.User> allStudents = userRepository.findByRole(Role.STUDENT);
         List<StudentProgressDto> studentProgressList = new ArrayList<>();
 
         for (com.example.blog.entity.User student : allStudents) {
@@ -380,12 +483,12 @@ public class TeacherController {
                 }
             }
 
-            List<com.example.blog.entity.UserQuizResult> results = userQuizResultRepository.findByUserId(student.getId());
+            List<UserQuizResult> results = userQuizResultRepository.findByUserId(student.getId());
             int completedCount = results.size();
             double avgScore = 0.0;
             if (completedCount > 0) {
                 double total = 0.0;
-                for (com.example.blog.entity.UserQuizResult res : results) {
+                for (UserQuizResult res : results) {
                     total += res.getScore();
                 }
                 avgScore = Math.round((total / completedCount) * 10.0) / 10.0;
@@ -404,7 +507,7 @@ public class TeacherController {
         private final com.example.blog.entity.User student;
         private final int completedQuizzesCount;
         private final double averageScore;
-        private final List<com.example.blog.entity.UserQuizResult> quizResults;
+        private final List<UserQuizResult> quizResults;
 
         public String getPerformanceRating() {
             if (completedQuizzesCount == 0) return "NO_SUBMISSIONS";

@@ -6,12 +6,14 @@ import com.example.blog.entity.Question;
 import com.example.blog.entity.QuestionOption;
 import com.example.blog.entity.User;
 import com.example.blog.entity.UserQuizResult;
+import com.example.blog.entity.Role;
 import com.example.blog.repository.CourseRepository;
 import com.example.blog.repository.QuizRepository;
 import com.example.blog.repository.QuestionRepository;
 import com.example.blog.repository.UserRepository;
 import com.example.blog.repository.UserQuizResultRepository;
 import com.example.blog.service.QuizService;
+import com.example.blog.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +29,7 @@ public class QuizServiceImpl implements QuizService {
     private final CourseRepository courseRepository;
     private final UserRepository userRepository;
     private final UserQuizResultRepository userQuizResultRepository;
+    private final NotificationService notificationService;
 
     @Override
     public List<Quiz> getQuizzesByCourseId(Long courseId) {
@@ -97,6 +100,13 @@ public class QuizServiceImpl implements QuizService {
         }
         
         userQuizResultRepository.save(result);
+
+        // Notify teachers about quiz completion
+        String message = "Student " + user.getFullName() + " completed quiz: " + quiz.getTitle() + " with score " + score + "/5";
+        String link = "/teacher/students/" + userId;
+        userRepository.findByRole(Role.TEACHER).forEach(teacher -> 
+            notificationService.createNotification(teacher, message, link)
+        );
     }
 
     @Override

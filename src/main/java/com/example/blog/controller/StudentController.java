@@ -1,5 +1,6 @@
 package com.example.blog.controller;
 
+import com.example.blog.dto.StudentCourseProgressDto;
 import com.example.blog.entity.Course;
 import com.example.blog.entity.CourseModule;
 import com.example.blog.entity.Quiz;
@@ -11,6 +12,7 @@ import com.example.blog.repository.CourseRepository;
 import com.example.blog.repository.QuizRepository;
 import com.example.blog.service.CourseService;
 import com.example.blog.service.QuizService;
+import com.example.blog.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -31,6 +33,7 @@ public class StudentController {
     private final QuizRepository quizRepository;
     private final CourseService courseService;
     private final QuizService quizService;
+    private final NotificationService notificationService;
 
     @GetMapping("/dashboard")
     public String dashboard(Principal principal, Model model) {
@@ -171,16 +174,10 @@ public class StudentController {
         model.addAttribute("message", "Добро пожаловать в командный центр студента!");
         model.addAttribute("title", "Student Cabinet");
         
-        return "student/dashboard";
-    }
+        // Add notifications
+        model.addAttribute("notifications", notificationService.getRecentNotifications(user.getId(), 5));
+        model.addAttribute("unreadNotificationsCount", notificationService.getUnreadCount(user.getId()));
 
-    @lombok.Getter
-    @lombok.RequiredArgsConstructor
-    public static class StudentCourseProgressDto {
-        private final Course course;
-        private final int progressPercentage;
-        private final String status;
-        private final int passedQuizzesCount;
-        private final int totalQuizzesCount;
+        return "student/dashboard";
     }
 }

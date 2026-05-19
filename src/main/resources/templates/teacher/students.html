@@ -47,11 +47,15 @@
                 <!-- Student Header Details -->
                 <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 20px;">
                     <div style="flex-shrink: 0;">
-                        <img th:if="${item.student.avatarUrl != null}" th:src="${item.student.avatarUrl}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border-subtle); background: var(--bg-body);">
-                        <div th:if="${item.student.avatarUrl == null}" class="avatar-circle" style="width: 60px; height: 60px; border-radius: 50%; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; border: 2px solid var(--border-subtle); font-family: var(--font-mono); background: linear-gradient(135deg, rgba(88,166,255,0.1) 0%, rgba(188,140,255,0.1) 100%);" th:text="${item.student.fullName != null and #strings.length(item.student.fullName) > 0 ? #strings.substring(item.student.fullName, 0, 1).toUpperCase() : #strings.substring(item.student.username, 0, 1).toUpperCase()}">U</div>
+                        <a th:href="@{/teacher/students/{id}(id=${item.student.id})}">
+                            <img th:if="${item.student.avatarUrl != null}" th:src="${item.student.avatarUrl}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border-subtle); background: var(--bg-body);">
+                            <div th:if="${item.student.avatarUrl == null}" class="avatar-circle" style="width: 60px; height: 60px; border-radius: 50%; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; border: 2px solid var(--border-subtle); font-family: var(--font-mono); background: linear-gradient(135deg, rgba(88,166,255,0.1) 0%, rgba(188,140,255,0.1) 100%);" th:text="${item.student.fullName != null and #strings.length(item.student.fullName) > 0 ? #strings.substring(item.student.fullName, 0, 1).toUpperCase() : #strings.substring(item.student.username, 0, 1).toUpperCase()}">U</div>
+                        </a>
                     </div>
                     <div style="overflow: hidden;">
-                        <h4 class="text-green font-mono" style="margin: 0 0 2px; font-size: 1.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" th:text="${item.student.fullName != null and item.student.fullName != '' ? item.student.fullName : item.student.username}">Student Full Name</h4>
+                        <a th:href="@{/teacher/students/{id}(id=${item.student.id})}" style="text-decoration: none;">
+                            <h4 class="text-green font-mono" style="margin: 0 0 2px; font-size: 1.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" th:text="${item.student.fullName != null and item.student.fullName != '' ? item.student.fullName : item.student.username}">Student Full Name</h4>
+                        </a>
                         <div class="font-mono text-dim" style="font-size: 0.8rem; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" th:text="'@' + ${item.student.username}">@username</div>
                         <div class="text-dim" style="font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" th:text="${item.student.email != null and item.student.email != '' ? item.student.email : 'No email registered'}">student@example.com</div>
                     </div>
@@ -80,11 +84,17 @@
                     </div>
                 </div>
 
-                <!-- Interactive Diagnostics Toggle -->
-                <button class="btn btn-outline btn-xs w-full font-mono" style="border-color: var(--border-subtle); margin-top: auto; padding: 8px; font-size: 0.8rem;"
-                        th:onclick="'toggleDiagnostics(' + ${item.student.id} + ')'" th:id="'btn-diag-' + ${item.student.id}">
-                    <i class="bi bi-terminal"></i> inspect_diagnostics()
-                </button>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: auto;">
+                    <!-- Interactive Diagnostics Toggle -->
+                    <button class="btn btn-outline btn-xs font-mono" style="border-color: var(--border-subtle); padding: 8px; font-size: 0.8rem;"
+                            th:onclick="'toggleDiagnostics(' + ${item.student.id} + ')'" th:id="'btn-diag-' + ${item.student.id}">
+                        <i class="bi bi-terminal"></i> inspect()
+                    </button>
+
+                    <a th:href="@{/teacher/students/{id}(id=${item.student.id})}" class="btn btn-blue btn-xs font-mono" style="padding: 8px; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                        <i class="bi bi-person-badge"></i> full_audit()
+                    </a>
+                </div>
 
                 <!-- Collapsible Detailed Diagnostics Container -->
                 <div th:id="'diagnostics-' + ${item.student.id}" class="card-glass" style="display: none; margin-top: 16px; padding: 16px; background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(88, 166, 255, 0.15); border-radius: 8px;">

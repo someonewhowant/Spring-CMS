@@ -92,37 +92,56 @@
             </div>
         </div>
 
+        <!-- Notifications & Academic Alerts -->
+        <div th:if="${!#lists.isEmpty(notifications)}" class="terminal-console" style="margin-bottom: 32px; border-color: rgba(188, 140, 255, 0.3);">
+            <div class="terminal-console-header" style="background: rgba(188, 140, 255, 0.05);">
+                <div class="terminal-dots">
+                    <span class="terminal-dot red"></span>
+                    <span class="terminal-dot yellow"></span>
+                    <span class="terminal-dot green"></span>
+                </div>
+                <span class="font-mono text-purple">bash - instructor_alerts.sh --unread=<span th:text="${unreadNotificationsCount}">0</span></span>
+            </div>
+            <div class="terminal-line" style="display: block; padding: 16px;">
+                <div th:each="note : ${notifications}" class="terminal-output" style="margin-bottom: 12px; border-left: 2px solid var(--accent-purple); padding-left: 12px;">
+                    <span class="text-dim" style="font-size: 0.75rem;" th:text="'[' + ${#temporals.format(note.createdAt, 'HH:mm:ss')} + '] '"></span>
+                    <span th:text="${note.message}">Notification message</span>
+                    <a th:if="${note.link != null}" th:href="${note.link}" class="text-purple" style="font-size: 0.8rem; margin-left: 8px;">[VIEW_AUDIT]</a>
+                </div>
+            </div>
+        </div>
+
         <!-- Top Performing Students & Dashboard Action Modules -->
-        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 32px; margin-bottom: 32px; align-items: start; flex-wrap: wrap;">
-            <div>
-                <h3 class="font-mono text-dim" style="font-size: 0.85rem; text-transform: uppercase; margin-bottom: 20px; letter-spacing: 0.08em;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px; margin-bottom: 32px; align-items: start;">
+            <div style="display: flex; flex-direction: column; gap: 24px;">
+                <h3 class="font-mono text-dim" style="font-size: 0.85rem; text-transform: uppercase; margin-bottom: 0; letter-spacing: 0.08em;">
                     <i class="bi bi-terminal"></i> executable_commands
                 </h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px;">
                     <!-- Course Management Card -->
-                    <div class="card-glass course-card" style="padding: 24px; height: 100%;">
+                    <div class="card-glass" style="padding: 24px;">
                         <div class="stat-icon orange" style="margin-bottom: 20px; width: 42px; height: 42px; font-size: 1.2rem;">
                             <i class="bi bi-folder-symlink"></i>
                         </div>
-                        <h3 class="course-card__title" style="margin: 0 0 10px; font-size: 1.1rem; font-family: var(--font-mono);">manage_courses()</h3>
-                        <p class="course-card__description" style="margin-bottom: 24px; font-size: 0.8rem; color: var(--text-dim);">
+                        <h3 class="font-mono" style="margin: 0 0 10px; font-size: 1.1rem; color: var(--text-main);">manage_courses()</h3>
+                        <p style="margin-bottom: 24px; font-size: 0.85rem; color: var(--text-dim); flex-grow: 1;">
                             Structure syllabus, import articles, manage lessons, and bind quizzes.
                         </p>
-                        <a th:href="@{/teacher/courses}" class="btn btn-outline btn-orange btn-xs font-mono">
+                        <a th:href="@{/teacher/courses}" class="btn btn-outline btn-orange btn-xs font-mono w-full">
                             BUILD_CURRICULUM <i class="bi bi-arrow-right-short"></i>
                         </a>
                     </div>
 
                     <!-- Student View Card -->
-                    <div class="card-glass course-card" style="padding: 24px; height: 100%;">
+                    <div class="card-glass" style="padding: 24px;">
                         <div class="stat-icon green" style="margin-bottom: 20px; width: 42px; height: 42px; font-size: 1.2rem;">
                             <i class="bi bi-mortarboard"></i>
                         </div>
-                        <h3 class="course-card__title" style="margin: 0 0 10px; font-size: 1.1rem; font-family: var(--font-mono);">browse_students()</h3>
-                        <p class="course-card__description" style="margin-bottom: 24px; font-size: 0.8rem; color: var(--text-dim);">
+                        <h3 class="font-mono" style="margin: 0 0 10px; font-size: 1.1rem; color: var(--text-main);">browse_students()</h3>
+                        <p style="margin-bottom: 24px; font-size: 0.85rem; color: var(--text-dim); flex-grow: 1;">
                             Audit individual progress, view completed quizzes and performance.
                         </p>
-                        <a th:href="@{/teacher/students}" class="btn btn-outline btn-green btn-xs font-mono">
+                        <a th:href="@{/teacher/students}" class="btn btn-outline btn-green btn-xs font-mono w-full">
                             AUDIT_REPORTS <i class="bi bi-arrow-right-short"></i>
                         </a>
                     </div>
@@ -141,11 +160,15 @@
                 
                 <div th:each="studentDto : ${topStudents}" style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
                     <div style="flex-shrink: 0;">
-                        <img th:if="${studentDto.student.avatarUrl != null}" th:src="${studentDto.student.avatarUrl}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
-                        <div th:if="${studentDto.student.avatarUrl == null}" class="avatar-circle" style="width: 32px; height: 32px; border-radius: 50%; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; background: rgba(88,166,255,0.1); border: 1px solid rgba(88,166,255,0.3);" th:text="${#strings.substring(studentDto.student.username, 0, 1).toUpperCase()}">U</div>
+                        <a th:href="@{/teacher/students/{id}(id=${studentDto.student.id})}">
+                            <img th:if="${studentDto.student.avatarUrl != null}" th:src="${studentDto.student.avatarUrl}" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-subtle);">
+                            <div th:if="${studentDto.student.avatarUrl == null}" class="avatar-circle" style="width: 36px; height: 36px; border-radius: 50%; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; background: rgba(88,166,255,0.1); border: 1px solid rgba(88,166,255,0.3);" th:text="${#strings.substring(studentDto.student.username, 0, 1).toUpperCase()}">U</div>
+                        </a>
                     </div>
                     <div style="flex: 1; overflow: hidden;">
-                        <div class="font-mono" style="font-size: 0.85rem; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" th:text="${studentDto.student.fullName != null and studentDto.student.fullName != '' ? studentDto.student.fullName : studentDto.student.username}">Name</div>
+                        <a th:href="@{/teacher/students/{id}(id=${studentDto.student.id})}" style="text-decoration: none;">
+                            <div class="font-mono" style="font-size: 0.85rem; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" th:text="${studentDto.student.fullName != null and studentDto.student.fullName != '' ? studentDto.student.fullName : studentDto.student.username}">Name</div>
+                        </a>
                         <div class="font-mono text-dim" style="font-size: 0.7rem;" th:text="${studentDto.averageScore} + ' AVG_SCORE'">4.8 AVG_SCORE</div>
                     </div>
                     <div class="text-purple font-mono" style="font-size: 0.75rem; font-weight: bold;">
@@ -153,8 +176,8 @@
                     </div>
                 </div>
                 
-                <a th:href="@{/teacher/students}" class="btn btn-outline btn-xs w-full font-mono mt-s" style="border-color: rgba(188, 140, 255, 0.3); color: #bc8cff;">
-                    VIEW_ALL_STUDENTS()
+                <a th:href="@{/teacher/students}" class="btn btn-outline btn-xs w-full font-mono mt-auto" style="border-color: rgba(188, 140, 255, 0.3); color: #bc8cff;">
+                    VIEW_ALL_DIRECTORY()
                 </a>
             </div>
         </div>

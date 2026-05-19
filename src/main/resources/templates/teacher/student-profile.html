@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title th:text="${title}">Student Profile - CodeBlog</title>
+</head>
+<body>
+    <div layout:fragment="content" class="container py-l fade-in">
+        <!-- Dashboard Terminal Header -->
+        <div class="admin-header" style="margin-bottom: 32px;">
+            <div>
+                <h1 class="text-green font-mono" style="font-size: 1.8rem; margin: 0 0 4px;">student_profile_audit.sh</h1>
+                <p class="font-mono text-dim" style="font-size: 0.85rem; margin: 0;">Detailed performance metrics for user: <span class="text-blue" th:text="${student.username}">student</span></p>
+            </div>
+            <div class="admin-actions">
+                <a th:href="@{/teacher/students}" class="btn btn-outline btn-xs" style="border-color: var(--border-subtle);">
+                    <i class="bi bi-chevron-left"></i> back_to_directory()
+                </a>
+            </div>
+        </div>
+
+        <!-- Student Basic Info Card -->
+        <div class="card-glass" style="padding: clamp(1.5rem, 4vw, 2.5rem); margin-bottom: 40px; background: linear-gradient(135deg, rgba(88, 166, 255, 0.05) 0%, rgba(188, 140, 255, 0.05) 100%); display: flex; gap: 32px; align-items: flex-start; flex-wrap: wrap;">
+            <div style="flex-shrink: 0;">
+                <img th:if="${student.avatarUrl != null}" th:src="${student.avatarUrl}" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent-blue); box-shadow: 0 0 20px rgba(88, 166, 255, 0.2);">
+                <div th:if="${student.avatarUrl == null}" class="avatar-circle" style="width: 120px; height: 120px; border-radius: 50%; font-size: 3rem; display: flex; align-items: center; justify-content: center; border: 3px solid var(--border-subtle); background: var(--bg-body);" th:text="${student.fullName != null and #strings.length(student.fullName) > 0 ? #strings.substring(student.fullName, 0, 1).toUpperCase() : #strings.substring(student.username, 0, 1).toUpperCase()}">U</div>
+            </div>
+            
+            <div style="flex: 1; min-width: 300px;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                    <h2 class="text-green font-mono" style="font-size: 1.8rem; margin: 0;" th:text="${student.fullName != null and student.fullName != '' ? student.fullName : student.username}">Student Name</h2>
+                    <span class="profile-role-badge student" style="font-family: var(--font-mono); font-size: 0.75rem; background: rgba(56, 139, 253, 0.15); color: var(--accent-blue); padding: 4px 12px; border-radius: 4px; border: 1px solid rgba(56, 139, 253, 0.3);">ACADEMY_STUDENT</span>
+                </div>
+                <div class="font-mono text-blue" style="font-size: 0.95rem; margin-bottom: 16px;" th:text="'@' + ${student.username} + ' | ' + ${student.email}">@username | student@example.com</div>
+                
+                <p style="margin: 0 0 20px; opacity: 0.85; font-family: var(--font-mono); font-size: 0.9rem; color: var(--text-main); line-height: 1.6;" th:text="${student.bio != null and student.bio != '' ? student.bio : 'No biography provided by the student.'}">Student bio...</p>
+                
+                <div style="display: flex; gap: 16px;">
+                    <div class="font-mono" style="font-size: 0.8rem;">
+                        <span class="text-dim">STATUS:</span> <span class="text-green">ONLINE_SECURE</span>
+                    </div>
+                    <div class="font-mono" style="font-size: 0.8rem;">
+                        <span class="text-dim">LAST_ACTIVE:</span> <span class="text-blue" th:text="${#dates.format(#dates.createNow(), 'yyyy-MM-dd HH:mm')}">2026-05-19</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Course Progress Summary Table Widget -->
+        <h3 class="font-mono text-dim" style="font-size: 0.9rem; text-transform: uppercase; margin-bottom: 20px; letter-spacing: 0.08em; display: flex; align-items: center; gap: 10px;">
+            <i class="bi bi-table"></i> curriculum_progress_matrix.csv
+        </h3>
+        
+        <div class="card-glass" style="padding: 0; overflow: hidden; margin-bottom: 40px; border: 1px solid rgba(88, 166, 255, 0.15);">
+            <table style="width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: 0.85rem;">
+                <thead>
+                    <tr style="background: rgba(255, 255, 255, 0.03); border-bottom: 1px solid var(--border-subtle);">
+                        <th style="text-align: left; padding: 16px 20px; color: var(--text-dim); font-weight: 500;">COURSE_TITLE</th>
+                        <th style="text-align: center; padding: 16px 20px; color: var(--text-dim); font-weight: 500;">COMPLETION_%</th>
+                        <th style="text-align: center; padding: 16px 20px; color: var(--text-dim); font-weight: 500;">STATUS</th>
+                        <th style="text-align: center; padding: 16px 20px; color: var(--text-dim); font-weight: 500;">QUIZZES_PASSED</th>
+                        <th style="text-align: right; padding: 16px 20px; color: var(--text-dim); font-weight: 500;">ACTION</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="progress : ${courseProgress}" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05); transition: background 0.2s ease;" onmouseover="this.style.background='rgba(88, 166, 255, 0.02)'" onmouseout="this.style.background='transparent'">
+                        <td style="padding: 16px 20px;">
+                            <span class="text-main" style="font-weight: 600; display: block;" th:text="${progress.course.title}">Course Title</span>
+                            <span class="text-dim" style="font-size: 0.75rem;" th:text="${progress.course.level}">Beginner</span>
+                        </td>
+                        <td style="padding: 16px 20px; text-align: center; width: 200px;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div style="flex: 1; height: 6px; background: rgba(255, 255, 255, 0.05); border-radius: 3px; overflow: hidden;">
+                                    <div th:style="'width: ' + ${progress.progressPercentage} + '%; height: 100%; background: ' + (${progress.status == 'COMPLETED' ? 'var(--accent-green)' : 'var(--accent-blue)'}) + '; transition: width 1s ease;'"></div>
+                                </div>
+                                <span th:text="${progress.progressPercentage} + '%'" style="width: 35px; text-align: right; font-weight: 600;" th:class="${progress.status == 'COMPLETED' ? 'text-green' : 'text-blue'}">50%</span>
+                            </div>
+                        </td>
+                        <td style="padding: 16px 20px; text-align: center;">
+                            <span th:if="${progress.status == 'COMPLETED'}" class="profile-role-badge" style="background: rgba(46, 160, 67, 0.15); color: #3fb950; border: 1px solid rgba(46, 160, 67, 0.4); font-size: 0.65rem; padding: 2px 8px;">COMPLETED</span>
+                            <span th:if="${progress.status == 'ACTIVE'}" class="profile-role-badge" style="background: rgba(56, 139, 253, 0.15); color: #58a6ff; border: 1px solid rgba(56, 139, 253, 0.4); font-size: 0.65rem; padding: 2px 8px;">ACTIVE</span>
+                            <span th:if="${progress.status == 'AVAILABLE'}" class="profile-role-badge" style="background: rgba(139, 148, 158, 0.15); color: #8b949e; border: 1px solid rgba(139, 148, 158, 0.4); font-size: 0.65rem; padding: 2px 8px;">NOT_STARTED</span>
+                        </td>
+                        <td style="padding: 16px 20px; text-align: center;" th:text="${progress.passedQuizzesCount} + ' / ' + ${progress.totalQuizzesCount}">2 / 4</td>
+                        <td style="padding: 16px 20px; text-align: right;">
+                            <a th:href="@{/teacher/courses/{id}/modules(id=${progress.course.id})}" class="btn btn-outline btn-xs" style="border-color: var(--border-subtle); padding: 4px 10px;">audit_curriculum()</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Detailed Quiz Attempts Logs -->
+        <h3 class="font-mono text-dim" style="font-size: 0.9rem; text-transform: uppercase; margin-bottom: 20px; letter-spacing: 0.08em; display: flex; align-items: center; gap: 10px;">
+            <i class="bi bi-clock-history"></i> detailed_assessment_logs.log
+        </h3>
+
+        <div class="terminal-console" style="margin-top: 0;">
+            <div class="terminal-console-header">
+                <div class="terminal-dots">
+                    <span class="terminal-dot red"></span>
+                    <span class="terminal-dot yellow"></span>
+                    <span class="terminal-dot green"></span>
+                </div>
+                <span class="font-mono">bash - quiz_audit.sh --uid=<span th:text="${student.id}">101</span></span>
+            </div>
+            <div class="terminal-line">
+                <span class="terminal-output text-green">■ INITIALIZING DATA FETCH: SUCCESS</span>
+                <span class="terminal-output">■ RETRIEVING ALL CHECKPOINT INTERACTION RECORDS...</span>
+                <span th:if="${#lists.isEmpty(quizResults)}" class="terminal-output text-purple" style="padding-left: 20px;">
+                    ↳ [WARNING]: No quiz attempts recorded for this user.
+                </span>
+                <span th:each="result : ${quizResults}" class="terminal-output" style="padding-left: 20px;">
+                    ↳ [<span th:text="${#dates.format(#dates.createNow(), 'HH:mm:ss')}">10:45:22</span>] <span class="text-blue" th:text="${result.quiz.title}">Quiz</span>: SCORE=<span th:text="${result.score}">0</span>/5 | STATUS=<span th:class="${result.score >= 3 ? 'text-green' : 'text-purple'}" th:text="${result.score >= 3 ? 'PASSED' : 'FAILED'}">PASSED</span>
+                </span>
+                <span class="terminal-output text-dim" style="margin-top: 12px;">■ AUDIT COMPLETE. SESSION SECURE.</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
