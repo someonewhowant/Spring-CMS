@@ -7,14 +7,17 @@
 </head>
 <body>
     <div layout:fragment="content" class="container py-l fade-in">
-        <!-- Dashboard Terminal Header -->
-        <div class="admin-header">
-            <h1 class="text-green font-mono" th:text="${currentUser} + '@student:~$'">student@cabinet:~$</h1>
-            <div class="admin-actions" style="display: flex; gap: 12px; align-items: center;">
-                <span class="profile-role-badge student" style="font-family: var(--font-mono); font-size: 0.75rem; background: rgba(56, 139, 253, 0.15); color: var(--accent-blue); padding: 4px 10px; border-radius: 4px; border: 1px solid rgba(56, 139, 253, 0.3);">STUDENT_CONSOLE</span>
+        <!-- Dashboard Header -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px;">
+            <div>
+                <h1 style="font-size: 2.5rem; margin: 0 0 8px; font-weight: 800; letter-spacing: -0.02em;">Student <span class="text-gradient-blue">Workspace</span></h1>
+                <p style="color: var(--text-dim); margin: 0; font-size: 1.1rem;">Track your progress, explore courses, and connect with mentors.</p>
+            </div>
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <span class="profile-role-badge student" style="background: rgba(56, 139, 253, 0.15); color: var(--accent-blue); padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(56, 139, 253, 0.3); font-weight: 600; font-size: 0.8rem;">ACADEMY STUDENT</span>
                 <form th:action="@{/logout}" method="POST" style="margin: 0;">
-                    <button type="submit" class="btn btn-outline btn-xs" style="border-color: var(--border-subtle);" onmouseover="this.style.borderColor='var(--accent-red)'" onmouseout="this.style.borderColor='var(--border-subtle)'">
-                        <i class="bi bi-box-arrow-right"></i> logout()
+                    <button type="submit" class="btn btn-outline" style="border-radius: 20px;">
+                        <i class="bi bi-box-arrow-right"></i> Sign Out
                     </button>
                 </form>
             </div>
@@ -110,20 +113,25 @@
         </div>
 
         <!-- Notifications & System Alerts -->
-        <div th:if="${!#lists.isEmpty(notifications)}" class="terminal-console" style="margin-bottom: 32px; border-color: rgba(88, 166, 255, 0.3);">
-            <div class="terminal-console-header" style="background: rgba(88, 166, 255, 0.05);">
-                <div class="terminal-dots">
-                    <span class="terminal-dot red"></span>
-                    <span class="terminal-dot yellow"></span>
-                    <span class="terminal-dot green"></span>
-                </div>
-                <span class="font-mono text-blue">bash - inbox_alerts.sh --unread=<span th:text="${unreadNotificationsCount}">0</span></span>
+        <div th:if="${!#lists.isEmpty(notifications)}" class="card-glass" style="margin-bottom: 32px; border-left: 4px solid var(--accent-blue);">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 16px 24px;">
+                <h3 style="margin: 0; font-size: 1rem; display: flex; align-items: center; gap: 8px;">
+                    <i class="bi bi-bell-fill text-blue"></i> Inbox Alerts
+                    <span class="badge" style="background: var(--accent-blue); color: white; border-radius: 12px; padding: 2px 8px; font-size: 0.7rem; font-weight: bold;" th:text="${unreadNotificationsCount}">0</span>
+                </h3>
             </div>
-            <div class="terminal-line" style="display: block; padding: 16px;">
-                <div th:each="note : ${notifications}" class="terminal-output" style="margin-bottom: 12px; border-left: 2px solid var(--accent-blue); padding-left: 12px;">
-                    <span class="text-dim" style="font-size: 0.75rem;" th:text="'[' + ${#temporals.format(note.createdAt, 'HH:mm:ss')} + '] '"></span>
-                    <span th:text="${note.message}">Notification message</span>
-                    <a th:if="${note.link != null}" th:href="${note.link}" class="text-blue" style="font-size: 0.8rem; margin-left: 8px;">[OPEN_RESOURCE]</a>
+            <div style="padding: 16px 24px;">
+                <div th:each="note : ${notifications}" style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); last-child: { margin-bottom: 0; border-bottom: none; padding-bottom: 0; }">
+                    <div style="flex-shrink: 0; color: var(--text-dim); margin-top: 2px;">
+                        <i class="bi bi-info-circle"></i>
+                    </div>
+                    <div>
+                        <p style="margin: 0 0 4px; font-size: 0.9rem;" th:text="${note.message}">Notification message</p>
+                        <div style="display: flex; gap: 12px; align-items: center;">
+                            <span class="text-dim" style="font-size: 0.75rem;" th:text="${#temporals.format(note.createdAt, 'dd MMM yyyy, HH:mm')}"></span>
+                            <a th:if="${note.link != null}" th:href="${note.link}" class="text-blue hover-underline" style="font-size: 0.75rem; text-decoration: none; font-weight: 600;">View Details <i class="bi bi-arrow-right-short"></i></a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -176,9 +184,11 @@
 
         <!-- Active Courses Section -->
         <div th:if="${!#lists.isEmpty(activeCourses)}" style="margin-top: 32px;">
-            <h3 class="font-mono text-blue" style="font-size: 1rem; text-transform: uppercase; margin-bottom: 20px; letter-spacing: 0.08em;">
-                <i class="bi bi-play-fill"></i> active_courses()
-            </h3>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 12px;">
+                <h3 style="font-size: 1.4rem; margin: 0; font-weight: 700;">
+                    <i class="bi bi-play-circle-fill text-blue"></i> Active Courses
+                </h3>
+            </div>
             <div class="courses-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; margin-bottom: 32px;">
                 <div th:each="progress : ${activeCourses}" class="card-glass course-card" style="padding: 24px; display: flex; flex-direction: column; border-radius: 8px;">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
@@ -211,9 +221,11 @@
 
         <!-- Available Courses Section -->
         <div th:if="${!#lists.isEmpty(availableCourses)}" style="margin-top: 32px;">
-            <h3 class="font-mono text-purple" style="font-size: 1rem; text-transform: uppercase; margin-bottom: 20px; letter-spacing: 0.08em;">
-                <i class="bi bi-journal-album"></i> available_courses()
-            </h3>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 12px;">
+                <h3 style="font-size: 1.4rem; margin: 0; font-weight: 700;">
+                    <i class="bi bi-journal-album text-purple"></i> Available Courses
+                </h3>
+            </div>
             <div class="courses-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; margin-bottom: 32px;">
                 <div th:each="progress : ${availableCourses}" class="card-glass course-card" style="padding: 24px; display: flex; flex-direction: column; border-radius: 8px;">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
@@ -237,9 +249,11 @@
 
         <!-- Completed Courses Section -->
         <div th:if="${!#lists.isEmpty(completedCourses)}" style="margin-top: 32px;">
-            <h3 class="font-mono text-green" style="font-size: 1rem; text-transform: uppercase; margin-bottom: 20px; letter-spacing: 0.08em;">
-                <i class="bi bi-award"></i> completed_courses()
-            </h3>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 12px;">
+                <h3 style="font-size: 1.4rem; margin: 0; font-weight: 700;">
+                    <i class="bi bi-award text-green"></i> Completed Courses
+                </h3>
+            </div>
             <div class="courses-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; margin-bottom: 32px;">
                 <div th:each="progress : ${completedCourses}" class="card-glass course-card" style="padding: 24px; display: flex; flex-direction: column; background: linear-gradient(135deg, rgba(46, 160, 67, 0.02) 0%, rgba(255,255,255,0.01) 100%); border-color: rgba(46, 160, 67, 0.25); border-radius: 8px;">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
@@ -268,57 +282,72 @@
         </div>
 
 
-        <!-- Simulated Student Progress Console Terminal -->
-        <div class="terminal-console" style="margin-top: 32px;">
-            <div class="terminal-console-header">
-                <div class="terminal-dots">
-                    <span class="terminal-dot red"></span>
-                    <span class="terminal-dot yellow"></span>
-                    <span class="terminal-dot green"></span>
+        <!-- Academy Mentors Section -->
+        <div th:if="${!#lists.isEmpty(teachers)}" style="margin-top: 48px; margin-bottom: 32px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 12px;">
+                <h3 style="font-size: 1.4rem; margin: 0; font-weight: 700;">
+                    <i class="bi bi-people-fill text-purple"></i> Academy Mentors
+                </h3>
+                <span class="badge" style="background: rgba(188, 140, 255, 0.1); color: #bc8cff; padding: 6px 12px; border-radius: 12px; font-weight: 600;" th:text="${#lists.size(teachers)} + ' Mentors Available'"></span>
+            </div>
+            
+            <div class="courses-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px;">
+                <div th:each="mentor : ${teachers}" class="card-glass" style="padding: 24px; display: flex; flex-direction: column; align-items: center; text-align: center; border-radius: 12px;">
+                    <a th:href="@{/student/teacher/{id}(id=${mentor.id})}" style="display: block; margin-bottom: 16px;">
+                        <img th:if="${mentor.avatarUrl != null}" th:src="${mentor.avatarUrl}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(188, 140, 255, 0.5); box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                        <div th:if="${mentor.avatarUrl == null}" class="avatar-circle" style="width: 80px; height: 80px; border-radius: 50%; font-size: 2rem; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, rgba(88, 166, 255, 0.1) 0%, rgba(188, 140, 255, 0.1) 100%); border: 2px solid rgba(188, 140, 255, 0.3); color: var(--text-main); margin: 0 auto; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" th:text="${mentor.fullName != null and mentor.fullName != '' ? #strings.substring(mentor.fullName, 0, 1).toUpperCase() : #strings.substring(mentor.username, 0, 1).toUpperCase()}">U</div>
+                    </a>
+                    
+                    <h4 style="margin: 0 0 4px; font-size: 1.1rem; color: var(--text-main); font-weight: 600;" th:text="${mentor.fullName != null and mentor.fullName != '' ? mentor.fullName : mentor.username}">Mentor Name</h4>
+                    <p style="margin: 0 0 20px; font-size: 0.85rem; color: var(--text-dim);" th:text="${mentor.title != null and mentor.title != '' ? mentor.title : 'Instructor'}">Senior Engineer</p>
+                    
+                    <a th:href="@{/student/teacher/{id}(id=${mentor.id})}" class="btn btn-outline w-full mt-auto" style="border-radius: 20px; padding: 8px; font-size: 0.85rem; font-weight: 500; border-color: rgba(255,255,255,0.1);">
+                        View Profile
+                    </a>
                 </div>
-                <span class="font-mono">bash - student_progress.sh</span>
-                <span>tty2</span>
             </div>
-            <div class="terminal-line">
-                <span class="terminal-prompt">guest@codeblog:~$</span>
-                <span class="terminal-command">ssh -T <span th:text="${currentUser}">student</span>@localhost</span>
-            </div>
-            <div class="terminal-line">
-                <span class="terminal-output">Authentication key accepted. Welcome to CodeBlog LMS Academy!</span>
-                <span class="terminal-output">Last compiled report: <span th:text="${#dates.format(#dates.createNow(), 'yyyy-MM-dd HH:mm')}">2026-05-18</span> from localhost</span>
-                <span class="terminal-output" th:text="'Terminal shell active: [Session: active | Role: ' + ${currentUserRole} + ']'">Terminal shell active: [Session: active | Role: ROLE_STUDENT]</span>
-            </div>
-            <div class="terminal-line">
-                <span class="terminal-prompt" th:text="${currentUser} + '@localhost:~$'">student@localhost:~$</span>
-                <span class="terminal-command">./student_progress.sh --verbose</span>
+        </div>
+
+        <!-- Recent Quiz Results (Replaces Simulated Progress Console) -->
+        <div class="card-glass" style="margin-top: 32px; padding: 24px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 12px;">
+                <h3 style="font-size: 1.2rem; margin: 0; font-weight: 600;">
+                    <i class="bi bi-clock-history"></i> Recent Quiz Results
+                </h3>
             </div>
             
-            <!-- Real-time Dynamic Quiz Progress Console Output -->
-            <div class="terminal-line">
-                <span class="terminal-output text-green">■ INITIALIZING LOG EXTRACTION: SUCCESS</span>
-                <span class="terminal-output" th:text="'■ PLATFORM CATALOG CONTEXT: ' + ${totalCoursesCount} + ' courses available, ' + ${totalQuizzesCount} + ' interactive checkpoints configured.'">■ PLATFORM CATALOG CONTEXT: 4 courses available.</span>
-                <span class="terminal-output">■ QUIZ RESULTS RETRIEVED FROM DATABASE LOGS:</span>
-                
-                <!-- Display message if student took zero quizzes -->
-                <span th:if="${#lists.isEmpty(quizResults)}" class="terminal-output text-purple" style="padding-left: 20px; font-style: italic;">
-                    ↳ [WARNING]: No quiz records found in context! Visit '/courses' to complete checkpoints and track achievements.
-                </span>
-                
-                <!-- Loop through quiz attempt history if present -->
-                <span th:each="result : ${quizResults}" class="terminal-output" style="padding-left: 20px;">
-                    ↳ <span class="text-blue" th:text="${result.quiz.title}">Java Syntax Basics</span>: 
-                    SCORE=[<span th:text="${result.score}">0</span> / 5] | 
-                    ACCURACY=<span th:text="${result.score * 20} + '%'">0%</span> | 
-                    STATUS=<span th:class="${result.score >= 3} ? 'text-green' : 'text-purple'" th:text="${result.score >= 3} ? 'PASSED' : 'RETRY_RECOMMENDED'">PASSED</span>
-                </span>
-                
-                <span class="terminal-output" style="margin-top: 8px;" th:text="'■ COMPLETED METRICS: ' + ${passedQuizzesCount} + ' quizzes passed. Cumulative accuracy rating: ' + ${averageScore} + ' / 5.0.'">■ COMPLETED METRICS: 0 quizzes passed. Cumulative accuracy rating: 0.0.</span>
+            <div th:if="${#lists.isEmpty(quizResults)}" class="text-center py-l" style="color: var(--text-dim);">
+                <i class="bi bi-inbox" style="font-size: 2.5rem; display: block; margin-bottom: 16px; opacity: 0.5;"></i>
+                <p>No quiz attempts found. Start a course to see your progress here.</p>
             </div>
             
-            <div class="terminal-line">
-                <span class="terminal-prompt" th:text="${currentUser} + '@localhost:~$'">student@localhost:~$</span>
-                <span class="terminal-command"><span class="blink">_</span></span>
-            </div>
+            <table th:if="${!#lists.isEmpty(quizResults)}" style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--text-dim); font-size: 0.85rem;">
+                        <th style="padding: 12px 16px; font-weight: 500;">Quiz Assessment</th>
+                        <th style="padding: 12px 16px; font-weight: 500;">Score</th>
+                        <th style="padding: 12px 16px; font-weight: 500;">Accuracy</th>
+                        <th style="padding: 12px 16px; font-weight: 500;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="result : ${quizResults}" style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <td style="padding: 16px; color: var(--text-main); font-weight: 500;" th:text="${result.quiz.title}">Quiz Title</td>
+                        <td style="padding: 16px;" th:text="${result.score} + ' / 5'">0 / 5</td>
+                        <td style="padding: 16px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span th:text="${result.score * 20} + '%'">0%</span>
+                                <div style="width: 60px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px;">
+                                    <div th:style="'width: ' + (${result.score * 20}) + '%; height: 100%; border-radius: 2px; background: ' + (${result.score >= 3 ? 'var(--accent-green)' : 'var(--accent-orange)'})"></div>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="padding: 16px;">
+                            <span class="badge" th:classappend="${result.score >= 3} ? 'bg-green text-green bg-opacity-10' : 'bg-orange text-orange bg-opacity-10'" style="padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;" th:text="${result.score >= 3} ? 'PASSED' : 'RETRY'">PASSED</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </body>

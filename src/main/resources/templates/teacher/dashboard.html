@@ -7,14 +7,17 @@
 </head>
 <body>
     <div layout:fragment="content" class="container py-l fade-in">
-        <!-- Dashboard Terminal Header -->
-        <div class="admin-header">
-            <h1 class="text-green font-mono" th:text="${currentUser} + '@cabinet:~$'">teacher@cabinet:~$</h1>
-            <div class="admin-actions" style="display: flex; gap: 12px; align-items: center;">
-                <span class="profile-role-badge teacher" style="font-family: var(--font-mono); font-size: 0.75rem;">TEACHER_CONSOLE</span>
+        <!-- Dashboard Header -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px;">
+            <div>
+                <h1 style="font-size: 2.5rem; margin: 0 0 8px; font-weight: 800; letter-spacing: -0.02em;">Instructor <span class="text-gradient-purple">Workspace</span></h1>
+                <p style="color: var(--text-dim); margin: 0; font-size: 1.1rem;">Manage your courses, articles, and mentor students.</p>
+            </div>
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <span class="profile-role-badge teacher" style="background: rgba(188, 140, 255, 0.15); color: #bc8cff; padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(188, 140, 255, 0.3); font-weight: 600; font-size: 0.8rem;">ACADEMY MENTOR</span>
                 <form th:action="@{/logout}" method="POST" style="margin: 0;">
-                    <button type="submit" class="btn btn-outline btn-xs" style="border-color: var(--border-subtle);" onmouseover="this.style.borderColor='var(--accent-red)'" onmouseout="this.style.borderColor='var(--border-subtle)'">
-                        <i class="bi bi-box-arrow-right"></i> logout()
+                    <button type="submit" class="btn btn-outline" style="border-radius: 20px;">
+                        <i class="bi bi-box-arrow-right"></i> Sign Out
                     </button>
                 </form>
             </div>
@@ -93,20 +96,25 @@
         </div>
 
         <!-- Notifications & Academic Alerts -->
-        <div th:if="${!#lists.isEmpty(notifications)}" class="terminal-console" style="margin-bottom: 32px; border-color: rgba(188, 140, 255, 0.3);">
-            <div class="terminal-console-header" style="background: rgba(188, 140, 255, 0.05);">
-                <div class="terminal-dots">
-                    <span class="terminal-dot red"></span>
-                    <span class="terminal-dot yellow"></span>
-                    <span class="terminal-dot green"></span>
-                </div>
-                <span class="font-mono text-purple">bash - instructor_alerts.sh --unread=<span th:text="${unreadNotificationsCount}">0</span></span>
+        <div th:if="${!#lists.isEmpty(notifications)}" class="card-glass" style="margin-bottom: 32px; border-left: 4px solid var(--accent-purple);">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 16px 24px;">
+                <h3 style="margin: 0; font-size: 1rem; display: flex; align-items: center; gap: 8px;">
+                    <i class="bi bi-bell-fill text-purple"></i> Academic Alerts
+                    <span class="badge" style="background: var(--accent-purple); color: white; border-radius: 12px; padding: 2px 8px; font-size: 0.7rem; font-weight: bold;" th:text="${unreadNotificationsCount}">0</span>
+                </h3>
             </div>
-            <div class="terminal-line" style="display: block; padding: 16px;">
-                <div th:each="note : ${notifications}" class="terminal-output" style="margin-bottom: 12px; border-left: 2px solid var(--accent-purple); padding-left: 12px;">
-                    <span class="text-dim" style="font-size: 0.75rem;" th:text="'[' + ${#temporals.format(note.createdAt, 'HH:mm:ss')} + '] '"></span>
-                    <span th:text="${note.message}">Notification message</span>
-                    <a th:if="${note.link != null}" th:href="${note.link}" class="text-purple" style="font-size: 0.8rem; margin-left: 8px;">[VIEW_AUDIT]</a>
+            <div style="padding: 16px 24px;">
+                <div th:each="note : ${notifications}" style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); last-child: { margin-bottom: 0; border-bottom: none; padding-bottom: 0; }">
+                    <div style="flex-shrink: 0; color: var(--text-dim); margin-top: 2px;">
+                        <i class="bi bi-info-circle"></i>
+                    </div>
+                    <div>
+                        <p style="margin: 0 0 4px; font-size: 0.9rem;" th:text="${note.message}">Notification message</p>
+                        <div style="display: flex; gap: 12px; align-items: center;">
+                            <span class="text-dim" style="font-size: 0.75rem;" th:text="${#temporals.format(note.createdAt, 'dd MMM yyyy, HH:mm')}"></span>
+                            <a th:if="${note.link != null}" th:href="${note.link}" class="text-purple hover-underline" style="font-size: 0.75rem; text-decoration: none; font-weight: 600;">View Audit <i class="bi bi-arrow-right-short"></i></a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -132,17 +140,17 @@
                         </a>
                     </div>
 
-                    <!-- Student View Card -->
+                    <!-- Articles View Card -->
                     <div class="card-glass" style="padding: 24px;">
-                        <div class="stat-icon green" style="margin-bottom: 20px; width: 42px; height: 42px; font-size: 1.2rem;">
-                            <i class="bi bi-mortarboard"></i>
+                        <div class="stat-icon purple" style="margin-bottom: 20px; width: 42px; height: 42px; font-size: 1.2rem; background: rgba(188, 140, 255, 0.15); color: #bc8cff; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-file-earmark-text"></i>
                         </div>
-                        <h3 class="font-mono" style="margin: 0 0 10px; font-size: 1.1rem; color: var(--text-main);">browse_students()</h3>
+                        <h3 class="font-mono" style="margin: 0 0 10px; font-size: 1.1rem; color: var(--text-main);">manage_articles()</h3>
                         <p style="margin-bottom: 24px; font-size: 0.85rem; color: var(--text-dim); flex-grow: 1;">
-                            Audit individual progress, view completed quizzes and performance.
+                            Write new blog posts, manage knowledge base, and share expertise.
                         </p>
-                        <a th:href="@{/teacher/students}" class="btn btn-outline btn-green btn-xs font-mono w-full">
-                            AUDIT_REPORTS <i class="bi bi-arrow-right-short"></i>
+                        <a th:href="@{/admin/dashboard}" class="btn btn-outline btn-purple btn-xs font-mono w-full" style="color: #bc8cff; border-color: rgba(188, 140, 255, 0.3);">
+                            OPEN_EDITOR <i class="bi bi-arrow-right-short"></i>
                         </a>
                     </div>
                 </div>
@@ -182,41 +190,33 @@
             </div>
         </div>
 
-        <!-- Terminal Diagnostics Widget -->
-        <div class="terminal-console">
-            <div class="terminal-console-header">
-                <div class="terminal-dots">
-                    <span class="terminal-dot red"></span>
-                    <span class="terminal-dot yellow"></span>
-                    <span class="terminal-dot green"></span>
+        <!-- System Information Widget -->
+        <div class="card-glass" style="margin-bottom: 32px; padding: 24px; border-left: 4px solid var(--accent-blue);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 12px;">
+                <h3 style="font-size: 1.2rem; margin: 0; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                    <i class="bi bi-cpu text-blue"></i> System Status
+                </h3>
+                <span class="badge" style="background: rgba(46, 160, 67, 0.15); color: #3fb950; font-weight: 600; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem;"><i class="bi bi-check-circle-fill" style="margin-right: 4px;"></i> ONLINE</span>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; font-size: 0.85rem; color: var(--text-dim);">
+                <div>
+                    <strong style="color: var(--text-main); display: block; margin-bottom: 4px;">Mentor Context</strong>
+                    <span th:text="${user != null and user.fullName != null and user.fullName != ''} ? ${user.fullName} : 'NOT_SET'">NOT_SET</span>
+                    <span th:if="${user != null and user.title != null and user.title != ''}" style="display: block; opacity: 0.8;" th:text="${user.title}">Title</span>
                 </div>
-                <span class="font-mono">bash - cabinet_diagnostics.sh</span>
-                <span>tty1</span>
-            </div>
-            <div class="terminal-line">
-                <span class="terminal-prompt">guest@codeblog:~$</span>
-                <span class="terminal-command">ssh -T <span th:text="${currentUser}">teacher</span>@localhost</span>
-            </div>
-            <div class="terminal-line">
-                <span class="terminal-output">Welcome to CodeBlog Academy Command Panel!</span>
-                <span class="terminal-output">Last login: <span th:text="${#dates.format(#dates.createNow(), 'yyyy-MM-dd HH:mm')}">2026-05-18</span> from 127.0.0.1</span>
-                <span class="terminal-output" th:text="'User context initialized: [UID: 2048 | Role: ' + ${currentUserRole} + ' | Auth: SECURE]'">User context initialized: [UID: 2048 | Role: ROLE_TEACHER | Auth: SECURE]</span>
-            </div>
-            <div class="terminal-line">
-                <span class="terminal-prompt" th:text="${currentUser} + '@localhost:~$'">teacher@localhost:~$</span>
-                <span class="terminal-command">cat sys_status.log</span>
-            </div>
-            <div class="terminal-line">
-                <span class="terminal-output text-green">■ SYSTEM STATUS: ONLINE</span>
-                <span class="terminal-output" th:text="'■ MENTOR CONTEXT: ' + (${user != null and user.fullName != null and user.fullName != ''} ? ${user.fullName} : 'NOT_SET') + ' (' + (${user != null and user.title != null and user.title != ''} ? ${user.title} : 'NO_SPECIALIZATION') + ')'">■ MENTOR CONTEXT: NOT_SET</span>
-                <span class="terminal-output" th:text="'■ CONTACT PORTAL: ' + (${user != null and user.email != null and user.email != ''} ? ${user.email} : 'OFFLINE')">■ CONTACT PORTAL: OFFLINE</span>
-                <span class="terminal-output" th:text="'■ SOCIAL LINKS: GitHub=' + (${user != null and user.githubUrl != null and user.githubUrl != ''} ? ${user.githubUrl} : 'N/A') + ' | LinkedIn=' + (${user != null and user.linkedinUrl != null and user.linkedinUrl != ''} ? ${user.linkedinUrl} : 'N/A')">■ SOCIAL LINKS: N/A</span>
-                <span class="terminal-output" th:text="'■ ALLOCATED METRICS: ' + ${coursesCount} + ' courses, ' + ${quizzesCount} + ' quizzes loaded into context.'">■ ALLOCATED METRICS: 4 courses, 3 quizzes loaded into context.</span>
-                <span class="terminal-output">■ DEPLOYMENT ARCHITECTURE: SPRING SECURITY BLOCKED-FLOW ROUTING</span>
-            </div>
-            <div class="terminal-line">
-                <span class="terminal-prompt" th:text="${currentUser} + '@localhost:~$'">teacher@localhost:~$</span>
-                <span class="terminal-command"><span class="blink">_</span></span>
+                <div>
+                    <strong style="color: var(--text-main); display: block; margin-bottom: 4px;">Contact Portal</strong>
+                    <span th:text="${user != null and user.email != null and user.email != ''} ? ${user.email} : 'OFFLINE'">OFFLINE</span>
+                </div>
+                <div>
+                    <strong style="color: var(--text-main); display: block; margin-bottom: 4px;">Allocated Resources</strong>
+                    <span th:text="${coursesCount} + ' courses, ' + ${quizzesCount} + ' quizzes'">0 courses, 0 quizzes</span> loaded in context
+                </div>
+                <div>
+                    <strong style="color: var(--text-main); display: block; margin-bottom: 4px;">System Architecture</strong>
+                    <span>Spring Security Secured Router</span>
+                </div>
             </div>
         </div>
     </div>

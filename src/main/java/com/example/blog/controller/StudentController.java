@@ -6,6 +6,7 @@ import com.example.blog.entity.CourseModule;
 import com.example.blog.entity.Quiz;
 import com.example.blog.entity.User;
 import com.example.blog.entity.UserQuizResult;
+import com.example.blog.entity.Role;
 import com.example.blog.repository.UserRepository;
 import com.example.blog.repository.UserQuizResultRepository;
 import com.example.blog.repository.CourseRepository;
@@ -17,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.security.Principal;
@@ -178,6 +180,31 @@ public class StudentController {
         model.addAttribute("notifications", notificationService.getRecentNotifications(user.getId(), 5));
         model.addAttribute("unreadNotificationsCount", notificationService.getUnreadCount(user.getId()));
 
+        List<User> teachers = userRepository.findByRole(Role.TEACHER);
+        model.addAttribute("teachers", teachers);
+
         return "student/dashboard";
+    }
+
+    @GetMapping("/teacher/{id}")
+    public String viewTeacherProfile(@PathVariable Long id, Principal principal, Model model) {
+        if (principal == null) {
+            return "redirect:/admin/login";
+        }
+        User student = userRepository.findByUsername(principal.getName()).orElse(null);
+        if (student == null) {
+            return "redirect:/admin/login";
+        }
+
+        User teacher = userRepository.findById(id).orElse(null);
+        if (teacher == null || teacher.getRole() != Role.TEACHER) {
+            return "redirect:/student/dashboard";
+        }
+
+        model.addAttribute("teacher", teacher);
+        model.addAttribute("currentUserRole", "ROLE_" + student.getRole().name());
+        model.addAttribute("currentUser", student.getUsername());
+
+        return "student/teacher-profile";
     }
 }

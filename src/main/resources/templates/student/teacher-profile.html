@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title th:text="${teacher.fullName != null and teacher.fullName != '' ? teacher.fullName + ' - Mentor Profile' : 'Mentor Profile'}">Mentor Profile</title>
+</head>
+<body>
+    <div layout:fragment="content" class="container py-l fade-in">
+        
+        <!-- Breadcrumb & Back action -->
+        <div style="margin-bottom: 24px;">
+            <a th:href="@{/student/dashboard}" class="btn btn-outline btn-xs" style="border-color: var(--border-subtle);">
+                <i class="bi bi-chevron-left"></i> back_to_dashboard
+            </a>
+        </div>
+
+        <!-- Teacher Profile Hero -->
+        <div class="card-glass hero-platform" style="padding: clamp(2rem, 5vw, 4rem); margin-bottom: 32px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 24px; position: relative; overflow: hidden;">
+            
+            <!-- Decorative elements -->
+            <div style="position: absolute; top: -50px; left: -50px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(188, 140, 255, 0.1) 0%, transparent 70%); border-radius: 50%; pointer-events: none;"></div>
+            <div style="position: absolute; bottom: -100px; right: -50px; width: 300px; height: 300px; background: radial-gradient(circle, rgba(88, 166, 255, 0.1) 0%, transparent 70%); border-radius: 50%; pointer-events: none;"></div>
+            
+            <div style="position: relative; z-index: 1;">
+                <img th:if="${teacher.avatarUrl != null}" th:src="${teacher.avatarUrl}" style="width: 140px; height: 140px; border-radius: 50%; object-fit: cover; border: 4px solid var(--accent-purple); background: var(--bg-body); box-shadow: 0 0 30px rgba(188, 140, 255, 0.2); margin: 0 auto;">
+                <div th:if="${teacher.avatarUrl == null}" class="avatar-circle" style="width: 140px; height: 140px; border-radius: 50%; font-size: 3.5rem; margin: 0 auto; display: flex; align-items: center; justify-content: center; border: 3px solid var(--border-subtle); background: linear-gradient(135deg, rgba(88, 166, 255, 0.1) 0%, rgba(188, 140, 255, 0.1) 100%); color: var(--text-main); box-shadow: 0 0 20px rgba(255,255,255,0.05);" th:text="${teacher.fullName != null and teacher.fullName != '' ? #strings.substring(teacher.fullName, 0, 1).toUpperCase() : #strings.substring(teacher.username, 0, 1).toUpperCase()}">U</div>
+            </div>
+            
+            <div style="position: relative; z-index: 1; max-width: 600px;">
+                <div style="margin-bottom: 8px;">
+                    <span class="profile-role-badge teacher" style="background: rgba(188, 140, 255, 0.15); color: #bc8cff; border: 1px solid rgba(188, 140, 255, 0.4); font-size: 0.75rem; padding: 4px 12px; border-radius: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;"><i class="bi bi-star-fill" style="margin-right: 4px; font-size: 0.7rem;"></i> Academy Mentor</span>
+                </div>
+                
+                <h1 style="font-size: clamp(2rem, 4vw, 2.8rem); margin: 0 0 8px; color: var(--text-main); font-weight: 800; letter-spacing: -0.02em;" th:text="${teacher.fullName != null and teacher.fullName != '' ? teacher.fullName : '@' + teacher.username}">Mentor Name</h1>
+                
+                <h3 th:if="${teacher.title != null and teacher.title != ''}" class="text-blue" style="font-size: 1.1rem; margin: 0 0 20px; font-weight: 500;" th:text="${teacher.title}">Senior Software Engineer</h3>
+                
+                <p style="color: var(--text-dim); font-size: 1.05rem; line-height: 1.7; margin: 0 0 32px;" th:text="${teacher.bio != null and teacher.bio != '' ? teacher.bio : 'This mentor has not provided a biography yet.'}">
+                    Biography goes here.
+                </p>
+                
+                <!-- Social media buttons -->
+                <div style="display: flex; gap: 16px; align-items: center; justify-content: center; flex-wrap: wrap;">
+                    <a th:if="${teacher.githubUrl != null and teacher.githubUrl != ''}" th:href="${teacher.githubUrl}" target="_blank" class="btn btn-outline" style="border-color: rgba(255,255,255,0.15); border-radius: 20px; padding: 10px 24px;">
+                        <i class="bi bi-github"></i> GitHub Profile
+                    </a>
+                    <a th:if="${teacher.linkedinUrl != null and teacher.linkedinUrl != ''}" th:href="${teacher.linkedinUrl}" target="_blank" class="btn btn-outline" style="border-color: rgba(255,255,255,0.15); border-radius: 20px; padding: 10px 24px;">
+                        <i class="bi bi-linkedin"></i> LinkedIn
+                    </a>
+                    <a th:if="${teacher.email != null and teacher.email != ''}" th:href="'mailto:' + ${teacher.email}" class="btn btn-blue" style="border-radius: 20px; padding: 10px 24px;">
+                        <i class="bi bi-envelope"></i> Contact Mentor
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

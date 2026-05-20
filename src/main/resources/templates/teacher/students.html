@@ -7,15 +7,15 @@
 </head>
 <body>
     <div layout:fragment="content" class="container py-l fade-in">
-        <!-- Dashboard Terminal Header -->
-        <div class="admin-header" style="margin-bottom: 24px;">
+        <!-- Dashboard Header -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px;">
             <div>
-                <h1 class="text-green font-mono" style="font-size: 1.8rem; margin: 0 0 4px;">student_directory.sh</h1>
-                <p class="font-mono text-dim" style="font-size: 0.85rem; margin: 0;">Audit and monitor student progress metrics</p>
+                <h1 style="font-size: 2.5rem; margin: 0 0 8px; font-weight: 800; letter-spacing: -0.02em;">Student <span class="text-gradient-green">Directory</span></h1>
+                <p style="color: var(--text-dim); margin: 0; font-size: 1.1rem;">Audit and monitor student progress metrics.</p>
             </div>
-            <div class="admin-actions">
-                <a th:href="@{/teacher/dashboard}" class="btn btn-outline btn-xs" style="border-color: var(--border-subtle);">
-                    <i class="bi bi-chevron-left"></i> back_to_console()
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <a th:href="@{/teacher/dashboard}" class="btn btn-outline" style="border-radius: 20px;">
+                    <i class="bi bi-chevron-left"></i> Back to Workspace
                 </a>
             </div>
         </div>
@@ -48,82 +48,83 @@
                 <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 20px;">
                     <div style="flex-shrink: 0;">
                         <a th:href="@{/teacher/students/{id}(id=${item.student.id})}">
-                            <img th:if="${item.student.avatarUrl != null}" th:src="${item.student.avatarUrl}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border-subtle); background: var(--bg-body);">
-                            <div th:if="${item.student.avatarUrl == null}" class="avatar-circle" style="width: 60px; height: 60px; border-radius: 50%; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; border: 2px solid var(--border-subtle); font-family: var(--font-mono); background: linear-gradient(135deg, rgba(88,166,255,0.1) 0%, rgba(188,140,255,0.1) 100%);" th:text="${item.student.fullName != null and #strings.length(item.student.fullName) > 0 ? #strings.substring(item.student.fullName, 0, 1).toUpperCase() : #strings.substring(item.student.username, 0, 1).toUpperCase()}">U</div>
+                            <img th:if="${item.student.avatarUrl != null}" th:src="${item.student.avatarUrl}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(88, 166, 255, 0.5); background: var(--bg-body); transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                            <div th:if="${item.student.avatarUrl == null}" class="avatar-circle" style="width: 60px; height: 60px; border-radius: 50%; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; border: 2px solid rgba(88, 166, 255, 0.3); background: linear-gradient(135deg, rgba(88,166,255,0.1) 0%, rgba(188,140,255,0.1) 100%); color: var(--text-main); font-weight: 600; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" th:text="${item.student.fullName != null and #strings.length(item.student.fullName) > 0 ? #strings.substring(item.student.fullName, 0, 1).toUpperCase() : #strings.substring(item.student.username, 0, 1).toUpperCase()}">U</div>
                         </a>
                     </div>
                     <div style="overflow: hidden;">
                         <a th:href="@{/teacher/students/{id}(id=${item.student.id})}" style="text-decoration: none;">
-                            <h4 class="text-green font-mono" style="margin: 0 0 2px; font-size: 1.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" th:text="${item.student.fullName != null and item.student.fullName != '' ? item.student.fullName : item.student.username}">Student Full Name</h4>
+                            <h4 style="margin: 0 0 2px; font-size: 1.1rem; font-weight: 600; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" th:text="${item.student.fullName != null and item.student.fullName != '' ? item.student.fullName : item.student.username}">Student Full Name</h4>
                         </a>
-                        <div class="font-mono text-dim" style="font-size: 0.8rem; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" th:text="'@' + ${item.student.username}">@username</div>
-                        <div class="text-dim" style="font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" th:text="${item.student.email != null and item.student.email != '' ? item.student.email : 'No email registered'}">student@example.com</div>
+                        <div class="text-blue" style="font-size: 0.85rem; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500;" th:text="'@' + ${item.student.username}">@username</div>
+                        <div class="text-dim" style="font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" th:text="${item.student.email != null and item.student.email != '' ? item.student.email : 'No email registered'}">student@example.com</div>
                     </div>
                 </div>
 
                 <!-- Academic Metric Board -->
-                <div class="font-mono" style="background: rgba(0, 0, 0, 0.15); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 12px; margin-bottom: 20px; font-size: 0.85rem; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 16px; margin-bottom: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; text-align: center;">
                     <div>
-                        <span class="text-dim" style="display: block; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">Completed:</span>
-                        <span class="text-blue" style="font-weight: 600;" th:text="${item.completedQuizzesCount} + ' quizzes'">0 quizzes</span>
+                        <span class="text-dim" style="display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Completed</span>
+                        <span class="text-blue" style="font-weight: 700; font-size: 1.1rem;" th:text="${item.completedQuizzesCount}">0</span>
+                        <span class="text-dim" style="font-size: 0.75rem;"> quizzes</span>
                     </div>
                     <div>
-                        <span class="text-dim" style="display: block; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">Avg Score:</span>
-                        <span class="text-purple" style="font-weight: 600;" th:text="${item.averageScore} + ' / 5'">0.0 / 5</span>
+                        <span class="text-dim" style="display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Avg Score</span>
+                        <span class="text-purple" style="font-weight: 700; font-size: 1.1rem;" th:text="${item.averageScore}">0.0</span>
+                        <span class="text-dim" style="font-size: 0.75rem;"> / 5.0</span>
                     </div>
                 </div>
 
                 <!-- Status Evaluation & Level Badge -->
-                <div style="margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem;">
-                    <span class="text-dim font-mono" style="font-size: 0.8rem;">Evaluation:</span>
+                <div style="margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between;">
+                    <span class="text-dim" style="font-size: 0.85rem; font-weight: 500;">Status:</span>
                     <div>
-                        <span th:if="${item.performanceRating == 'ELITE_DEV'}" class="profile-role-badge" style="background: rgba(46, 160, 67, 0.15); color: #3fb950; border: 1px solid rgba(46, 160, 67, 0.4); font-size: 0.72rem; font-family: var(--font-mono); font-weight: 600; padding: 2px 8px;">ELITE_DEV</span>
-                        <span th:if="${item.performanceRating == 'ADVANCED_CODER'}" class="profile-role-badge teacher" style="font-size: 0.72rem; font-family: var(--font-mono); font-weight: 600; padding: 2px 8px;">ADVANCED</span>
-                        <span th:if="${item.performanceRating == 'APPRENTICE'}" class="profile-role-badge" style="background: rgba(56, 139, 253, 0.15); color: #58a6ff; border: 1px solid rgba(56, 139, 253, 0.4); font-size: 0.72rem; font-family: var(--font-mono); font-weight: 600; padding: 2px 8px;">APPRENTICE</span>
-                        <span th:if="${item.performanceRating == 'NO_SUBMISSIONS'}" class="profile-role-badge" style="background: rgba(139, 148, 158, 0.15); color: #8b949e; border: 1px solid rgba(139, 148, 158, 0.4); font-size: 0.72rem; font-family: var(--font-mono); font-weight: 600; padding: 2px 8px;">NO_RECORDS</span>
+                        <span th:if="${item.performanceRating == 'ELITE_DEV'}" class="badge" style="background: rgba(46, 160, 67, 0.15); color: #3fb950; border: 1px solid rgba(46, 160, 67, 0.4); font-size: 0.75rem; font-weight: 600; padding: 4px 10px; border-radius: 12px;">ELITE DEV</span>
+                        <span th:if="${item.performanceRating == 'ADVANCED_CODER'}" class="badge" style="background: rgba(188, 140, 255, 0.15); color: #bc8cff; border: 1px solid rgba(188, 140, 255, 0.4); font-size: 0.75rem; font-weight: 600; padding: 4px 10px; border-radius: 12px;">ADVANCED</span>
+                        <span th:if="${item.performanceRating == 'APPRENTICE'}" class="badge" style="background: rgba(56, 139, 253, 0.15); color: #58a6ff; border: 1px solid rgba(56, 139, 253, 0.4); font-size: 0.75rem; font-weight: 600; padding: 4px 10px; border-radius: 12px;">APPRENTICE</span>
+                        <span th:if="${item.performanceRating == 'NO_SUBMISSIONS'}" class="badge" style="background: rgba(139, 148, 158, 0.15); color: #8b949e; border: 1px solid rgba(139, 148, 158, 0.4); font-size: 0.75rem; font-weight: 600; padding: 4px 10px; border-radius: 12px;">NO RECORDS</span>
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: auto;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: auto;">
                     <!-- Interactive Diagnostics Toggle -->
-                    <button class="btn btn-outline btn-xs font-mono" style="border-color: var(--border-subtle); padding: 8px; font-size: 0.8rem;"
+                    <button class="btn btn-outline" style="border-radius: 20px; padding: 8px; font-size: 0.85rem;"
                             th:onclick="'toggleDiagnostics(' + ${item.student.id} + ')'" th:id="'btn-diag-' + ${item.student.id}">
-                        <i class="bi bi-terminal"></i> inspect()
+                        <i class="bi bi-bar-chart"></i> View Stats
                     </button>
 
-                    <a th:href="@{/teacher/students/{id}(id=${item.student.id})}" class="btn btn-blue btn-xs font-mono" style="padding: 8px; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; gap: 4px;">
-                        <i class="bi bi-person-badge"></i> full_audit()
+                    <a th:href="@{/teacher/students/{id}(id=${item.student.id})}" class="btn btn-blue" style="border-radius: 20px; padding: 8px; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                        <i class="bi bi-person-badge"></i> Full Profile
                     </a>
                 </div>
 
                 <!-- Collapsible Detailed Diagnostics Container -->
-                <div th:id="'diagnostics-' + ${item.student.id}" class="card-glass" style="display: none; margin-top: 16px; padding: 16px; background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(88, 166, 255, 0.15); border-radius: 8px;">
-                    <h5 class="font-mono text-blue" style="font-size: 0.8rem; margin: 0 0 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; letter-spacing: 0.05em;">
-                        <span>■ DIAGNOSTICS REPORT</span>
-                        <span class="text-dim" style="font-size: 0.7rem; font-weight: normal;">tty3</span>
+                <div th:id="'diagnostics-' + ${item.student.id}" class="card-glass" style="display: none; margin-top: 16px; padding: 16px; background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 12px;">
+                    <h5 style="font-size: 0.9rem; margin: 0 0 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 8px; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                        <i class="bi bi-clipboard2-data text-blue"></i> Recent Quizzes
                     </h5>
 
                     <!-- No records state -->
-                    <div th:if="${#lists.isEmpty(item.quizResults)}" class="text-dim font-mono text-center" style="font-size: 0.75rem; padding: 12px 0;">
-                        ■ NO QUIZ RECORD SIGNALS RECOVERED
+                    <div th:if="${#lists.isEmpty(item.quizResults)}" class="text-dim text-center" style="font-size: 0.85rem; padding: 12px 0; font-style: italic;">
+                        No quiz attempts recorded yet.
                     </div>
 
                     <!-- Attempts Logs -->
-                    <table th:if="${!#lists.isEmpty(item.quizResults)}" style="width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: 0.75rem;">
+                    <table th:if="${!#lists.isEmpty(item.quizResults)}" style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
                         <thead>
-                            <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); text-transform: uppercase;">
-                                <th style="text-align: left; padding: 6px 4px; color: var(--text-dim); font-weight: normal;">Checkpoint</th>
-                                <th style="text-align: right; padding: 6px 4px; color: var(--text-dim); font-weight: normal;">Score</th>
-                                <th style="text-align: right; padding: 6px 4px; color: var(--text-dim); font-weight: normal;">Eval</th>
+                            <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                                <th style="text-align: left; padding: 8px 4px; color: var(--text-dim); font-weight: 500;">Quiz</th>
+                                <th style="text-align: right; padding: 8px 4px; color: var(--text-dim); font-weight: 500;">Score</th>
+                                <th style="text-align: right; padding: 8px 4px; color: var(--text-dim); font-weight: 500;">Status</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr th:each="res : ${item.quizResults}" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05); transition: background 0.2s ease;">
-                                <td style="padding: 8px 4px; text-align: left; color: var(--text-main); font-weight: 500;" th:text="${res.quiz.title}">Quiz Title</td>
-                                <td style="padding: 8px 4px; text-align: right;" th:class="${res.score >= 4 ? 'text-green' : 'text-blue'}" th:text="${res.score} + ' / 5'">5 / 5</td>
-                                <td style="padding: 8px 4px; text-align: right;">
-                                    <span th:if="${res.score >= 4}" class="text-green" style="font-weight: 600;">PASS</span>
-                                    <span th:if="${res.score < 4}" class="text-blue" style="font-weight: 600;">NEEDS_REV</span>
+                            <tr th:each="res : ${item.quizResults}" style="border-bottom: 1px solid rgba(255, 255, 255, 0.03);">
+                                <td style="padding: 10px 4px; text-align: left; color: var(--text-main); font-weight: 500;" th:text="${res.quiz.title}">Quiz Title</td>
+                                <td style="padding: 10px 4px; text-align: right;" th:class="${res.score >= 4 ? 'text-green' : 'text-blue'}" th:text="${res.score} + ' / 5'">5 / 5</td>
+                                <td style="padding: 10px 4px; text-align: right;">
+                                    <span th:if="${res.score >= 4}" class="badge bg-green text-green bg-opacity-10" style="padding: 2px 8px; border-radius: 8px; font-size: 0.7rem;">PASS</span>
+                                    <span th:if="${res.score < 4}" class="badge bg-orange text-orange bg-opacity-10" style="padding: 2px 8px; border-radius: 8px; font-size: 0.7rem;">REVIEW</span>
                                 </td>
                             </tr>
                         </tbody>
@@ -140,12 +141,12 @@
                 var btn = document.getElementById('btn-diag-' + studentId);
                 if (diagDiv.style.display === 'none') {
                     diagDiv.style.display = 'block';
-                    btn.innerHTML = '<i class="bi bi-x-circle"></i> close_diagnostics()';
+                    btn.innerHTML = '<i class="bi bi-x-circle"></i> Close Stats';
                     btn.style.borderColor = 'var(--accent-red)';
                     btn.style.color = 'var(--accent-red)';
                 } else {
                     diagDiv.style.display = 'none';
-                    btn.innerHTML = '<i class="bi bi-terminal"></i> inspect_diagnostics()';
+                    btn.innerHTML = '<i class="bi bi-bar-chart"></i> View Stats';
                     btn.style.borderColor = 'var(--border-subtle)';
                     btn.style.color = '';
                 }
