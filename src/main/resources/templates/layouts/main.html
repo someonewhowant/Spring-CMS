@@ -42,5 +42,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
     <script type="text/javascript" th:src="@{/js/script.js}"></script>
+    <!-- Page-specific scripts slot -->
+    <th:block layout:fragment="scripts"></th:block>
 </body>
 </html>

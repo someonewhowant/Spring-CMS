@@ -3,50 +3,176 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layouts/main}">
 <head>
-    <title>Courses</title>
+    <title>Courses — CodeBlog Academy</title>
 </head>
 <body>
     <div layout:fragment="content">
-        <section class="hero-minimal container">
-            <span class="hero-label">courses</span>
-            <h1 class="author__heading">/dev/academy</h1>
-            <p class="author__body">
-                Structured learning paths to master <span class="text-accent-mono">system architecture</span> and <span class="text-accent-mono">modern backend engineering</span>. Professional grade courses for the next generation of engineers.
-            </p>
-        </section>
 
-        <div class="courses-grid container">
-            <!-- Dynamic Course Cards -->
-            <div th:each="course : ${courses}" class="card-glass course-card">
-                <div class="course-card__icon" 
-                     th:classappend="${course.level == 'Beginner'} ? 'level-beginner' : (${course.level == 'Advanced'} ? 'level-advanced' : 'level-intermediate')">
-                    <i th:class="${course.level == 'Beginner'} ? 'bi bi-database-check' : (${course.level == 'Advanced'} ? 'bi bi-layers-half' : 'bi bi-lightning-charge')"></i>
-                </div>
-                <h3 class="course-card__title" th:text="${course.title}">Course Title</h3>
-                <p class="course-card__description" th:text="${course.description}">
-                    Description goes here...
-                </p>
-                <div class="course-card__meta">
-                    <span><i class="bi bi-clock"></i> <span th:text="${course.duration}">12 Hours</span></span>
-                    <span><i class="bi bi-bar-chart"></i> <span th:text="${course.level}">Level</span></span>
-                </div>
-                <a th:href="@{/course/{id}(id=${course.id})}" class="btn btn-outline w-full mt-m">Start Learning</a>
+        <!-- ===== HERO ===== -->
+        <section class="hero-platform container">
+            <p class="hero-platform__eyebrow">All Courses</p>
+
+            <h1 class="hero-platform__heading">
+                Choose Your<br>
+                <span class="highlight">Learning Path</span>
+            </h1>
+
+            <p class="hero-platform__sub">
+                Structured, production-grade courses for developers who want to go deep.
+                Pick a track that fits your level and start building expertise today.
+            </p>
+
+            <div class="hero-platform__cta">
+                <a th:href="@{/about}" class="btn btn-outline btn-large">
+                    <i class="bi bi-info-circle"></i> How it works
+                </a>
             </div>
 
-            <!-- Empty State -->
-            <div th:if="${#lists.isEmpty(courses)}" class="col-span-full text-center py-2xl w-full text-dim">
-                <i class="bi bi-inbox mb-m block text-3xl"></i>
-                <p>No courses are currently available. Check back soon!</p>
+            <div class="hero-platform__stats">
+                <div>
+                    <div class="hero-stat__value">12+</div>
+                    <div class="hero-stat__label">Courses</div>
+                </div>
+                <div>
+                    <div class="hero-stat__value">3</div>
+                    <div class="hero-stat__label">Skill levels</div>
+                </div>
+                <div>
+                    <div class="hero-stat__value">Self</div>
+                    <div class="hero-stat__label">Paced</div>
+                </div>
             </div>
-        </div>
-
-        <section class="card-glass container mt-3xl py-2xl text-center">
-            <h2 class="section-title mt-0 mx-auto justify-center">Want a custom workshop?</h2>
-            <p class="mb-xl text-dim max-w-600 mx-auto">
-                We offer tailored training sessions for corporate teams focusing on specific technologies and architectural challenges.
-            </p>
-            <a href="/about" class="btn btn-primary">Get in Touch</a>
         </section>
+
+        <!-- ===== COURSES LIST ===== -->
+        <section class="container" style="padding-top: var(--space-2xl); padding-bottom: var(--space-3xl);">
+
+            <!-- Level filter -->
+            <div class="level-filter" id="levelFilter">
+                <button class="level-filter__btn active" data-filter="all">
+                    <i class="bi bi-grid-3x3-gap"></i> All
+                </button>
+                <button class="level-filter__btn beginner" data-filter="Beginner">
+                    <i class="bi bi-reception-1"></i> Beginner
+                </button>
+                <button class="level-filter__btn intermediate" data-filter="Intermediate">
+                    <i class="bi bi-reception-3"></i> Intermediate
+                </button>
+                <button class="level-filter__btn advanced" data-filter="Advanced">
+                    <i class="bi bi-reception-4"></i> Advanced
+                </button>
+            </div>
+
+            <!-- Course cards grid -->
+            <div class="courses-grid" id="coursesGrid">
+
+                <div th:each="course : ${courses}"
+                     class="card-glass course-card"
+                     th:attr="data-level=${course.level}">
+
+                    <!-- Level badge (top-right) -->
+                    <span class="course-card__badge"
+                          th:classappend="${course.level == 'Beginner'} ? ' badge-beginner' : (${course.level == 'Advanced'} ? ' badge-advanced' : ' badge-intermediate')"
+                          th:text="${course.level}">Level</span>
+
+                    <!-- Icon -->
+                    <div class="course-card__icon"
+                         th:classappend="${course.level == 'Beginner'} ? 'level-beginner' : (${course.level == 'Advanced'} ? 'level-advanced' : 'level-intermediate')">
+                        <i th:class="${course.level == 'Beginner'} ? 'bi bi-database-check' : (${course.level == 'Advanced'} ? 'bi bi-layers-half' : 'bi bi-lightning-charge')"></i>
+                    </div>
+
+                    <h3 class="course-card__title" th:text="${course.title}">Course Title</h3>
+                    <p class="course-card__description" th:text="${#strings.abbreviate(course.description, 130)}">
+                        Description goes here...
+                    </p>
+
+                    <div class="course-card__meta">
+                        <span><i class="bi bi-clock"></i> <span th:text="${course.duration}">12 Hours</span></span>
+                        <span><i class="bi bi-bar-chart"></i> <span th:text="${course.level}">Level</span></span>
+                    </div>
+
+                    <a th:href="@{/course/{id}(id=${course.id})}" class="btn btn-outline w-full mt-m">
+                        Start Learning <i class="bi bi-arrow-right ms-2"></i>
+                    </a>
+                </div>
+
+                <!-- Empty state -->
+                <div th:if="${#lists.isEmpty(courses)}"
+                     class="col-span-full text-center py-2xl w-full">
+                    <i class="bi bi-inbox" style="font-size: 3rem; color: var(--text-dim); display: block; margin-bottom: var(--space-m);"></i>
+                    <p class="text-dim">No courses are currently available. Check back soon!</p>
+                </div>
+            </div>
+
+            <!-- No results (shown by JS filter) -->
+            <div id="noResults" style="display:none;" class="text-center py-2xl">
+                <i class="bi bi-funnel" style="font-size: 2.5rem; color: var(--text-dim); display: block; margin-bottom: var(--space-m);"></i>
+                <p class="text-dim">No courses at this level yet.</p>
+            </div>
+        </section>
+
+        <!-- ===== CTA BANNER ===== -->
+        <section class="container" style="padding-bottom: var(--space-3xl);">
+            <div class="card-glass" style="padding: clamp(2rem, 6vw, 4rem); text-align: center; position: relative; overflow: hidden;">
+                <!-- Subtle background accent -->
+                <div style="position: absolute; top: -60px; right: -60px; width: 220px; height: 220px; background: radial-gradient(circle, rgba(88,166,255,0.08) 0%, transparent 70%); pointer-events: none;"></div>
+                <div style="position: absolute; bottom: -40px; left: -40px; width: 180px; height: 180px; background: radial-gradient(circle, rgba(188,140,255,0.07) 0%, transparent 70%); pointer-events: none;"></div>
+
+                <div style="position: relative;">
+                    <span style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent-blue); letter-spacing: 0.1em; text-transform: uppercase;">Corporate &amp; Teams</span>
+                    <h2 class="section-title justify-center mt-s mb-m" style="font-family: var(--font-sans); font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 700;">
+                        Need a Custom Workshop?
+                    </h2>
+                    <p class="text-dim mb-xl mx-auto" style="max-width: 500px; line-height: 1.7; font-size: 1rem;">
+                        We offer tailored on-site and remote training sessions for engineering teams.
+                        From Java internals to cloud-native architecture — we cover what your team needs.
+                    </p>
+                    <div style="display: flex; justify-content: center; gap: var(--space-m); flex-wrap: wrap;">
+                        <a href="/about" class="btn btn-primary btn-large">
+                            Get in Touch <i class="bi bi-arrow-right ms-2"></i>
+                        </a>
+                        <a href="/courses" class="btn btn-outline btn-large">
+                            Browse All Courses
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </div>
+
+    <!-- Level filter JS -->
+    <th:block layout:fragment="scripts">
+        <script>
+            (function () {
+                const filter = document.getElementById('levelFilter');
+                const grid   = document.getElementById('coursesGrid');
+                const noRes  = document.getElementById('noResults');
+                if (!filter || !grid) return;
+
+                filter.addEventListener('click', function (e) {
+                    const btn = e.target.closest('.level-filter__btn');
+                    if (!btn) return;
+
+                    // Update active button
+                    filter.querySelectorAll('.level-filter__btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+
+                    const value = btn.dataset.filter;
+                    const cards = grid.querySelectorAll('.course-card');
+                    let visible = 0;
+
+                    cards.forEach(function (card) {
+                        const level = card.dataset.level || '';
+                        const show  = (value === 'all' || level === value);
+                        card.classList.toggle('course-card--hidden', !show);
+                        if (show) visible++;
+                    });
+
+                    noRes.style.display = visible === 0 ? 'block' : 'none';
+                });
+            })();
+        </script>
+    </th:block>
 </body>
 </html>

@@ -60,4 +60,13 @@ public class NotificationServiceImpl implements NotificationService {
         unread.forEach(n -> n.setRead(true));
         notificationRepository.saveAll(unread);
     }
+
+    @Override
+    @Transactional
+    public void clearAll(Long userId) {
+        List<Notification> all = notificationRepository.findAll().stream()
+                .filter(n -> n.getUser().getId().equals(userId))
+                .toList();
+        notificationRepository.deleteAll(all);
+    }
 }

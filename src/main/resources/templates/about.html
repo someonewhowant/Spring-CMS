@@ -3,78 +3,125 @@
     layout:decorate="~{layouts/main}">
 
 <head>
-    <title>About</title>
+    <title>About — CodeBlog Academy</title>
 </head>
 
 <body>
     <div layout:fragment="content">
-        <section class="hero-minimal container">
-            <span class="hero-label">about</span>
-            <h1 class="author__heading">/dev/academy/about</h1>
-            <p class="author__body">
-                CodeBlog Academy is more than just a technical blog. It's a structured learning platform designed for engineers who want to go beyond the basics and master <span class="text-accent-mono">complex system architecture</span> and <span class="text-accent-mono">performance engineering</span>.
+
+        <!-- ===== HERO ===== -->
+        <section class="hero-platform container">
+            <p class="hero-platform__eyebrow">About the Platform</p>
+
+            <h1 class="hero-platform__heading">
+                Built for Engineers<br>
+                Who Want to <span class="highlight">Think Deeper</span>
+            </h1>
+
+            <p class="hero-platform__sub">
+                CodeBlog Academy is a structured learning platform for developers who are ready to go
+                beyond tutorials and understand how production systems actually work — at scale,
+                under load, and in the real world.
             </p>
+
+            <div class="hero-platform__cta">
+                <a th:href="@{/courses}" class="btn btn-primary btn-large">
+                    Start Learning <i class="bi bi-arrow-right"></i>
+                </a>
+                <a th:href="@{/articles}" class="btn btn-outline btn-large">
+                    Read Articles
+                </a>
+            </div>
         </section>
 
+        <!-- ===== MISSION ===== -->
         <section class="container">
             <div class="card-glass overflow-hidden">
                 <div class="terminal-header">
                     <span class="terminal-header__dot"></span>
                     <span class="terminal-header__dot"></span>
                     <span class="terminal-header__dot"></span>
-                    <span class="terminal-header__title">system.init()</span>
+                    <span class="terminal-header__title">mission.md</span>
                 </div>
                 <div class="p-l">
                     <div class="terminal-body p-0">
                         <p class="terminal-line"><span class="terminal-prompt">$</span> cat mission.md</p>
                         <p class="terminal-text mb-0">
-                            The mission of CodeBlog Academy is to bridge the gap between academic theory and production-grade engineering. We provide deep technical insights, architectural case studies, and structured learning paths for modern developers.
+                            Our mission is simple: bridge the gap between surface-level tutorials and the engineering
+                            depth required to work on meaningful systems. We believe every developer deserves access to
+                            the kind of knowledge that's usually only shared in senior engineering teams.
                         </p>
                     </div>
 
                     <div class="about-grid mt-2xl">
                         <div class="about-card">
-                            <div class="about-card__step">01 // ANALYZE</div>
-                            <h3 class="about-card__title">Deep Architecture</h3>
-                            <p class="about-card__text">Exploring the internals of distributed systems and database engines.</p>
+                            <div class="about-card__step">01 // LEARN</div>
+                            <h3 class="about-card__title">Production-Grade Content</h3>
+                            <p class="about-card__text">Every article and course is grounded in real engineering practice, not toy examples. We cover the internals, edge cases and trade-offs.</p>
                         </div>
                         <div class="about-card">
-                            <div class="about-card__step text-green">02 // OPTIMIZE</div>
-                            <h3 class="about-card__title">Performance First</h3>
-                            <p class="about-card__text">Practical guides on squeezing every millisecond out of the critical path.</p>
+                            <div class="about-card__step text-green">02 // BUILD</div>
+                            <h3 class="about-card__title">Hands-On Modules</h3>
+                            <p class="about-card__text">Each course module includes exercises, code walkthroughs and practical tasks that reinforce concepts through doing, not just reading.</p>
                         </div>
                         <div class="about-card">
-                            <div class="about-card__step text-purple">03 // SCALE</div>
-                            <h3 class="about-card__title">Cloud Native</h3>
-                            <p class="about-card__text">Designing for horizontal scale and zero-downtime deployments.</p>
+                            <div class="about-card__step text-purple">03 // GROW</div>
+                            <h3 class="about-card__title">Career Progression</h3>
+                            <p class="about-card__text">Our structured paths take you from solid fundamentals to senior-level topics like distributed databases, system design and cloud architecture.</p>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
+        <!-- ===== PHILOSOPHY ===== -->
         <section class="container">
             <h2 class="section-title">
-                <i class="bi bi-patch-check"></i> Academy Philosophy
+                <i class="bi bi-patch-check"></i> Our Teaching Philosophy
             </h2>
             <div class="grid grid-2 gap-m">
                 <div class="card-glass philosophy-card">
-                    <h4 class="philosophy-card__label text-blue">01 // PRODUCTION_READY</h4>
-                    <p class="text-dim leading-relaxed">Every article and course is based on real-world production experience. We don't just show you "Hello World" - we show you how to build systems that handle traffic, failures, and scale.</p>
+                    <h4 class="philosophy-card__label text-blue">01 // No Hand-Waving</h4>
+                    <p class="text-dim leading-relaxed">
+                        We don't skip the hard parts. When explaining a concept, we go into the
+                        implementation details — because that's where real understanding lives. If you've
+                        ever been frustrated by "just trust me it works" explanations, you're in the right place.
+                    </p>
                 </div>
                 <div class="card-glass philosophy-card">
-                    <h4 class="philosophy-card__label text-green">02 // STRUCTURED_PATH</h4>
-                    <p class="text-dim leading-relaxed">Our courses are designed as logical progressions. From understanding memory management to designing distributed databases, we guide you through the learning curve.</p>
+                    <h4 class="philosophy-card__label text-green">02 // Structured Progression</h4>
+                    <p class="text-dim leading-relaxed">
+                        Learning is non-linear by nature, but a good curriculum provides a clear path.
+                        Our courses are ordered so each lesson builds on the previous one — from
+                        memory management to designing globally distributed systems.
+                    </p>
+                </div>
+                <div class="card-glass philosophy-card">
+                    <h4 class="philosophy-card__label text-purple">03 // Context Over Syntax</h4>
+                    <p class="text-dim leading-relaxed">
+                        Syntax can be looked up. Context cannot. We focus on the "why" behind every
+                        architectural decision — what problems a pattern solves, when to use it, and
+                        when not to. That's what separates engineers from developers.
+                    </p>
+                </div>
+                <div class="card-glass philosophy-card">
+                    <h4 class="philosophy-card__label text-orange">04 // Always Evolving</h4>
+                    <p class="text-dim leading-relaxed">
+                        The industry moves fast. We continuously update courses and publish new articles
+                        reflecting current best practices in cloud-native development, observability,
+                        and modern backend engineering.
+                    </p>
                 </div>
             </div>
         </section>
 
+        <!-- ===== TECH STACK ===== -->
         <section class="container">
             <h2 class="section-title">
-                <i class="bi bi-layers"></i> The Stack
+                <i class="bi bi-layers"></i> Technologies We Cover
             </h2>
             <p class="text-dim max-w-450 mb-l">
-                Our core architectural pillars and tools used for building modern applications.
+                Our courses and articles span the full backend engineering stack — from JVM internals to cloud infrastructure.
             </p>
             <div class="tech-grid">
                 <div class="tech-item">
@@ -83,31 +130,42 @@
                 </div>
                 <div class="tech-item">
                     <i class="bi bi-database"></i>
-                    <span>PostgreSQL/MySQL</span>
+                    <span>PostgreSQL / MySQL</span>
                 </div>
                 <div class="tech-item">
                     <i class="bi bi-code-slash"></i>
-                    <span>JavaScript</span>
+                    <span>JavaScript / Node</span>
                 </div>
                 <div class="tech-item">
                     <i class="bi bi-box-seam"></i>
-                    <span>Docker</span>
+                    <span>Docker / K8s</span>
                 </div>
                 <div class="tech-item">
                     <i class="bi bi-cloud-arrow-up"></i>
-                    <span>AWS / Cloud</span>
+                    <span>AWS / GCP</span>
                 </div>
                 <div class="tech-item">
                     <i class="bi bi-git"></i>
-                    <span>Git Ops</span>
+                    <span>GitOps / CI-CD</span>
                 </div>
             </div>
         </section>
 
+        <!-- ===== CTA ===== -->
         <section class="text-center py-2xl container border-top mt-3xl">
-            <div class="mb-3xl">
+            <h2 class="section-title justify-center mt-0">
+                <i class="bi bi-mortarboard"></i> Ready to level up?
+            </h2>
+            <p class="text-dim mb-xl mx-auto" style="max-width: 480px; line-height: 1.7;">
+                Join hundreds of engineers who are deepening their skills with structured, practical
+                courses and weekly technical articles.
+            </p>
+            <div class="mb-3xl" style="display: flex; justify-content: center; gap: var(--space-m); flex-wrap: wrap;">
                 <a th:href="@{/courses}" class="btn btn-primary btn-large">
-                    Explore Academy <i class="bi bi-arrow-right" style="margin-left: 8px;"></i>
+                    Explore Courses <i class="bi bi-arrow-right"></i>
+                </a>
+                <a th:href="@{/articles}" class="btn btn-outline btn-large">
+                    Read the Blog
                 </a>
             </div>
 

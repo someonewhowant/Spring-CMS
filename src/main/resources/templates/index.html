@@ -3,24 +3,104 @@
     layout:decorate="~{layouts/main}">
 
 <head>
-    <title th:text="${title}">Home</title>
+    <title th:text="${title}">Home — CodeBlog Academy</title>
 </head>
 
 <body>
 
     <div layout:fragment="content">
-        <section class="hero-minimal container">
-            <span class="hero-label">/dev/academy/intro</span>
-            <h1 class="author__heading">Accelerate Your Dev Journey</h1>
-            <p class="author__body">High-quality courses and deep technical articles for engineers who want to master
-                <span class="text-accent-mono">system architecture</span> and <span class="text-accent-mono">backend
-                    engineering</span>.
+
+        <!-- ===== HERO ===== -->
+        <section class="hero-platform container">
+            <p class="hero-platform__eyebrow">CodeBlog Academy</p>
+
+            <h1 class="hero-platform__heading">
+                Master Backend Engineering&nbsp;—<br>
+                <span class="highlight">Build Systems That Scale</span>
+            </h1>
+
+            <p class="hero-platform__sub">
+                Deep-dive courses and production-grade technical articles for developers
+                who want to level up from writing code to designing resilient systems.
             </p>
+
+            <ul class="hero-platform__bullets">
+                <li>
+                    <i class="bi bi-check-circle-fill"></i>
+                    Structured learning paths: from junior to senior engineer
+                </li>
+                <li>
+                    <i class="bi bi-check-circle-fill"></i>
+                    Real-world case studies: distributed systems, databases, cloud
+                </li>
+                <li>
+                    <i class="bi bi-check-circle-fill"></i>
+                    In-depth technical articles published weekly
+                </li>
+            </ul>
+
+            <div class="hero-platform__cta">
+                <a th:href="@{/courses}" class="btn btn-primary btn-large">
+                    Explore Courses <i class="bi bi-arrow-right ms-2"></i>
+                </a>
+                <a th:href="@{/articles}" class="btn btn-outline btn-large">
+                    Browse Articles
+                </a>
+            </div>
+
+            <div class="hero-platform__stats">
+                <div>
+                    <div class="hero-stat__value">12+</div>
+                    <div class="hero-stat__label">Courses</div>
+                </div>
+                <div>
+                    <div class="hero-stat__value">50+</div>
+                    <div class="hero-stat__label">Articles</div>
+                </div>
+                <div>
+                    <div class="hero-stat__value">100%</div>
+                    <div class="hero-stat__label">Practice-first</div>
+                </div>
+            </div>
         </section>
 
+        <!-- ===== WHY US ===== -->
+        <section class="why-us-section container">
+            <div class="section-header">
+                <h2 class="section-title mt-0">
+                    <i class="bi bi-stars"></i> Why engineers choose us
+                </h2>
+                <p>We focus on what matters for your career — not just syntax, but how real systems are built.</p>
+            </div>
+
+            <div class="why-us-grid">
+                <div class="why-us-card">
+                    <div class="why-us-card__icon blue"><i class="bi bi-layers"></i></div>
+                    <h3 class="why-us-card__title">Depth Over Breadth</h3>
+                    <p class="why-us-card__text">Each course goes beyond the surface. We break down internals, trade-offs and design decisions you'll face at senior level.</p>
+                </div>
+                <div class="why-us-card">
+                    <div class="why-us-card__icon green"><i class="bi bi-terminal"></i></div>
+                    <h3 class="why-us-card__title">Hands-On Practice</h3>
+                    <p class="why-us-card__text">Theory without practice is useless. Every module includes concrete exercises, code examples and production-ready patterns.</p>
+                </div>
+                <div class="why-us-card">
+                    <div class="why-us-card__icon purple"><i class="bi bi-map"></i></div>
+                    <h3 class="why-us-card__title">Structured Paths</h3>
+                    <p class="why-us-card__text">Courses are sequenced logically. You won't get lost — we guide you from fundamentals to advanced distributed system design.</p>
+                </div>
+                <div class="why-us-card">
+                    <div class="why-us-card__icon orange"><i class="bi bi-briefcase"></i></div>
+                    <h3 class="why-us-card__title">Career-Ready Skills</h3>
+                    <p class="why-us-card__text">Everything is rooted in real production experience. You learn what senior engineers actually use in interviews and on the job.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== LATEST ARTICLES ===== -->
         <section class="articles container py-l">
             <h2 class="section-title">
-                <i class="bi bi-journal-code"></i> latest_insights
+                <i class="bi bi-journal-code"></i> Latest Articles
             </h2>
 
             <nav th:replace="~{partials/fragments :: categoryNav(@{/})}"></nav>
@@ -48,7 +128,7 @@
                         <p class="article-card__excerpt" th:text="${#strings.abbreviate(post.body, 120)}"></p>
 
                         <div class="article-card__footer">
-                            <span class="read-more">read_insight <i class="bi bi-arrow-right"></i></span>
+                            <span class="read-more">Read more <i class="bi bi-arrow-right"></i></span>
                         </div>
                     </div>
                 </li>
@@ -56,15 +136,19 @@
 
             <div class="text-center mt-l">
                 <a th:href="@{/articles}" class="btn btn-outline">
-                    <i class="bi bi-archive"></i> view_all_articles()
+                    <i class="bi bi-archive"></i> View All Articles
                 </a>
             </div>
         </section>
 
+        <!-- ===== RECENT COURSES ===== -->
         <section class="recent-courses container mt-3xl py-2xl border-top">
             <h2 class="section-title">
-                <i class="bi bi-mortarboard"></i> recent_courses
+                <i class="bi bi-mortarboard"></i> Popular Courses
             </h2>
+            <p class="text-dim mb-l" style="max-width: 520px;">
+                Start with our most popular courses and build a solid foundation in backend engineering and system design.
+            </p>
 
             <div class="courses-grid mt-l">
                 <div th:each="course : ${recentCourses}" class="card-glass course-card">
@@ -86,7 +170,7 @@
 
             <div class="text-center mt-2xl">
                 <a th:href="@{/courses}" class="btn btn-primary btn-large">
-                    Get Started <i class="bi bi-arrow-right" style="margin-left: 8px;"></i>
+                    See All Courses <i class="bi bi-arrow-right"></i>
                 </a>
             </div>
         </section>
