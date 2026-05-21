@@ -3374,18 +3374,6 @@ code[class*="language-"] {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
 /* --- Global Alignment & UI Polish --- */
-.card-glass {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    transition: var(--transition);
-}
-
-.card-glass:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow), 0 0 20px rgba(88, 166, 255, 0.1);
-    border-color: var(--accent-blue);
-}
 
 .course-card__description {
     flex-grow: 1;
@@ -3618,4 +3606,204 @@ code[class*="language-"] {
 
 .light-theme .notification-bell-btn:hover {
     color: var(--accent-blue);
+}
+
+/* --- Gradient Titles --- */
+.text-gradient-blue {
+  background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: inline-block;
+}
+
+.text-gradient-purple {
+  background: linear-gradient(135deg, var(--accent-purple) 0%, #ff7b72 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: inline-block;
+}
+
+.text-gradient-green {
+  background: linear-gradient(135deg, var(--accent-green) 0%, var(--accent-blue) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: inline-block;
+}
+
+/* --- Notifications Helper Classes --- */
+.student-notification-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.student-notification-item:last-child {
+  margin-bottom: 0 !important;
+  border-bottom: none !important;
+  padding-bottom: 0 !important;
+}
+
+.teacher-notification-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.teacher-notification-item:last-child {
+  margin-bottom: 0 !important;
+  border-bottom: none !important;
+  padding-bottom: 0 !important;
+}
+
+/* --- Light Theme Cabinet Overrides --- */
+.light-theme [style*="border-bottom: 1px solid rgba(255"] {
+  border-bottom: 1px solid var(--border-subtle) !important;
+}
+.light-theme [style*="border-bottom: 1px solid rgba(255,255,255,0.05)"] {
+  border-bottom: 1px solid var(--border-subtle) !important;
+}
+.light-theme [style*="border-bottom: 1px solid rgba(255,255,255,0.1)"] {
+  border-bottom: 1px solid var(--border-subtle) !important;
+}
+.light-theme [style*="border-bottom: 1px solid rgba(255, 255, 255, 0.05)"] {
+  border-bottom: 1px solid var(--border-subtle) !important;
+}
+.light-theme [style*="border-bottom: 1px solid rgba(255, 255, 255, 0.1)"] {
+  border-bottom: 1px solid var(--border-subtle) !important;
+}
+.light-theme [style*="border-color: rgba(255,255,255"] {
+  border-color: var(--border-subtle) !important;
+}
+.light-theme [style*="border: 1px solid rgba(255, 255, 255"] {
+  border: 1px solid var(--border-subtle) !important;
+}
+.light-theme [style*="background: rgba(255,255,255,0.05)"] {
+  background: var(--bg-dark) !important;
+}
+.light-theme [style*="background: rgba(255, 255, 255, 0.08)"] {
+  background: var(--bg-dark) !important;
+}
+.light-theme [style*="background: rgba(255,255,255,0.08)"] {
+  background: var(--bg-dark) !important;
+}
+.light-theme [style*="background: rgba(255,255,255,0.1)"] {
+  background: var(--border-subtle) !important;
+}
+.light-theme [style*="background: rgba(255, 255, 255, 0.05)"] {
+  background: var(--bg-dark) !important;
+}
+.light-theme [style*="background: rgba(0, 0, 0, 0.2)"] {
+  background: var(--bg-dark) !important;
+}
+.light-theme [style*="background: rgba(255, 255, 255, 0.03)"] {
+  background: var(--bg-dark) !important;
+}
+
+
+/* ═══════════════════════════════════════════════
+   Profile Settings — Redesigned Components
+   ═══════════════════════════════════════════════ */
+
+/* Cropper Modal Overlay */
+#cropperModalOverlay {
+  animation: fadeIn 0.2s ease;
+}
+
+/* Avatar upload button hover ring effect */
+.settings-avatar-ring {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.settings-avatar-ring::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid rgba(88, 166, 255, 0.35);
+  animation: avatar-ring-spin 6s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes avatar-ring-spin {
+  0%   { transform: rotate(0deg);   border-color: rgba(88,166,255,0.4); }
+  33%  { border-color: rgba(188,140,255,0.4); }
+  66%  { border-color: rgba(63,185,80,0.4); }
+  100% { transform: rotate(360deg); border-color: rgba(88,166,255,0.4); }
+}
+
+/* Settings Avatar Upload Button */
+.settings-avatar-upload-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(88, 166, 255, 0.1);
+  border: 1px solid rgba(88, 166, 255, 0.25);
+  color: var(--accent-blue);
+  padding: 7px 18px;
+  border-radius: 20px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+}
+
+.settings-avatar-upload-btn:hover {
+  background: rgba(88, 166, 255, 0.2);
+  border-color: rgba(88, 166, 255, 0.5);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(88, 166, 255, 0.15);
+}
+
+/* Password Strength Bar */
+.pwd-strength-bar {
+  margin-top: 8px;
+}
+
+/* Light theme overrides for cropper modal */
+.light-theme #cropperModalOverlay > div {
+  background: var(--bg-surface);
+  border-color: var(--border-subtle);
+}
+
+/* Settings form icon inputs */
+.form-control:focus {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.1);
+  outline: none;
+}
+
+/* Cropper.js dark theme overrides */
+.cropper-view-box,
+.cropper-face {
+  border-radius: 50%;
+}
+
+.cropper-bg {
+  background-image: none;
+  background-color: rgba(0,0,0,0.3);
+}
+
+.cropper-modal {
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+.cropper-line,
+.cropper-point {
+  background-color: var(--accent-blue);
+}
+
+.cropper-view-box {
+  outline: 2px solid var(--accent-blue);
+  outline-color: rgba(88, 166, 255, 0.8);
 }

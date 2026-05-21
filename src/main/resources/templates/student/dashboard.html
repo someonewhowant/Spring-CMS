@@ -121,7 +121,7 @@
                 </h3>
             </div>
             <div style="padding: 16px 24px;">
-                <div th:each="note : ${notifications}" style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); last-child: { margin-bottom: 0; border-bottom: none; padding-bottom: 0; }">
+                <div th:each="note : ${notifications}" class="student-notification-item">
                     <div style="flex-shrink: 0; color: var(--text-dim); margin-top: 2px;">
                         <i class="bi bi-info-circle"></i>
                     </div>

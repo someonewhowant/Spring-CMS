@@ -4,210 +4,372 @@
       layout:decorate="~{layouts/main}">
 <head>
     <title>Profile Settings - CodeBlog</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
 </head>
 <body>
-    <div layout:fragment="content" class="container py-l fade-in">
-        <!-- Terminal Header -->
-        <div class="admin-header">
-            <h1 class="text-green font-mono" th:text="${user.username} + '@cabinet:~/profile/settings$'">user@cabinet:~/profile/settings$</h1>
-            <div class="admin-actions">
-                <!-- Direct link back to role dashboard -->
-                <a th:if="${user.role.name() == 'TEACHER'}" th:href="@{/teacher/dashboard}" class="btn btn-outline btn-xs">
-                    <i class="bi bi-arrow-left"></i> back_to_dashboard()
-                </a>
-                <a th:if="${user.role.name() == 'STUDENT'}" th:href="@{/courses}" class="btn btn-outline btn-xs">
-                    <i class="bi bi-arrow-left"></i> back_to_academy()
-                </a>
-                <a th:if="${user.role.name() == 'ADMIN'}" th:href="@{/admin}" class="btn btn-outline btn-xs">
-                    <i class="bi bi-arrow-left"></i> back_to_admin()
-                </a>
-            </div>
+<div layout:fragment="content" class="container py-l fade-in">
+
+    <!-- Page Header -->
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:24px;">
+        <div>
+            <h1 style="font-size:2.5rem;margin:0 0 8px;font-weight:800;letter-spacing:-0.02em;">
+                Profile <span class="text-gradient-blue">Settings</span>
+            </h1>
+            <p style="color:var(--text-dim);margin:0;font-size:1.1rem;">Manage your identity, credentials and avatar.</p>
         </div>
-
-        <!-- Alerts -->
-        <div th:if="${error}" class="alert alert-error mt-m" style="border-left: 3px solid var(--accent-red); background: rgba(255, 123, 114, 0.05); padding: 12px 16px; border-radius: var(--radius); font-family: var(--font-mono); font-size: 0.85rem; color: #ff7b72; margin-bottom: 20px;">
-            <i class="bi bi-exclamation-triangle-fill"></i> <span th:text="${error}">Error details</span>
-        </div>
-        <div th:if="${success}" class="alert alert-success mt-m" style="border-left: 3px solid var(--accent-green); background: rgba(63, 185, 80, 0.05); padding: 12px 16px; border-radius: var(--radius); font-family: var(--font-mono); font-size: 0.85rem; color: var(--accent-green); margin-bottom: 20px;">
-            <i class="bi bi-check-circle-fill"></i> <span th:text="${success}">Success details</span>
-        </div>
-
-        <!-- Profile Grid Layout -->
-        <div class="profile-grid">
-            <!-- Sidebar -->
-            <aside class="profile-sidebar">
-                <!-- Avatar card -->
-                <div class="profile-avatar-card">
-                    <img th:if="${user.avatarUrl != null}" th:src="${user.avatarUrl}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent-blue); background: var(--bg-body); margin-bottom: 16px;">
-                    <div th:if="${user.avatarUrl == null}" class="avatar-circle" th:text="${#strings.substring(user.username, 0, 1).toUpperCase()}" style="margin-bottom: 16px;">U</div>
-                    <h2 class="profile-name" th:text="${user.fullName != null and user.fullName != '' ? user.fullName : user.username}">Username</h2>
-                    <span class="profile-role-badge" th:classappend="${#strings.toLowerCase(user.role.name())}" th:text="'ROLE_' + ${user.role.name()}">ROLE_USER</span>
-                    <span th:if="${user.title != null and user.title != ''}" class="profile-title" style="font-family: var(--font-mono); font-size: 0.75rem; text-align: center; color: var(--text-dim); margin-top: 8px;" th:text="${user.title}">Instructor</span>
-                </div>
-
-                <!-- Stats Summary -->
-                <div class="profile-avatar-card" style="padding: 24px 20px; align-items: stretch; text-align: left;">
-                    <h3 class="font-mono text-dim" style="font-size: 0.8rem; margin: 0 0 16px; text-transform: uppercase; border-bottom: 1px solid var(--border-subtle); padding-bottom: 8px;">
-                        <i class="bi bi-cpu"></i> system_diagnostics
-                    </h3>
-                    <div style="display: flex; flex-direction: column; gap: 12px; font-family: var(--font-mono); font-size: 0.8rem;">
-                        <div style="display: flex; justify-content: space-between;">
-                            <span class="text-dim">TOTAL_COURSES:</span>
-                            <span class="text-blue text-bold" th:text="${totalCourses}">0</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between;">
-                            <span class="text-dim">TOTAL_QUIZZES:</span>
-                            <span class="text-purple text-bold" th:text="${totalQuizzes}">0</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between;">
-                            <span class="text-dim">ACTIVE_POSTS:</span>
-                            <span class="text-green text-bold" th:text="${totalPosts}">0</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Settings Nav -->
-                <ul class="settings-nav">
-                    <li class="settings-nav-item active">
-                        <a href="#general-settings">
-                            <i class="bi bi-gear"></i> general_configuration
-                        </a>
-                    </li>
-                </ul>
-            </aside>
-
-            <!-- Main Content Area -->
-            <main class="card-glass" style="padding: clamp(1.5rem, 4vw, 2.5rem); background: var(--bg-surface);">
-                <div style="border-bottom: 1px solid rgba(48, 54, 61, 0.4); padding-bottom: 16px; margin-bottom: 28px;">
-                    <h2 class="font-mono text-orange" style="font-size: 1.2rem; margin: 0;">
-                        <i class="bi bi-sliders"></i> [ edit_account_parameters ]
-                    </h2>
-                    <p style="font-size: 0.85rem; color: var(--text-dim); margin-top: 4px;">Update display attributes and credentials below.</p>
-                </div>
-
-                <form th:action="@{/profile/settings/update}" method="POST" enctype="multipart/form-data" autocomplete="off">
-                    <!-- General details -->
-                    <div class="form-group">
-                        <label for="username" class="form-label" style="color: var(--accent-blue);">// STRING: display_username</label>
-                        <input type="text" id="username" name="username" th:value="${user.username}" class="form-control" required autocomplete="username">
-                        <p style="font-size: 0.75rem; color: var(--text-dim); margin-top: 6px;">
-                            <i class="bi bi-info-circle"></i> Changing your username will invalidate your active session, requiring re-authentication.
-                        </p>
-                    </div>
-
-                    <!-- LMS Personal Metadata Settings -->
-                    <div style="margin-top: 36px; border-top: 1px solid var(--border-subtle); padding-top: 24px;">
-                        <h3 class="font-mono text-green" style="font-size: 0.95rem; margin: 0 0 20px;">
-                            <i class="bi bi-person-lines-fill"></i> [ personal_lms_metadata ]
-                        </h3>
-                        
-                        <!-- Avatar Upload with Preview -->
-                        <div class="form-group" style="display: flex; gap: 20px; align-items: center; margin-bottom: 24px;">
-                            <div class="avatar-preview-container" style="position: relative; flex-shrink: 0;">
-                                <img id="avatarPreview" th:src="${user.avatarUrl}" 
-                                     style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent-blue); background: var(--bg-body);"
-                                     th:style="${user.avatarUrl != null} ? 'width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent-blue); background: var(--bg-body); display: block;' : 'width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent-blue); background: var(--bg-body); display: none;'">
-                                
-                                <div id="avatarLetter" class="avatar-circle" style="width: 80px; height: 80px; border-radius: 50%; font-size: 2rem; margin: 0; display: flex; align-items: center; justify-content: center;"
-                                     th:text="${#strings.substring(user.username, 0, 1).toUpperCase()}"
-                                     th:style="${user.avatarUrl == null} ? 'width: 80px; height: 80px; border-radius: 50%; font-size: 2rem; margin: 0; display: flex; align-items: center; justify-content: center;' : 'display: none;'">
-                                    U
-                                </div>
-                            </div>
-                            <div style="flex-grow: 1;">
-                                <label for="avatarFile" class="form-label" style="color: var(--accent-blue);">// FILE: upload_profile_avatar</label>
-                                <input type="file" id="avatarFile" name="avatarFile" class="form-control" accept="image/*" onchange="previewImage(this)" style="padding: 8px 12px; font-size: 0.85rem;">
-                                <p style="font-size: 0.75rem; color: var(--text-dim); margin-top: 6px;">Supported formats: PNG, JPG, JPEG, GIF. Max size 2MB.</p>
-                            </div>
-                        </div>
-
-                        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-                            <div class="form-group">
-                                <label for="fullName" class="form-label" style="color: var(--accent-blue);">// STRING: full_name</label>
-                                <input type="text" id="fullName" name="fullName" th:value="${user.fullName}" placeholder="e.g. Александр Иванов" class="form-control">
-                            </div>
-                            <div class="form-group">
-                                <label for="email" class="form-label" style="color: var(--accent-blue);">// STRING: contact_email</label>
-                                <input type="email" id="email" name="email" th:value="${user.email}" placeholder="e.g. mentor@codeblog.edu" class="form-control">
-                            </div>
-                        </div>
-
-                        <div class="form-group" style="margin-bottom: 20px;">
-                            <label for="title" class="form-label" style="color: var(--accent-blue);">// STRING: professional_title_or_specialization</label>
-                            <input type="text" id="title" name="title" th:value="${user.title}" placeholder="e.g. Senior Java Core & Architecture Instructor" class="form-control">
-                        </div>
-
-                        <div class="form-group" style="margin-bottom: 20px;">
-                            <label for="bio" class="form-label" style="color: var(--accent-blue);">// TEXT: short_biography_and_experience</label>
-                            <textarea id="bio" name="bio" th:text="${user.bio}" rows="4" placeholder="Share your academic background, experience, or student guidelines..." class="form-control" style="font-family: var(--font-mono); resize: vertical; padding: 12px; font-size: 0.85rem; line-height: 1.5;"></textarea>
-                        </div>
-
-                        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                            <div class="form-group">
-                                <label for="githubUrl" class="form-label" style="color: var(--accent-blue);">// URL: github_profile</label>
-                                <input type="url" id="githubUrl" name="githubUrl" th:value="${user.githubUrl}" placeholder="https://github.com/yourusername" class="form-control">
-                            </div>
-                            <div class="form-group">
-                                <label for="linkedinUrl" class="form-label" style="color: var(--accent-blue);">// URL: linkedin_profile</label>
-                                <input type="url" id="linkedinUrl" name="linkedinUrl" th:value="${user.linkedinUrl}" placeholder="https://linkedin.com/in/yourusername" class="form-control">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Security settings -->
-                    <div style="margin-top: 36px; border-top: 1px solid var(--border-subtle); padding-top: 24px;">
-                        <h3 class="font-mono text-purple" style="font-size: 0.95rem; margin: 0 0 20px;">
-                            <i class="bi bi-shield-key"></i> [ secure_access_keys ]
-                        </h3>
-
-                        <div class="form-group">
-                            <label for="currentPassword" class="form-label">// SECURE: current_verification_password</label>
-                            <input type="password" id="currentPassword" name="currentPassword" placeholder="••••••••" class="form-control" autocomplete="current-password">
-                        </div>
-
-                        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                            <div class="form-group">
-                                <label for="newPassword" class="form-label" style="color: var(--accent-green);">// SECURE: new_password</label>
-                                <input type="password" id="newPassword" name="newPassword" placeholder="••••••••" class="form-control" autocomplete="new-password">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="confirmPassword" class="form-label" style="color: var(--accent-green);">// SECURE: confirm_new_password</label>
-                                <input type="password" id="confirmPassword" name="confirmPassword" placeholder="••••••••" class="form-control" autocomplete="new-password">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Submit action -->
-                    <div style="margin-top: 40px; border-top: 1px solid var(--border-subtle); padding-top: 24px; display: flex; justify-content: flex-end;">
-                        <button type="submit" class="btn btn-primary" style="padding: 12px 32px; font-weight: 600;">
-                            <i class="bi bi-cpu"></i> execute_profile_update()
-                        </button>
-                    </div>
-                </form>
-            </main>
+        <div style="display:flex;gap:12px;align-items:center;">
+            <a th:if="${user.role.name() == 'TEACHER'}" th:href="@{/teacher/dashboard}" class="btn btn-outline" style="border-radius:20px;">
+                <i class="bi bi-arrow-left"></i> Dashboard
+            </a>
+            <a th:if="${user.role.name() == 'STUDENT'}" th:href="@{/courses}" class="btn btn-outline" style="border-radius:20px;">
+                <i class="bi bi-arrow-left"></i> Academy
+            </a>
+            <a th:if="${user.role.name() == 'ADMIN'}" th:href="@{/admin}" class="btn btn-outline" style="border-radius:20px;">
+                <i class="bi bi-arrow-left"></i> Admin
+            </a>
         </div>
     </div>
-    <!-- Client-side image preview and settings UI enhancements -->
-    <th:block layout:fragment="scripts">
-        <script>
-            function previewImage(input) {
-                const file = input.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        const preview = document.getElementById('avatarPreview');
-                        const letter = document.getElementById('avatarLetter');
-                        preview.src = e.target.result;
-                        preview.style.display = 'block';
-                        if (letter) {
-                            letter.style.display = 'none';
-                        }
-                    };
-                    reader.readAsDataURL(file);
-                }
-            }
-        </script>
-    </th:block>
+
+    <!-- Alerts -->
+    <div th:if="${error}" style="border-left:3px solid var(--accent-red);background:rgba(255,123,114,0.07);padding:14px 18px;border-radius:var(--radius);font-family:var(--font-mono);font-size:0.85rem;color:#ff7b72;margin-bottom:24px;">
+        <i class="bi bi-exclamation-triangle-fill"></i> <span th:text="${error}">Error</span>
+    </div>
+    <div th:if="${success}" style="border-left:3px solid var(--accent-green);background:rgba(63,185,80,0.07);padding:14px 18px;border-radius:var(--radius);font-family:var(--font-mono);font-size:0.85rem;color:var(--accent-green);margin-bottom:24px;">
+        <i class="bi bi-check-circle-fill"></i> <span th:text="${success}">Success</span>
+    </div>
+
+    <!-- Profile Grid -->
+    <div class="profile-grid">
+
+        <!-- Sidebar -->
+        <aside class="profile-sidebar">
+
+            <!-- Avatar Card -->
+            <div class="profile-avatar-card" style="background:linear-gradient(135deg,rgba(88,166,255,0.04) 0%,rgba(188,140,255,0.04) 100%);">
+                <div class="settings-avatar-ring" id="avatarRing">
+                    <img id="avatarPreview"
+                         th:if="${user.avatarUrl != null}"
+                         th:src="${user.avatarUrl}"
+                         style="width:96px;height:96px;border-radius:50%;object-fit:cover;border:3px solid var(--accent-blue);box-shadow:0 0 24px rgba(88,166,255,0.25);display:block;">
+                    <div id="avatarLetter" class="avatar-circle"
+                         th:text="${#strings.substring(user.username,0,1).toUpperCase()}"
+                         th:style="${user.avatarUrl == null} ? '' : 'display:none;'">U</div>
+                </div>
+                <button type="button" id="openCropperBtn" class="settings-avatar-upload-btn" style="margin-top:16px;">
+                    <i class="bi bi-camera"></i> Change Avatar
+                </button>
+                <input type="file" id="avatarFileInput" accept="image/*" style="display:none;">
+                <h2 class="profile-name" th:text="${user.fullName != null and user.fullName != '' ? user.fullName : user.username}" style="margin-top:14px;">Username</h2>
+                <span class="profile-role-badge" th:classappend="${#strings.toLowerCase(user.role.name())}" th:text="'ROLE_' + ${user.role.name()}">ROLE</span>
+                <span th:if="${user.title != null and user.title != ''}" style="font-family:var(--font-mono);font-size:0.75rem;color:var(--text-dim);margin-top:8px;text-align:center;" th:text="${user.title}"></span>
+            </div>
+
+            <!-- System Stats -->
+            <div class="profile-avatar-card" style="padding:20px;align-items:stretch;text-align:left;">
+                <h3 class="font-mono text-dim" style="font-size:0.75rem;margin:0 0 14px;text-transform:uppercase;letter-spacing:0.08em;border-bottom:1px solid var(--border-subtle);padding-bottom:8px;">
+                    <i class="bi bi-cpu"></i> system_diagnostics
+                </h3>
+                <div style="display:flex;flex-direction:column;gap:10px;font-family:var(--font-mono);font-size:0.8rem;">
+                    <div style="display:flex;justify-content:space-between;">
+                        <span class="text-dim">TOTAL_COURSES:</span>
+                        <span class="text-blue" style="font-weight:700;" th:text="${totalCourses}">0</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;">
+                        <span class="text-dim">TOTAL_QUIZZES:</span>
+                        <span style="color:var(--accent-purple);font-weight:700;" th:text="${totalQuizzes}">0</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;">
+                        <span class="text-dim">ACTIVE_POSTS:</span>
+                        <span class="text-green" style="font-weight:700;" th:text="${totalPosts}">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nav -->
+            <ul class="settings-nav">
+                <li class="settings-nav-item active">
+                    <a href="#general-settings"><i class="bi bi-person"></i> personal_info</a>
+                </li>
+                <li class="settings-nav-item">
+                    <a href="#security-settings"><i class="bi bi-shield-lock"></i> security_keys</a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="card-glass" style="padding:clamp(1.5rem,4vw,2.5rem);background:var(--bg-surface);">
+            <form th:action="@{/profile/settings/update}" method="POST" enctype="multipart/form-data" autocomplete="off" id="settingsForm">
+                <!-- Hidden file input used by cropper -->
+                <input type="file" id="avatarFile" name="avatarFile" style="display:none;" accept="image/*">
+
+                <!-- ── Section: General ── -->
+                <div id="general-settings">
+                    <div style="display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(48,54,61,0.6);padding-bottom:16px;margin-bottom:28px;">
+                        <div style="width:36px;height:36px;border-radius:8px;background:rgba(88,166,255,0.12);color:var(--accent-blue);display:flex;align-items:center;justify-content:center;font-size:1rem;"><i class="bi bi-person-lines-fill"></i></div>
+                        <div>
+                            <h2 class="font-mono" style="font-size:1rem;margin:0;color:var(--accent-blue);">[ personal_lms_metadata ]</h2>
+                            <p style="font-size:0.8rem;color:var(--text-dim);margin:2px 0 0;">Update display attributes and public profile info.</p>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="username" class="form-label" style="color:var(--accent-blue);">// STRING: display_username</label>
+                        <input type="text" id="username" name="username" th:value="${user.username}" class="form-control" required>
+                        <p style="font-size:0.75rem;color:var(--text-dim);margin-top:6px;"><i class="bi bi-info-circle"></i> Changing username will invalidate your active session.</p>
+                    </div>
+
+                    <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px;margin-bottom:20px;">
+                        <div class="form-group">
+                            <label for="fullName" class="form-label" style="color:var(--accent-blue);">// STRING: full_name</label>
+                            <input type="text" id="fullName" name="fullName" th:value="${user.fullName}" placeholder="e.g. Александр Иванов" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="email" class="form-label" style="color:var(--accent-blue);">// STRING: contact_email</label>
+                            <input type="email" id="email" name="email" th:value="${user.email}" placeholder="e.g. user@codeblog.edu" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom:20px;">
+                        <label for="title" class="form-label" style="color:var(--accent-blue);">// STRING: professional_title</label>
+                        <input type="text" id="title" name="title" th:value="${user.title}" placeholder="e.g. Senior Java Instructor" class="form-control">
+                    </div>
+
+                    <div class="form-group" style="margin-bottom:20px;">
+                        <label for="bio" class="form-label" style="color:var(--accent-blue);">// TEXT: biography</label>
+                        <textarea id="bio" name="bio" th:text="${user.bio}" rows="4" placeholder="Share your experience..." class="form-control" style="font-family:var(--font-mono);resize:vertical;"></textarea>
+                    </div>
+
+                    <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+                        <div class="form-group">
+                            <label for="githubUrl" class="form-label" style="color:var(--accent-blue);">// URL: github_profile</label>
+                            <div style="position:relative;">
+                                <i class="bi bi-github" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);"></i>
+                                <input type="url" id="githubUrl" name="githubUrl" th:value="${user.githubUrl}" placeholder="https://github.com/user" class="form-control" style="padding-left:36px;">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="linkedinUrl" class="form-label" style="color:var(--accent-blue);">// URL: linkedin_profile</label>
+                            <div style="position:relative;">
+                                <i class="bi bi-linkedin" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);"></i>
+                                <input type="url" id="linkedinUrl" name="linkedinUrl" th:value="${user.linkedinUrl}" placeholder="https://linkedin.com/in/user" class="form-control" style="padding-left:36px;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Section: Security ── -->
+                <div id="security-settings" style="margin-top:40px;">
+                    <div style="display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(48,54,61,0.6);padding-bottom:16px;margin-bottom:28px;">
+                        <div style="width:36px;height:36px;border-radius:8px;background:rgba(188,140,255,0.12);color:var(--accent-purple);display:flex;align-items:center;justify-content:center;font-size:1rem;"><i class="bi bi-shield-lock"></i></div>
+                        <div>
+                            <h2 class="font-mono" style="font-size:1rem;margin:0;color:var(--accent-purple);">[ secure_access_keys ]</h2>
+                            <p style="font-size:0.8rem;color:var(--text-dim);margin:2px 0 0;">Update your password. Leave blank to keep current.</p>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom:20px;">
+                        <label for="currentPassword" class="form-label">// SECURE: current_password</label>
+                        <div style="position:relative;">
+                            <i class="bi bi-lock" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);"></i>
+                            <input type="password" id="currentPassword" name="currentPassword" placeholder="••••••••" class="form-control" style="padding-left:36px;" autocomplete="current-password">
+                        </div>
+                    </div>
+
+                    <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+                        <div class="form-group">
+                            <label for="newPassword" class="form-label" style="color:var(--accent-green);">// SECURE: new_password</label>
+                            <div style="position:relative;">
+                                <i class="bi bi-key" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);"></i>
+                                <input type="password" id="newPassword" name="newPassword" placeholder="••••••••" class="form-control" style="padding-left:36px;" autocomplete="new-password">
+                            </div>
+                            <div class="pwd-strength-bar" id="pwdStrengthBar" style="display:none;margin-top:8px;">
+                                <div style="height:4px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden;">
+                                    <div id="pwdStrengthFill" style="height:100%;width:0%;border-radius:2px;transition:width 0.3s,background 0.3s;"></div>
+                                </div>
+                                <span id="pwdStrengthLabel" style="font-family:var(--font-mono);font-size:0.7rem;color:var(--text-dim);margin-top:4px;display:block;"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmPassword" class="form-label" style="color:var(--accent-green);">// SECURE: confirm_new_password</label>
+                            <div style="position:relative;">
+                                <i class="bi bi-key-fill" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);"></i>
+                                <input type="password" id="confirmPassword" name="confirmPassword" placeholder="••••••••" class="form-control" style="padding-left:36px;" autocomplete="new-password">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit -->
+                <div style="margin-top:40px;border-top:1px solid var(--border-subtle);padding-top:24px;display:flex;justify-content:flex-end;gap:12px;">
+                    <a th:href="@{/profile/settings}" class="btn btn-outline">reset_changes()</a>
+                    <button type="submit" class="btn btn-primary" style="padding:12px 36px;font-weight:600;">
+                        <i class="bi bi-cpu"></i> execute_update()
+                    </button>
+                </div>
+            </form>
+        </main>
+    </div>
+
+    <!-- ── Image Cropper Modal ── -->
+    <div id="cropperModalOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);z-index:9000;align-items:center;justify-content:center;">
+        <div style="background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:16px;width:min(620px,95vw);max-height:90vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,0.5);">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid var(--border-subtle);">
+                <h3 class="font-mono" style="margin:0;color:var(--accent-blue);font-size:1rem;"><i class="bi bi-crop"></i> [ crop_avatar_image ]</h3>
+                <button type="button" id="closeCropperBtn" style="background:transparent;border:none;color:var(--text-dim);font-size:1.4rem;cursor:pointer;line-height:1;padding:0;">&times;</button>
+            </div>
+            <div style="flex:1;overflow:auto;padding:20px;background:var(--bg-dark);">
+                <div style="max-height:420px;overflow:hidden;">
+                    <img id="cropperImage" src="" style="max-width:100%;display:block;">
+                </div>
+            </div>
+            <div style="padding:16px 24px;border-top:1px solid var(--border-subtle);display:flex;gap:12px;justify-content:space-between;align-items:center;">
+                <div style="display:flex;gap:8px;">
+                    <button type="button" id="rotateLeftBtn" class="btn btn-outline btn-xs" title="Rotate Left"><i class="bi bi-arrow-counterclockwise"></i></button>
+                    <button type="button" id="rotateRightBtn" class="btn btn-outline btn-xs" title="Rotate Right"><i class="bi bi-arrow-clockwise"></i></button>
+                    <button type="button" id="flipHBtn" class="btn btn-outline btn-xs" title="Flip Horizontal"><i class="bi bi-symmetry-horizontal"></i></button>
+                </div>
+                <div style="display:flex;gap:12px;">
+                    <button type="button" id="cancelCropBtn" class="btn btn-outline">cancel()</button>
+                    <button type="button" id="confirmCropBtn" class="btn btn-primary"><i class="bi bi-check-lg"></i> crop_and_apply()</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+<script>
+(function() {
+    var fileInput = document.getElementById('avatarFileInput');
+    var hiddenFileInput = document.getElementById('avatarFile');
+    var openBtn = document.getElementById('openCropperBtn');
+    var overlay = document.getElementById('cropperModalOverlay');
+    var cropperImg = document.getElementById('cropperImage');
+    var confirmBtn = document.getElementById('confirmCropBtn');
+    var cancelBtn = document.getElementById('cancelCropBtn');
+    var closeBtn = document.getElementById('closeCropperBtn');
+    var rotateL = document.getElementById('rotateLeftBtn');
+    var rotateR = document.getElementById('rotateRightBtn');
+    var flipH = document.getElementById('flipHBtn');
+    var preview = document.getElementById('avatarPreview');
+    var letter = document.getElementById('avatarLetter');
+    var cropper = null;
+
+    openBtn.addEventListener('click', function() { fileInput.click(); });
+
+    fileInput.addEventListener('change', function() {
+        var file = this.files[0];
+        if (!file) return;
+        var url = URL.createObjectURL(file);
+        cropperImg.src = url;
+        overlay.style.display = 'flex';
+        if (cropper) { cropper.destroy(); cropper = null; }
+        setTimeout(function() {
+            cropper = new Cropper(cropperImg, {
+                aspectRatio: 1,
+                viewMode: 2,
+                dragMode: 'move',
+                autoCropArea: 0.85,
+                background: false,
+                movable: true,
+                zoomable: true,
+                scalable: true,
+                cropBoxResizable: true
+            });
+        }, 100);
+    });
+
+    function closeModal() {
+        overlay.style.display = 'none';
+        if (cropper) { cropper.destroy(); cropper = null; }
+        fileInput.value = '';
+    }
+
+    closeBtn.addEventListener('click', closeModal);
+    cancelBtn.addEventListener('click', closeModal);
+    overlay.addEventListener('click', function(e) { if (e.target === overlay) closeModal(); });
+
+    rotateL.addEventListener('click', function() { if (cropper) cropper.rotate(-90); });
+    rotateR.addEventListener('click', function() { if (cropper) cropper.rotate(90); });
+    flipH.addEventListener('click', function() { if (cropper) { var d = cropper.getData(); cropper.scaleX(-d.scaleX || -1); } });
+
+    confirmBtn.addEventListener('click', function() {
+        if (!cropper) return;
+        var canvas = cropper.getCroppedCanvas({ width: 400, height: 400, imageSmoothingEnabled: true, imageSmoothingQuality: 'high' });
+        canvas.toBlob(function(blob) {
+            var croppedFile = new File([blob], 'avatar.jpg', { type: 'image/jpeg' });
+            var dt = new DataTransfer();
+            dt.items.add(croppedFile);
+            hiddenFileInput.files = dt.files;
+            var objUrl = URL.createObjectURL(blob);
+            if (preview) { preview.src = objUrl; preview.style.display = 'block'; }
+            if (letter) letter.style.display = 'none';
+            closeModal();
+        }, 'image/jpeg', 0.92);
+    });
+
+    // Password strength indicator
+    var pwdInput = document.getElementById('newPassword');
+    var bar = document.getElementById('pwdStrengthBar');
+    var fill = document.getElementById('pwdStrengthFill');
+    var label = document.getElementById('pwdStrengthLabel');
+    if (pwdInput) {
+        pwdInput.addEventListener('input', function() {
+            var val = this.value;
+            if (!val) { bar.style.display='none'; return; }
+            bar.style.display='block';
+            var score = 0;
+            if (val.length >= 8) score++;
+            if (/[A-Z]/.test(val)) score++;
+            if (/[0-9]/.test(val)) score++;
+            if (/[^A-Za-z0-9]/.test(val)) score++;
+            var configs = [
+                { w:'25%', bg:'#ff7b72', t:'WEAK' },
+                { w:'50%', bg:'#d29922', t:'FAIR' },
+                { w:'75%', bg:'var(--accent-blue)', t:'GOOD' },
+                { w:'100%', bg:'var(--accent-green)', t:'STRONG' }
+            ];
+            var c = configs[score-1] || configs[0];
+            fill.style.width = c.w; fill.style.background = c.bg;
+            label.textContent = 'STRENGTH: ' + c.t;
+            label.style.color = c.bg;
+        });
+    }
+
+    // Sidebar nav smooth scroll + active
+    document.querySelectorAll('.settings-nav-item a').forEach(function(link) {
+        link.addEventListener('click', function(e) {
+            document.querySelectorAll('.settings-nav-item').forEach(function(li) { li.classList.remove('active'); });
+            this.closest('.settings-nav-item').classList.add('active');
+        });
+    });
+})();
+</script>
+<style>
+.settings-avatar-ring {
+    width:96px;height:96px;position:relative;
+    animation: ring-pulse 3s ease-in-out infinite;
+}
+@keyframes ring-pulse {
+    0%,100% { filter: drop-shadow(0 0 8px rgba(88,166,255,0.3)); }
+    50% { filter: drop-shadow(0 0 18px rgba(88,166,255,0.6)); }
+}
+.settings-avatar-upload-btn {
+    display:flex;align-items:center;gap:6px;
+    background:rgba(88,166,255,0.1);
+    border:1px solid rgba(88,166,255,0.25);
+    color:var(--accent-blue);
+    padding:6px 16px;border-radius:20px;
+    font-family:var(--font-mono);font-size:0.8rem;
+    cursor:pointer;transition:all 0.2s;
+}
+.settings-avatar-upload-btn:hover {
+    background:rgba(88,166,255,0.2);
+    border-color:rgba(88,166,255,0.5);
+    transform:translateY(-1px);
+}
+</style>
+</th:block>
 </body>
 </html>
