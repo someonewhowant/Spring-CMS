@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/main}">
+
+<head>
+    <title>Chat - CodeBlog Academy</title>
+    <style>
+        .chat-container {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            height: calc(100vh - 160px);
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .chat-container {
+                grid-template-columns: 1fr;
+            }
+            .chat-sidebar {
+                display: none;
+            }
+            .chat-sidebar.active {
+                display: block;
+                position: absolute;
+                z-index: 100;
+                width: 100%;
+                height: 100%;
+            }
+        }
+
+        .chat-sidebar {
+            border-right: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .chat-sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .chat-sidebar-header h2 {
+            font-size: 1.2rem;
+            font-family: var(--font-mono);
+            margin: 0;
+            color: var(--accent-blue);
+        }
+
+        .chat-partners-list {
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .chat-partner-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: var(--transition);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+            position: relative;
+        }
+
+        .chat-partner-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .chat-partner-item.active {
+            background: rgba(88, 166, 255, 0.1);
+            border-left: 3px solid var(--accent-blue);
+        }
+
+        .chat-partner-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            margin-right: 15px;
+            object-fit: cover;
+            border: 2px solid var(--glass-border);
+        }
+
+        .chat-partner-info {
+            flex-grow: 1;
+        }
+
+        .chat-partner-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 2px;
+            display: block;
+        }
+
+        .chat-partner-status {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            font-family: var(--font-mono);
+        }
+
+        .unread-badge {
+            background: var(--accent-blue);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-family: var(--font-mono);
+            position: absolute;
+            right: 20px;
+        }
+
+        .chat-main {
+            display: flex;
+            flex-direction: column;
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        .chat-main-header {
+            padding: 15px 25px;
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .chat-messages {
+            flex-grow: 1;
+            padding: 25px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 70%;
+            padding: 12px 18px;
+            border-radius: 14px;
+            font-size: 0.95rem;
+            position: relative;
+            line-height: 1.5;
+        }
+
+        .message-sent {
+            align-self: flex-end;
+            background: var(--accent-blue);
+            color: white;
+            border-bottom-right-radius: 2px;
+        }
+
+        .message-received {
+            align-self: flex-start;
+            background: var(--bg-surface);
+            border: 1px solid var(--glass-border);
+            border-bottom-left-radius: 2px;
+        }
+
+        .message-time {
+            font-size: 0.65rem;
+            opacity: 0.7;
+            margin-top: 5px;
+            display: block;
+            text-align: right;
+            font-family: var(--font-mono);
+        }
+
+        .chat-input-area {
+            padding: 20px 25px;
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            gap: 15px;
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .chat-input {
+            flex-grow: 1;
+            background: var(--bg-dark);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 12px 15px;
+            color: var(--text-main);
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .chat-input:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.2);
+        }
+
+        .chat-send-btn {
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .chat-send-btn:hover {
+            transform: scale(1.05);
+            filter: brightness(1.1);
+        }
+
+        .no-chat-selected {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--text-dim);
+            opacity: 0.5;
+        }
+
+        .no-chat-selected i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        /* Scrollbar styling */
+        .chat-messages::-webkit-scrollbar,
+        .chat-partners-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        .chat-messages::-webkit-scrollbar-thumb,
+        .chat-partners-list::-webkit-scrollbar-thumb {
+            background: var(--glass-border);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div layout:fragment="content" class="container">
+        <div class="chat-container">
+            <!-- Sidebar: Conversation List -->
+            <aside class="chat-sidebar">
+                <div class="chat-sidebar-header">
+                    <h2 th:text="${currentUserObj.role == T(com.example.blog.entity.Role).STUDENT ? '■ MENTORS' : '■ STUDENTS'}">■ CHATS</h2>
+                </div>
+                <div class="chat-partners-list">
+                    <div th:each="partner : ${chatPartners}" 
+                         class="chat-partner-item" 
+                         th:classappend="${activePartnerId == partner.id ? 'active' : ''}"
+                         th:onclick="'selectPartner(' + ${partner.id} + ')'"
+                         th:id="'partner-' + ${partner.id}">
+                        <img th:src="${partner.avatarUrl != null ? partner.avatarUrl : '/img/hero-image.webp'}" class="chat-partner-avatar" alt="">
+                        <div class="chat-partner-info">
+                            <span class="chat-partner-name" th:text="${partner.fullName}">Partner Name</span>
+                            <span class="chat-partner-status" th:text="${partner.title != null ? partner.title : (partner.role == T(com.example.blog.entity.Role).TEACHER ? 'Mentor' : 'Student')}">Status</span>
+                        </div>
+                        <span th:if="${unreadCounts.get(partner.id) > 0}" 
+                              class="unread-badge" 
+                              th:text="${unreadCounts.get(partner.id)}"
+                              th:id="'unread-' + ${partner.id}">3</span>
+                    </div>
+                    <div th:if="${#lists.isEmpty(chatPartners)}" class="text-center p-4 text-dim font-mono" style="font-size: 0.8rem;">
+                        ↳ NO_CONTACTS_FOUND
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Chat Area -->
+            <main class="chat-main">
+                <div id="chat-content" style="display: none; height: 100%; flex-direction: column;">
+                    <div class="chat-main-header">
+                        <img id="active-partner-avatar" src="" class="chat-partner-avatar" style="width: 40px; height: 40px;" alt="">
+                        <div class="chat-partner-info">
+                            <span id="active-partner-name" class="chat-partner-name">Select a conversation</span>
+                            <span id="active-partner-status" class="chat-partner-status">Online</span>
+                        </div>
+                    </div>
+
+                    <div class="chat-messages" id="message-container">
+                        <!-- Messages will be loaded here -->
+                    </div>
+
+                    <form class="chat-input-area" id="chat-form">
+                        <input type="hidden" id="recipient-id" value="">
+                        <input type="text" id="message-input" class="chat-input" placeholder="Type your message..." autocomplete="off">
+                        <button type="submit" class="chat-send-btn">
+                            <i class="bi bi-send-fill"></i>
+                        </button>
+                    </form>
+                </div>
+
+                <div id="no-chat-placeholder" class="no-chat-selected">
+                    <i class="bi bi-chat-square-dots"></i>
+                    <p class="font-mono">SELECT_CONVERSATION_TO_START</p>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <th:block layout:fragment="scripts">
+        <script th:inline="javascript">
+            let activePartnerId = [[${activePartnerId}]];
+            const currentUserId = [[${currentUserObj.id}]];
+            let pollInterval;
+
+            function selectPartner(id) {
+                activePartnerId = id;
+                document.querySelectorAll('.chat-partner-item').forEach(el => el.classList.remove('active'));
+                document.getElementById('partner-' + id).classList.add('active');
+                
+                document.getElementById('no-chat-placeholder').style.display = 'none';
+                document.getElementById('chat-content').style.display = 'flex';
+                
+                const partnerItem = document.getElementById('partner-' + id);
+                document.getElementById('active-partner-name').innerText = partnerItem.querySelector('.chat-partner-name').innerText;
+                document.getElementById('active-partner-avatar').src = partnerItem.querySelector('.chat-partner-avatar').src;
+                document.getElementById('active-partner-status').innerText = partnerItem.querySelector('.chat-partner-status').innerText;
+                document.getElementById('recipient-id').value = id;
+                
+                // Clear unread badge
+                const unreadBadge = document.getElementById('unread-' + id);
+                if (unreadBadge) unreadBadge.style.display = 'none';
+
+                loadMessages(id);
+                
+                // Reset polling
+                if (pollInterval) clearInterval(pollInterval);
+                pollInterval = setInterval(() => loadMessages(id), 3000);
+
+                // Update URL without reload
+                const newUrl = window.location.pathname + '?with=' + id;
+                window.history.pushState({path: newUrl}, '', newUrl);
+            }
+
+            async function loadMessages(partnerId) {
+                try {
+                    const response = await fetch('/api/chat/messages/' + partnerId);
+                    const messages = await response.json();
+                    renderMessages(messages);
+                } catch (error) {
+                    console.error('Error loading messages:', error);
+                }
+            }
+
+            function renderMessages(messages) {
+                const container = document.getElementById('message-container');
+                const isScrolledToBottom = container.scrollHeight - container.clientHeight <= container.scrollTop + 100;
+                
+                container.innerHTML = messages.map(msg => `
+                    <div class="message ${msg.senderId === currentUserId ? 'message-sent' : 'message-received'}">
+                        <div class="message-content">${msg.content}</div>
+                        <span class="message-time">${msg.timestamp}</span>
+                    </div>
+                `).join('');
+
+                if (isScrolledToBottom) {
+                    container.scrollTop = container.scrollHeight;
+                }
+            }
+
+            document.getElementById('chat-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const input = document.getElementById('message-input');
+                const content = input.value.trim();
+                const recipientId = document.getElementById('recipient-id').value;
+
+                if (!content) return;
+
+                const formData = new FormData();
+                formData.append('recipientId', recipientId);
+                formData.append('content', content);
+
+                try {
+                    input.value = '';
+                    await fetch('/api/chat/send', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    loadMessages(recipientId);
+                } catch (error) {
+                    console.error('Error sending message:', error);
+                }
+            });
+
+            // Initial load
+            if (activePartnerId) {
+                selectPartner(activePartnerId);
+            }
+
+            // Also poll for unread counts of other partners
+            setInterval(async () => {
+                try {
+                    const response = await fetch('/api/chat/unread-counts');
+                    const counts = await response.json();
+                    for (const [id, count] of Object.entries(counts)) {
+                        if (id != activePartnerId && count > 0) {
+                            let badge = document.getElementById('unread-' + id);
+                            if (badge) {
+                                badge.innerText = count;
+                                badge.style.display = 'block';
+                            }
+                        }
+                    }
+                } catch (error) {}
+            }, 5000);
+        </script>
+    </th:block>
+</body>
+
+</html>

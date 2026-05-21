@@ -301,9 +301,14 @@
                     <h4 style="margin: 0 0 4px; font-size: 1.1rem; color: var(--text-main); font-weight: 600;" th:text="${mentor.fullName != null and mentor.fullName != '' ? mentor.fullName : mentor.username}">Mentor Name</h4>
                     <p style="margin: 0 0 20px; font-size: 0.85rem; color: var(--text-dim);" th:text="${mentor.title != null and mentor.title != '' ? mentor.title : 'Instructor'}">Senior Engineer</p>
                     
-                    <a th:href="@{/student/teacher/{id}(id=${mentor.id})}" class="btn btn-outline w-full mt-auto" style="border-radius: 20px; padding: 8px; font-size: 0.85rem; font-weight: 500; border-color: rgba(255,255,255,0.1);">
-                        View Profile
-                    </a>
+                    <div style="display: flex; gap: 8px; width: 100%; margin-top: auto;">
+                        <a th:href="@{/student/teacher/{id}(id=${mentor.id})}" class="btn btn-outline" style="flex: 1; border-radius: 20px; padding: 8px; font-size: 0.85rem; font-weight: 500; border-color: rgba(255,255,255,0.1);">
+                            Profile
+                        </a>
+                        <a th:href="@{/chat(with=${mentor.id})}" class="btn btn-primary" style="flex: 1; border-radius: 20px; padding: 8px; font-size: 0.85rem; font-weight: 500;">
+                            <i class="bi bi-chat-dots"></i> Message
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

@@ -13,7 +13,10 @@
                 <h1 class="text-green font-mono" style="font-size: 1.8rem; margin: 0 0 4px;">student_profile_audit.sh</h1>
                 <p class="font-mono text-dim" style="font-size: 0.85rem; margin: 0;">Detailed performance metrics for user: <span class="text-blue" th:text="${student.username}">student</span></p>
             </div>
-            <div class="admin-actions">
+            <div class="admin-actions" style="display: flex; gap: 8px;">
+                <a th:href="@{/chat(with=${student.id})}" class="btn btn-blue btn-xs" style="border-radius: 4px; display: flex; align-items: center; gap: 6px;">
+                    <i class="bi bi-chat-dots"></i> chat_with_student()
+                </a>
                 <a th:href="@{/teacher/students}" class="btn btn-outline btn-xs" style="border-color: var(--border-subtle);">
                     <i class="bi bi-chevron-left"></i> back_to_directory()
                 </a>

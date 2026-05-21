@@ -48,8 +48,11 @@
                     <a th:if="${teacher.linkedinUrl != null and teacher.linkedinUrl != ''}" th:href="${teacher.linkedinUrl}" target="_blank" class="btn btn-outline" style="border-color: rgba(255,255,255,0.15); border-radius: 20px; padding: 10px 24px;">
                         <i class="bi bi-linkedin"></i> LinkedIn
                     </a>
-                    <a th:if="${teacher.email != null and teacher.email != ''}" th:href="'mailto:' + ${teacher.email}" class="btn btn-blue" style="border-radius: 20px; padding: 10px 24px;">
-                        <i class="bi bi-envelope"></i> Contact Mentor
+                    <a th:if="${teacher.email != null and teacher.email != ''}" th:href="'mailto:' + ${teacher.email}" class="btn btn-outline" style="border-color: rgba(255,255,255,0.15); border-radius: 20px; padding: 10px 24px;">
+                        <i class="bi bi-envelope"></i> Email
+                    </a>
+                    <a th:href="@{/chat(with=${teacher.id})}" class="btn btn-blue" style="border-radius: 20px; padding: 10px 24px;">
+                        <i class="bi bi-chat-dots"></i> Open Chat
                     </a>
                 </div>
             </div>
