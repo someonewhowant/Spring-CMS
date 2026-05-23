@@ -70,6 +70,13 @@ public class StudentController {
         model.addAttribute("passedQuizzesCount", passedQuizzesCount);
         model.addAttribute("totalPoints", user.getExperiencePoints() != null ? user.getExperiencePoints() : 0);
         
+        // Calculate XP progress for premium UI
+        int currentLevel = user.getLevel() != null ? user.getLevel() : 1;
+        int requiredXp = Math.max(100, currentLevel * 100);
+        int xpProgressPct = (model.getAttribute("totalPoints") != null ? (int)model.getAttribute("totalPoints") : 0) * 100 / requiredXp;
+        model.addAttribute("requiredXp", requiredXp);
+        model.addAttribute("xpProgressPct", xpProgressPct);
+        
         model.addAttribute("unlockedAchievements", gamificationService.getUnlockedAchievements(user.getId()));
         
         double averageScore = 0.0;

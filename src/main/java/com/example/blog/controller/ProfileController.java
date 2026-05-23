@@ -37,6 +37,15 @@ public class ProfileController {
         }
         User user = userOpt.get();
         model.addAttribute("profileUser", user);
+        
+        // Calculate XP progress for premium UI
+        int currentLevel = user.getLevel() != null ? user.getLevel() : 1;
+        int requiredXp = Math.max(100, currentLevel * 100);
+        int progressPct = (user.getExperiencePoints() * 100) / requiredXp;
+        
+        model.addAttribute("requiredXp", requiredXp);
+        model.addAttribute("xpProgressPct", progressPct);
+        
         return "profile/public";
     }
 
