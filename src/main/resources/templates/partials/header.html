@@ -79,7 +79,8 @@
                                 <div style="flex: 1;">
                                     <p th:text="${note.message}" th:class="${note.read ? 'text-dim' : 'text-main'}"
                                         style="margin: 0 0 4px; font-size: 0.85rem; line-height: 1.4;"></p>
-                                    <span class="font-mono text-dim" style="font-size: 0.7rem;"
+                                    <span class="font-mono text-dim js-localize-time" style="font-size: 0.7rem;"
+                                        th:data-timestamp="${note.createdAt.toEpochMilli()}"
                                         th:text="${#temporals.format(note.createdAt, 'MMM dd, HH:mm')}">Time</span>
                                 </div>
                             </div>

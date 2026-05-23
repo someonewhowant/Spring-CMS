@@ -36,5 +36,5 @@ public class Notification {
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private java.time.Instant createdAt;
 }

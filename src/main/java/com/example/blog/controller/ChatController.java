@@ -25,10 +25,14 @@ public class ChatController {
     private final UserRepository userRepository;
     private final com.example.blog.repository.UserQuizResultRepository userQuizResultRepository;
 
+    private User getCurrentUser(Authentication authentication) {
+        return userRepository.findByUsername(authentication.getName()).orElseThrow();
+    }
+
     @GetMapping("/chat")
     public String chatPage(@RequestParam(value = "with", required = false) Long withUserId,
                            Authentication authentication, Model model) {
-        User currentUser = userRepository.findByUsername(authentication.getName()).orElseThrow();
+        User currentUser = getCurrentUser(authentication);
         
         List<User> chatPartners;
         if (currentUser.getRole() == Role.STUDENT) {
@@ -64,7 +68,7 @@ public class ChatController {
     @GetMapping("/api/chat/messages/{partnerId}")
     @ResponseBody
     public List<ChatMessageDto> getMessages(@PathVariable Long partnerId, Authentication authentication) {
-        User currentUser = userRepository.findByUsername(authentication.getName()).orElseThrow();
+        User currentUser = getCurrentUser(authentication);
         chatService.markAsRead(currentUser, partnerId);
         return chatService.getMessagesBetween(currentUser, partnerId);
     }
@@ -72,15 +76,23 @@ public class ChatController {
     @PostMapping("/api/chat/send")
     @ResponseBody
     public ResponseEntity<?> sendMessage(@RequestParam Long recipientId, @RequestParam String content, Authentication authentication) {
-        User currentUser = userRepository.findByUsername(authentication.getName()).orElseThrow();
+        User currentUser = getCurrentUser(authentication);
         chatService.sendMessage(currentUser, recipientId, content);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/api/chat/clear")
+    @ResponseBody
+    public ResponseEntity<?> clearHistory(@RequestParam Long partnerId, Authentication authentication) {
+        User currentUser = getCurrentUser(authentication);
+        chatService.clearHistory(currentUser, partnerId);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/api/chat/unread-counts")
     @ResponseBody
     public Map<Long, Long> getUnreadCounts(Authentication authentication) {
-        User currentUser = userRepository.findByUsername(authentication.getName()).orElseThrow();
+        User currentUser = getCurrentUser(authentication);
         List<User> conversations = chatService.getConversationsForUser(currentUser);
         Map<Long, Long> counts = new HashMap<>();
         for (User partner : conversations) {

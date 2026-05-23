@@ -29,7 +29,7 @@ public class ChatMessage {
     private String content;
 
     @Column(nullable = false)
-    private LocalDateTime timestamp;
+    private java.time.Instant timestamp;
 
     @Column(name = "is_read", nullable = false)
     private boolean isRead = false;

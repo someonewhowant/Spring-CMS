@@ -22,11 +22,13 @@ public class ChatServiceImpl implements ChatService {
     private final ChatMessageRepository chatMessageRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+    private final org.springframework.messaging.simp.SimpMessagingTemplate messagingTemplate;
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ChatServiceImpl.class);
 
     @Override
     @Transactional
-    public void sendMessage(User sender, Long recipientId, String content) {
+    public ChatMessageDto sendMessage(User sender, Long recipientId, String content) {
+        log.info("Sending message from {} to {}", sender.getUsername(), recipientId);
         User recipient = userRepository.findById(recipientId)
                 .orElseThrow(() -> new RuntimeException("Recipient not found"));
 
@@ -34,18 +36,38 @@ public class ChatServiceImpl implements ChatService {
                 .sender(sender)
                 .recipient(recipient)
                 .content(content)
-                .timestamp(LocalDateTime.now())
+                .timestamp(java.time.Instant.now())
                 .isRead(false)
                 .build();
 
         chatMessageRepository.save(message);
 
-        // Create notification for recipient
+        ChatMessageDto dto = convertToDto(message);
+
+        log.info("Pushing message to recipient: {} and sender: {}", recipient.getUsername(), sender.getUsername());
+        try {
+            messagingTemplate.convertAndSendToUser(
+                    recipient.getUsername(),
+                    "/queue/messages",
+                    dto
+            );
+            
+            messagingTemplate.convertAndSendToUser(
+                    sender.getUsername(),
+                    "/queue/messages",
+                    dto
+            );
+        } catch (Exception e) {
+            log.error("Failed to push message via WebSocket", e);
+        }
+
         notificationService.createNotification(
                 recipient,
                 "New message from " + sender.getFullName(),
                 "/chat?with=" + sender.getId()
         );
+
+        return dto;
     }
 
     @Override
@@ -80,6 +102,14 @@ public class ChatServiceImpl implements ChatService {
         chatMessageRepository.saveAll(unreadMessages);
     }
 
+    @Override
+    @Transactional
+    public void clearHistory(User user1, Long user2Id) {
+        User user2 = userRepository.findById(user2Id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        chatMessageRepository.deleteMessagesBetween(user1, user2);
+    }
+
     private ChatMessageDto convertToDto(ChatMessage message) {
         return ChatMessageDto.builder()
                 .id(message.getId())
@@ -88,7 +118,7 @@ public class ChatServiceImpl implements ChatService {
                 .senderAvatar(message.getSender().getAvatarUrl())
                 .recipientId(message.getRecipient().getId())
                 .content(message.getContent())
-                .timestamp(message.getTimestamp().format(formatter))
+                .timestamp(String.valueOf(message.getTimestamp().toEpochMilli()))
                 .isRead(message.isRead())
                 .build();
     }

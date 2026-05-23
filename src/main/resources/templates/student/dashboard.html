@@ -128,7 +128,9 @@
                     <div>
                         <p style="margin: 0 0 4px; font-size: 0.9rem;" th:text="${note.message}">Notification message</p>
                         <div style="display: flex; gap: 12px; align-items: center;">
-                            <span class="text-dim" style="font-size: 0.75rem;" th:text="${#temporals.format(note.createdAt, 'dd MMM yyyy, HH:mm')}"></span>
+                            <span class="text-dim js-localize-time" style="font-size: 0.75rem;" 
+                                  th:data-timestamp="${note.createdAt.toEpochMilli()}"
+                                  th:text="${#temporals.format(note.createdAt, 'dd MMM yyyy, HH:mm')}"></span>
                             <a th:if="${note.link != null}" th:href="${note.link}" class="text-blue hover-underline" style="font-size: 0.75rem; text-decoration: none; font-weight: 600;">View Details <i class="bi bi-arrow-right-short"></i></a>
                         </div>
                     </div>

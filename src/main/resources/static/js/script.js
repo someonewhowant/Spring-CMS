@@ -299,4 +299,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
     enhanceCodeBlocks();
     setTimeout(enhanceCodeBlocks, 500);
+
+    // --- Time Localization ---
+    const localizeTimes = () => {
+        document.querySelectorAll('.js-localize-time').forEach(el => {
+            const timestamp = el.getAttribute('data-timestamp');
+            if (timestamp) {
+                try {
+                    const date = new Date(parseInt(timestamp));
+                    // Format: MMM dd, HH:mm
+                    const options = { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false };
+                    el.innerText = date.toLocaleString(undefined, options);
+                } catch (e) {
+                    console.error('Failed to localize time', e);
+                }
+            }
+        });
+    };
+
+    localizeTimes();
 });

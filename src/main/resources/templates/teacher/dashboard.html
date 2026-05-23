@@ -1,20 +1,26 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layouts/main}">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/main}">
+
 <head>
     <title>Teacher Command Center - CodeBlog</title>
 </head>
+
 <body>
     <div layout:fragment="content" class="container py-l fade-in">
         <!-- Dashboard Header -->
         <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px;">
             <div>
-                <h1 style="font-size: 2.5rem; margin: 0 0 8px; font-weight: 800; letter-spacing: -0.02em;">Instructor <span class="text-gradient-purple">Workspace</span></h1>
-                <p style="color: var(--text-dim); margin: 0; font-size: 1.1rem;">Manage your courses, articles, and mentor students.</p>
+                <h1 style="font-size: 2.5rem; margin: 0 0 8px; font-weight: 800; letter-spacing: -0.02em;">Instructor
+                    <span class="text-gradient-purple">Workspace</span>
+                </h1>
+                <p style="color: var(--text-dim); margin: 0; font-size: 1.1rem;">Manage your courses, articles, and
+                    mentor students.</p>
             </div>
             <div style="display: flex; gap: 12px; align-items: center;">
-                <span class="profile-role-badge teacher" style="background: rgba(188, 140, 255, 0.15); color: #bc8cff; padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(188, 140, 255, 0.3); font-weight: 600; font-size: 0.8rem;">ACADEMY MENTOR</span>
+                <span class="profile-role-badge teacher"
+                    style="background: rgba(188, 140, 255, 0.15); color: #bc8cff; padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(188, 140, 255, 0.3); font-weight: 600; font-size: 0.8rem;">ACADEMY
+                    MENTOR</span>
                 <form th:action="@{/logout}" method="POST" style="margin: 0;">
                     <button type="submit" class="btn btn-outline" style="border-radius: 20px;">
                         <i class="bi bi-box-arrow-right"></i> Sign Out
@@ -24,32 +30,51 @@
         </div>
 
         <!-- Welcome Banner / Teacher Profile -->
-        <div class="card-glass" style="padding: clamp(1.5rem, 4vw, 2.5rem); margin-bottom: 32px; background: linear-gradient(135deg, rgba(88, 166, 255, 0.03) 0%, rgba(188, 140, 255, 0.03) 100%); display: flex; gap: 28px; align-items: flex-start; flex-wrap: wrap;">
+        <div class="card-glass"
+            style="padding: clamp(1.5rem, 4vw, 2.5rem); margin-bottom: 32px; background: linear-gradient(135deg, rgba(88, 166, 255, 0.03) 0%, rgba(188, 140, 255, 0.03) 100%); display: flex; gap: 28px; align-items: flex-start; flex-wrap: wrap;">
             <!-- Profile Avatar Preview -->
             <div style="flex-shrink: 0; text-align: center; width: 100px;">
-                <img th:if="${user != null and user.avatarUrl != null}" th:src="${user.avatarUrl}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent-blue); background: var(--bg-body); box-shadow: 0 0 20px rgba(88, 166, 255, 0.2);">
-                <div th:if="${user == null or user.avatarUrl == null}" class="avatar-circle" style="width: 100px; height: 100px; border-radius: 50%; font-size: 2.5rem; margin: 0 auto; display: flex; align-items: center; justify-content: center; border: 2px solid var(--border-subtle);" th:text="${#strings.substring(currentUser, 0, 1).toUpperCase()}">U</div>
+                <img th:if="${user != null and user.avatarUrl != null}" th:src="${user.avatarUrl}"
+                    style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent-blue); background: var(--bg-body); box-shadow: 0 0 20px rgba(88, 166, 255, 0.2);">
+                <div th:if="${user == null or user.avatarUrl == null}" class="avatar-circle"
+                    style="width: 100px; height: 100px; border-radius: 50%; font-size: 2.5rem; margin: 0 auto; display: flex; align-items: center; justify-content: center; border: 2px solid var(--border-subtle);"
+                    th:text="${#strings.substring(currentUser, 0, 1).toUpperCase()}">U</div>
             </div>
-            
+
             <div style="flex: 1; min-width: 250px;">
-                <h2 class="text-green font-mono" style="font-size: 1.6rem; margin: 0 0 4px;" th:text="${user != null and user.fullName != null and user.fullName != '' ? user.fullName : currentUser}">Teacher Full Name</h2>
-                <div th:if="${user != null and user.title != null and user.title != ''}" class="font-mono text-blue" style="font-size: 0.85rem; margin-bottom: 12px; font-weight: 500;" th:text="${user.title}">Senior LMS Architect</div>
-                
-                <p style="margin: 0 0 16px; opacity: 0.85; font-family: var(--font-mono); font-size: 0.9rem; color: var(--text-main); line-height: 1.6;" th:text="${user != null and user.bio != null and user.bio != '' ? user.bio : 'Добро пожаловать в личный кабинет преподавателя. Настройте свои персональные данные в настройках профиля, чтобы студенты могли ознакомиться с вашим профессиональным бэкграундом.'}">
-                    Добро пожаловать в командный центр преподавателя. Здесь вы можете создавать новые курсы, настраивать учебные модули, загружать лекции, составлять интерактивные квизы и контролировать процесс обучения студентов.
+                <h2 class="text-green font-mono" style="font-size: 1.6rem; margin: 0 0 4px;"
+                    th:text="${user != null and user.fullName != null and user.fullName != '' ? user.fullName : currentUser}">
+                    Teacher Full Name</h2>
+                <div th:if="${user != null and user.title != null and user.title != ''}" class="font-mono text-blue"
+                    style="font-size: 0.85rem; margin-bottom: 12px; font-weight: 500;" th:text="${user.title}">Senior
+                    LMS Architect</div>
+
+                <p style="margin: 0 0 16px; opacity: 0.85; font-family: var(--font-mono); font-size: 0.9rem; color: var(--text-main); line-height: 1.6;"
+                    th:text="${user != null and user.bio != null and user.bio != '' ? user.bio : 'Добро пожаловать в личный кабинет преподавателя. Настройте свои персональные данные в настройках профиля, чтобы студенты могли ознакомиться с вашим профессиональным бэкграундом.'}">
+                    Добро пожаловать в командный центр преподавателя. Здесь вы можете создавать новые курсы, настраивать
+                    учебные модули, загружать лекции, составлять интерактивные квизы и контролировать процесс обучения
+                    студентов.
                 </p>
-                
+
                 <!-- Social media buttons for instructor -->
-                <div th:if="${user != null and ((user.githubUrl != null and user.githubUrl != '') or (user.linkedinUrl != null and user.linkedinUrl != '') or (user.email != null and user.email != ''))}" style="display: flex; gap: 12px; align-items: center;">
-                    <a th:if="${user.githubUrl != null and user.githubUrl != ''}" th:href="${user.githubUrl}" target="_blank" class="btn btn-outline btn-xs" style="border-color: var(--border-subtle);"><i class="bi bi-github"></i> github</a>
-                    <a th:if="${user.linkedinUrl != null and user.linkedinUrl != ''}" th:href="${user.linkedinUrl}" target="_blank" class="btn btn-outline btn-xs" style="border-color: var(--border-subtle);"><i class="bi bi-linkedin"></i> linkedin</a>
-                    <a th:if="${user.email != null and user.email != ''}" th:href="'mailto:' + ${user.email}" class="btn btn-outline btn-xs" style="border-color: var(--border-subtle);"><i class="bi bi-envelope"></i> contact_email</a>
+                <div th:if="${user != null and ((user.githubUrl != null and user.githubUrl != '') or (user.linkedinUrl != null and user.linkedinUrl != '') or (user.email != null and user.email != ''))}"
+                    style="display: flex; gap: 12px; align-items: center;">
+                    <a th:if="${user.githubUrl != null and user.githubUrl != ''}" th:href="${user.githubUrl}"
+                        target="_blank" class="btn btn-outline btn-xs" style="border-color: var(--border-subtle);"><i
+                            class="bi bi-github"></i> github</a>
+                    <a th:if="${user.linkedinUrl != null and user.linkedinUrl != ''}" th:href="${user.linkedinUrl}"
+                        target="_blank" class="btn btn-outline btn-xs" style="border-color: var(--border-subtle);"><i
+                            class="bi bi-linkedin"></i> linkedin</a>
+                    <a th:if="${user.email != null and user.email != ''}" th:href="'mailto:' + ${user.email}"
+                        class="btn btn-outline btn-xs" style="border-color: var(--border-subtle);"><i
+                            class="bi bi-envelope"></i> contact_email</a>
                 </div>
             </div>
         </div>
 
         <!-- Stats Grid -->
-        <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 32px;">
+        <div class="stats-grid"
+            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 32px;">
             <!-- Courses Stat -->
             <div class="stat-card">
                 <div class="stat-icon">
@@ -89,18 +114,23 @@
                     <i class="bi bi-person-badge"></i>
                 </div>
                 <div class="stat-info">
-                    <span class="stat-value" style="font-size: 1.1rem; letter-spacing: 0.05em;" th:text="${currentUserRole}">ROLE_TEACHER</span>
+                    <span class="stat-value" style="font-size: 1.1rem; letter-spacing: 0.05em;"
+                        th:text="${currentUserRole}">ROLE_TEACHER</span>
                     <span class="stat-label">Security Privilege</span>
                 </div>
             </div>
         </div>
 
         <!-- Notifications & Academic Alerts -->
-        <div th:if="${!#lists.isEmpty(notifications)}" class="card-glass" style="margin-bottom: 32px; border-left: 4px solid var(--accent-purple);">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 16px 24px;">
+        <div th:if="${!#lists.isEmpty(notifications)}" class="card-glass"
+            style="margin-bottom: 32px; border-left: 4px solid var(--accent-purple);">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 16px 24px;">
                 <h3 style="margin: 0; font-size: 1rem; display: flex; align-items: center; gap: 8px;">
                     <i class="bi bi-bell-fill text-purple"></i> Academic Alerts
-                    <span class="badge" style="background: var(--accent-purple); color: white; border-radius: 12px; padding: 2px 8px; font-size: 0.7rem; font-weight: bold;" th:text="${unreadNotificationsCount}">0</span>
+                    <span class="badge"
+                        style="background: var(--accent-purple); color: white; border-radius: 12px; padding: 2px 8px; font-size: 0.7rem; font-weight: bold;"
+                        th:text="${unreadNotificationsCount}">0</span>
                 </h3>
             </div>
             <div style="padding: 16px 24px;">
@@ -109,10 +139,15 @@
                         <i class="bi bi-info-circle"></i>
                     </div>
                     <div>
-                        <p style="margin: 0 0 4px; font-size: 0.9rem;" th:text="${note.message}">Notification message</p>
+                        <p style="margin: 0 0 4px; font-size: 0.9rem;" th:text="${note.message}">Notification message
+                        </p>
                         <div style="display: flex; gap: 12px; align-items: center;">
-                            <span class="text-dim" style="font-size: 0.75rem;" th:text="${#temporals.format(note.createdAt, 'dd MMM yyyy, HH:mm')}"></span>
-                            <a th:if="${note.link != null}" th:href="${note.link}" class="text-purple hover-underline" style="font-size: 0.75rem; text-decoration: none; font-weight: 600;">View Audit <i class="bi bi-arrow-right-short"></i></a>
+                            <span class="text-dim js-localize-time" style="font-size: 0.75rem;"
+                                th:data-timestamp="${note.createdAt.toEpochMilli()}"
+                                th:text="${#temporals.format(note.createdAt, 'MMM dd, HH:mm')}">Time</span>
+                            <a th:if="${note.link != null}" th:href="${note.link}" class="text-purple hover-underline"
+                                style="font-size: 0.75rem; text-decoration: none; font-weight: 600;">View Details <i
+                                    class="bi bi-arrow-right-short"></i></a>
                         </div>
                     </div>
                 </div>
@@ -120,18 +155,22 @@
         </div>
 
         <!-- Top Performing Students & Dashboard Action Modules -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px; margin-bottom: 32px; align-items: start;">
+        <div
+            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px; margin-bottom: 32px; align-items: start;">
             <div style="display: flex; flex-direction: column; gap: 24px;">
-                <h3 class="font-mono text-dim" style="font-size: 0.85rem; text-transform: uppercase; margin-bottom: 0; letter-spacing: 0.08em;">
+                <h3 class="font-mono text-dim"
+                    style="font-size: 0.85rem; text-transform: uppercase; margin-bottom: 0; letter-spacing: 0.08em;">
                     <i class="bi bi-terminal"></i> executable_commands
                 </h3>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px;">
                     <!-- Course Management Card -->
                     <div class="card-glass" style="padding: 24px;">
-                        <div class="stat-icon orange" style="margin-bottom: 20px; width: 42px; height: 42px; font-size: 1.2rem;">
+                        <div class="stat-icon orange"
+                            style="margin-bottom: 20px; width: 42px; height: 42px; font-size: 1.2rem;">
                             <i class="bi bi-folder-symlink"></i>
                         </div>
-                        <h3 class="font-mono" style="margin: 0 0 10px; font-size: 1.1rem; color: var(--text-main);">manage_courses()</h3>
+                        <h3 class="font-mono" style="margin: 0 0 10px; font-size: 1.1rem; color: var(--text-main);">
+                            manage_courses()</h3>
                         <p style="margin-bottom: 24px; font-size: 0.85rem; color: var(--text-dim); flex-grow: 1;">
                             Structure syllabus, import articles, manage lessons, and bind quizzes.
                         </p>
@@ -142,14 +181,17 @@
 
                     <!-- Articles View Card -->
                     <div class="card-glass" style="padding: 24px;">
-                        <div class="stat-icon purple" style="margin-bottom: 20px; width: 42px; height: 42px; font-size: 1.2rem; background: rgba(188, 140, 255, 0.15); color: #bc8cff; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                        <div class="stat-icon purple"
+                            style="margin-bottom: 20px; width: 42px; height: 42px; font-size: 1.2rem; background: rgba(188, 140, 255, 0.15); color: #bc8cff; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
                             <i class="bi bi-file-earmark-text"></i>
                         </div>
-                        <h3 class="font-mono" style="margin: 0 0 10px; font-size: 1.1rem; color: var(--text-main);">manage_articles()</h3>
+                        <h3 class="font-mono" style="margin: 0 0 10px; font-size: 1.1rem; color: var(--text-main);">
+                            manage_articles()</h3>
                         <p style="margin-bottom: 24px; font-size: 0.85rem; color: var(--text-dim); flex-grow: 1;">
                             Write new blog posts, manage knowledge base, and share expertise.
                         </p>
-                        <a th:href="@{/admin/dashboard}" class="btn btn-outline btn-purple btn-xs font-mono w-full" style="color: #bc8cff; border-color: rgba(188, 140, 255, 0.3);">
+                        <a th:href="@{/admin/dashboard}" class="btn btn-outline btn-purple btn-xs font-mono w-full"
+                            style="color: #bc8cff; border-color: rgba(188, 140, 255, 0.3);">
                             OPEN_EDITOR <i class="bi bi-arrow-right-short"></i>
                         </a>
                     </div>
@@ -157,34 +199,46 @@
             </div>
 
             <!-- Top Students Widget -->
-            <div class="card-glass" style="padding: 24px; border: 1px solid rgba(188, 140, 255, 0.2);">
-                <h3 class="font-mono text-purple" style="font-size: 0.85rem; text-transform: uppercase; margin-bottom: 20px; letter-spacing: 0.08em; display: flex; align-items: center; gap: 8px;">
+            <div class="card-glass" style="padding: 24px; margin: 45px; border: 1px solid rgba(188, 140, 255, 0.2);">
+                <h3 class="font-mono text-purple"
+                    style="font-size: 0.85rem; text-transform: uppercase; margin-bottom: 20px; letter-spacing: 0.08em; display: flex; align-items: center; gap: 8px;">
                     <i class="bi bi-star-fill"></i> top_performers
                 </h3>
-                
+
                 <div th:if="${#lists.isEmpty(topStudents)}" class="text-center py-m">
                     <p class="font-mono text-dim" style="font-size: 0.75rem;">■ NO SIGNALS DETECTED</p>
                 </div>
-                
-                <div th:each="studentDto : ${topStudents}" style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+
+                <div th:each="studentDto : ${topStudents}"
+                    style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
                     <div style="flex-shrink: 0;">
                         <a th:href="@{/teacher/students/{id}(id=${studentDto.student.id})}">
-                            <img th:if="${studentDto.student.avatarUrl != null}" th:src="${studentDto.student.avatarUrl}" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-subtle);">
-                            <div th:if="${studentDto.student.avatarUrl == null}" class="avatar-circle" style="width: 36px; height: 36px; border-radius: 50%; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; background: rgba(88,166,255,0.1); border: 1px solid rgba(88,166,255,0.3);" th:text="${#strings.substring(studentDto.student.username, 0, 1).toUpperCase()}">U</div>
+                            <img th:if="${studentDto.student.avatarUrl != null}"
+                                th:src="${studentDto.student.avatarUrl}"
+                                style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-subtle);">
+                            <div th:if="${studentDto.student.avatarUrl == null}" class="avatar-circle"
+                                style="width: 36px; height: 36px; border-radius: 50%; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; background: rgba(88,166,255,0.1); border: 1px solid rgba(88,166,255,0.3);"
+                                th:text="${#strings.substring(studentDto.student.username, 0, 1).toUpperCase()}">U</div>
                         </a>
                     </div>
                     <div style="flex: 1; overflow: hidden;">
-                        <a th:href="@{/teacher/students/{id}(id=${studentDto.student.id})}" style="text-decoration: none;">
-                            <div class="font-mono" style="font-size: 0.85rem; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" th:text="${studentDto.student.fullName != null and studentDto.student.fullName != '' ? studentDto.student.fullName : studentDto.student.username}">Name</div>
+                        <a th:href="@{/teacher/students/{id}(id=${studentDto.student.id})}"
+                            style="text-decoration: none;">
+                            <div class="font-mono"
+                                style="font-size: 0.85rem; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                                th:text="${studentDto.student.fullName != null and studentDto.student.fullName != '' ? studentDto.student.fullName : studentDto.student.username}">
+                                Name</div>
                         </a>
-                        <div class="font-mono text-dim" style="font-size: 0.7rem;" th:text="${studentDto.averageScore} + ' AVG_SCORE'">4.8 AVG_SCORE</div>
+                        <div class="font-mono text-dim" style="font-size: 0.7rem;"
+                            th:text="${studentDto.averageScore} + ' AVG_SCORE'">4.8 AVG_SCORE</div>
                     </div>
                     <div class="text-purple font-mono" style="font-size: 0.75rem; font-weight: bold;">
                         <i class="bi bi-trophy"></i>
                     </div>
                 </div>
-                
-                <a th:href="@{/teacher/students}" class="btn btn-outline btn-xs w-full font-mono mt-auto" style="border-color: rgba(188, 140, 255, 0.3); color: #bc8cff;">
+
+                <a th:href="@{/teacher/students}" class="btn btn-outline btn-xs w-full font-mono mt-auto"
+                    style="border-color: rgba(188, 140, 255, 0.3); color: #bc8cff;">
                     VIEW_ALL_DIRECTORY()
                 </a>
             </div>
@@ -192,29 +246,40 @@
 
         <!-- System Information Widget -->
         <div class="card-glass" style="margin-bottom: 32px; padding: 24px; border-left: 4px solid var(--accent-blue);">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 12px;">
-                <h3 style="font-size: 1.2rem; margin: 0; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+            <div
+                style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 12px;">
+                <h3
+                    style="font-size: 1.2rem; margin: 0; font-weight: 600; display: flex; align-items: center; gap: 8px;">
                     <i class="bi bi-cpu text-blue"></i> System Status
                 </h3>
-                <span class="badge" style="background: rgba(46, 160, 67, 0.15); color: #3fb950; font-weight: 600; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem;"><i class="bi bi-check-circle-fill" style="margin-right: 4px;"></i> ONLINE</span>
+                <span class="badge"
+                    style="background: rgba(46, 160, 67, 0.15); color: #3fb950; font-weight: 600; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem;"><i
+                        class="bi bi-check-circle-fill" style="margin-right: 4px;"></i> ONLINE</span>
             </div>
-            
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; font-size: 0.85rem; color: var(--text-dim);">
+
+            <div
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; font-size: 0.85rem; color: var(--text-dim);">
                 <div>
                     <strong style="color: var(--text-main); display: block; margin-bottom: 4px;">Mentor Context</strong>
-                    <span th:text="${user != null and user.fullName != null and user.fullName != ''} ? ${user.fullName} : 'NOT_SET'">NOT_SET</span>
-                    <span th:if="${user != null and user.title != null and user.title != ''}" style="display: block; opacity: 0.8;" th:text="${user.title}">Title</span>
+                    <span
+                        th:text="${user != null and user.fullName != null and user.fullName != ''} ? ${user.fullName} : 'NOT_SET'">NOT_SET</span>
+                    <span th:if="${user != null and user.title != null and user.title != ''}"
+                        style="display: block; opacity: 0.8;" th:text="${user.title}">Title</span>
                 </div>
                 <div>
                     <strong style="color: var(--text-main); display: block; margin-bottom: 4px;">Contact Portal</strong>
-                    <span th:text="${user != null and user.email != null and user.email != ''} ? ${user.email} : 'OFFLINE'">OFFLINE</span>
+                    <span
+                        th:text="${user != null and user.email != null and user.email != ''} ? ${user.email} : 'OFFLINE'">OFFLINE</span>
                 </div>
                 <div>
-                    <strong style="color: var(--text-main); display: block; margin-bottom: 4px;">Allocated Resources</strong>
-                    <span th:text="${coursesCount} + ' courses, ' + ${quizzesCount} + ' quizzes'">0 courses, 0 quizzes</span> loaded in context
+                    <strong style="color: var(--text-main); display: block; margin-bottom: 4px;">Allocated
+                        Resources</strong>
+                    <span th:text="${coursesCount} + ' courses, ' + ${quizzesCount} + ' quizzes'">0 courses, 0
+                        quizzes</span> loaded in context
                 </div>
                 <div>
-                    <strong style="color: var(--text-main); display: block; margin-bottom: 4px;">System Architecture</strong>
+                    <strong style="color: var(--text-main); display: block; margin-bottom: 4px;">System
+                        Architecture</strong>
                     <span>Spring Security Secured Router</span>
                 </div>
             </div>
@@ -225,9 +290,17 @@
     <th:block layout:fragment="scripts">
         <style>
             @keyframes blink {
-                0%, 100% { opacity: 1; }
-                50% { opacity: 0; }
+
+                0%,
+                100% {
+                    opacity: 1;
+                }
+
+                50% {
+                    opacity: 0;
+                }
             }
+
             .blink {
                 animation: blink 1s step-end infinite;
                 color: var(--accent-green);
@@ -236,4 +309,5 @@
         </style>
     </th:block>
 </body>
+
 </html>
