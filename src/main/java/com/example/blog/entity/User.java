@@ -60,5 +60,12 @@ public class User {
     @Column(name = "level")
     @Builder.Default
     private Integer level = 1;
+
+    @Column(name = "lms_status")
+    private String lmsStatus;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @Builder.Default
+    private java.util.Set<UserAchievement> achievements = new java.util.HashSet<>();
 }
 

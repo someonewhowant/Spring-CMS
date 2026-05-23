@@ -76,13 +76,26 @@
                 </div>
 
                 <!-- Status Evaluation & Level Badge -->
-                <div style="margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between;">
-                    <span class="text-dim" style="font-size: 0.85rem; font-weight: 500;">Status:</span>
-                    <div>
-                        <span th:if="${item.performanceRating == 'ELITE_DEV'}" class="badge" style="background: rgba(46, 160, 67, 0.15); color: #3fb950; border: 1px solid rgba(46, 160, 67, 0.4); font-size: 0.75rem; font-weight: 600; padding: 4px 10px; border-radius: 12px;">ELITE DEV</span>
-                        <span th:if="${item.performanceRating == 'ADVANCED_CODER'}" class="badge" style="background: rgba(188, 140, 255, 0.15); color: #bc8cff; border: 1px solid rgba(188, 140, 255, 0.4); font-size: 0.75rem; font-weight: 600; padding: 4px 10px; border-radius: 12px;">ADVANCED</span>
-                        <span th:if="${item.performanceRating == 'APPRENTICE'}" class="badge" style="background: rgba(56, 139, 253, 0.15); color: #58a6ff; border: 1px solid rgba(56, 139, 253, 0.4); font-size: 0.75rem; font-weight: 600; padding: 4px 10px; border-radius: 12px;">APPRENTICE</span>
-                        <span th:if="${item.performanceRating == 'NO_SUBMISSIONS'}" class="badge" style="background: rgba(139, 148, 158, 0.15); color: #8b949e; border: 1px solid rgba(139, 148, 158, 0.4); font-size: 0.75rem; font-weight: 600; padding: 4px 10px; border-radius: 12px;">NO RECORDS</span>
+                <div style="margin-bottom: 24px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                        <span class="text-dim" style="font-size: 0.85rem; font-weight: 500;">Status:</span>
+                        <span th:if="${item.student.lmsStatus != null}" class="badge" style="background: rgba(188, 140, 255, 0.15); color: #bc8cff; border: 1px solid rgba(188, 140, 255, 0.4); font-size: 0.75rem; font-weight: 600; padding: 4px 10px; border-radius: 12px; text-transform: uppercase;" th:text="${item.student.lmsStatus}">MASTER</span>
+                        <span th:if="${item.student.lmsStatus == null}" class="badge" style="background: rgba(56, 139, 253, 0.15); color: #58a6ff; border: 1px solid rgba(56, 139, 253, 0.4); font-size: 0.75rem; font-weight: 600; padding: 4px 10px; border-radius: 12px;">ACTIVE</span>
+                    </div>
+
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span class="text-dim" style="font-size: 0.85rem; font-weight: 500;">Level:</span>
+                        <div style="display: inline-flex; align-items: center; justify-content: center; background: rgba(63, 185, 80, 0.1); border: 1px solid rgba(63, 185, 80, 0.3); color: var(--accent-green); border-radius: 6px; padding: 2px 8px; font-family: var(--font-mono); font-size: 0.8rem; font-weight: 600;">
+                            Lvl <span th:text="${item.student.level}" style="margin-left: 4px;">1</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Achievements -->
+                <div th:if="${!#lists.isEmpty(item.student.achievements)}" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;">
+                    <div th:each="badge : ${item.student.achievements}" style="background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-subtle); border-radius: 20px; padding: 4px 10px; display: flex; align-items: center; gap: 6px; font-size: 0.7rem; color: var(--text-main);">
+                        <i class="bi bi-award-fill text-purple"></i>
+                        <span th:text="${badge}">Badge</span>
                     </div>
                 </div>
 

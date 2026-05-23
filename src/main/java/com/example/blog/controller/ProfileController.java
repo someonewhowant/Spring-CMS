@@ -29,6 +29,17 @@ public class ProfileController {
     private final PostRepository postRepository;
     private final FileStorageService fileStorageService;
 
+    @GetMapping("/u/{username}")
+    public String publicProfile(@PathVariable String username, Model model) {
+        Optional<User> userOpt = userRepository.findByUsername(username);
+        if (userOpt.isEmpty()) {
+            return "redirect:/leaderboard";
+        }
+        User user = userOpt.get();
+        model.addAttribute("profileUser", user);
+        return "profile/public";
+    }
+
     @GetMapping("/settings")
     public String profileSettings(Principal principal, Model model) {
         if (principal == null) {
