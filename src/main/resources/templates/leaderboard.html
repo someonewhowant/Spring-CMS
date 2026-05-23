@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title>Leaderboard - CodeBlog Academy</title>
+</head>
+<body>
+<div layout:fragment="content" class="container">
+    <div class="row mb-5 align-items-center">
+        <div class="col-12 text-center">
+            <h1 class="display-4 fw-bold gradient-text mb-3">Hall of Fame</h1>
+            <p class="lead text-dim font-mono">■ TOP_STUDENTS_BY_EXPERIENCE</p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card bg-glass border-glass shadow-lg">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-dark mb-0 align-middle">
+                            <thead class="font-mono text-dim" style="background: rgba(0,0,0,0.2);">
+                            <tr>
+                                <th class="px-4 py-3" style="width: 10%;">RANK</th>
+                                <th class="px-4 py-3">STUDENT</th>
+                                <th class="px-4 py-3 text-center">LEVEL</th>
+                                <th class="px-4 py-3 text-end">XP</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="student, stat : ${topStudents}">
+                                <td class="px-4 py-3">
+                                    <div class="d-flex align-items-center justify-content-center"
+                                         th:classappend="${stat.index < 3 ? 'rounded-circle bg-accent-blue text-white' : 'text-dim'}"
+                                         style="width: 32px; height: 32px; font-weight: 600;">
+                                        <span th:text="${stat.index + 1}">1</span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <img th:src="${student.avatarUrl != null ? student.avatarUrl : '/img/hero-image.webp'}"
+                                             class="rounded-circle border border-secondary"
+                                             style="width: 48px; height: 48px; object-fit: cover;" alt="">
+                                        <div>
+                                            <h6 class="mb-0 text-white" th:text="${student.fullName}">John Doe</h6>
+                                            <small class="text-dim font-mono" th:text="'@' + ${student.username}">@johndoe</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 text-center">
+                                    <span class="badge bg-purple px-3 py-2" th:text="'Lvl ' + ${student.level}">Lvl 5</span>
+                                </td>
+                                <td class="px-4 py-3 text-end">
+                                    <span class="text-accent-blue font-mono fw-bold" th:text="${student.experiencePoints} + ' XP'">1250 XP</span>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(topStudents)}">
+                                <td colspan="4" class="text-center py-5 text-dim font-mono">
+                                    [ NO_STUDENTS_FOUND ]
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

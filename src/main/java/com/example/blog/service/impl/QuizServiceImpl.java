@@ -14,6 +14,7 @@ import com.example.blog.repository.UserRepository;
 import com.example.blog.repository.UserQuizResultRepository;
 import com.example.blog.service.QuizService;
 import com.example.blog.service.NotificationService;
+import com.example.blog.service.GamificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +31,7 @@ public class QuizServiceImpl implements QuizService {
     private final UserRepository userRepository;
     private final UserQuizResultRepository userQuizResultRepository;
     private final NotificationService notificationService;
+    private final GamificationService gamificationService;
 
     @Override
     public List<Quiz> getQuizzesByCourseId(Long courseId) {
@@ -100,6 +102,14 @@ public class QuizServiceImpl implements QuizService {
         }
         
         userQuizResultRepository.save(result);
+
+        // Award XP
+        if (score >= 3) {
+            gamificationService.awardXp(userId, 50, "Quiz Passed");
+            if (score == 5) {
+                gamificationService.awardXp(userId, 20, "Perfect Score Bonus");
+            }
+        }
 
         // Notify teachers about quiz completion
         String message = "Student " + user.getFullName() + " completed quiz: " + quiz.getTitle() + " with score " + score + "/5";

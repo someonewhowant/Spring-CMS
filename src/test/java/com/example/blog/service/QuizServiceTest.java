@@ -36,11 +36,13 @@ class QuizServiceTest {
     private UserQuizResultRepository userQuizResultRepository;
     @Mock
     private NotificationService notificationService;
+    @Mock
+    private GamificationService gamificationService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        quizService = new QuizServiceImpl(quizRepository, questionRepository, courseRepository, userRepository, userQuizResultRepository, notificationService);
+        quizService = new QuizServiceImpl(quizRepository, questionRepository, courseRepository, userRepository, userQuizResultRepository, notificationService, gamificationService);
     }
 
     @Test

@@ -52,5 +52,13 @@ public class User {
 
     @Column(name = "last_opened_module_id")
     private Long lastOpenedModuleId;
+
+    @Column(name = "experience_points")
+    @Builder.Default
+    private Integer experiencePoints = 0;
+
+    @Column(name = "level")
+    @Builder.Default
+    private Integer level = 1;
 }
 

@@ -32,7 +32,10 @@
             </div>
             
             <div style="flex: 1; min-width: 250px;">
-                <h2 class="text-green font-mono" style="font-size: 1.6rem; margin: 0 0 4px;" th:text="${user != null and user.fullName != null and user.fullName != '' ? user.fullName : currentUser}">Student Full Name</h2>
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 4px;">
+                    <h2 class="text-green font-mono" style="font-size: 1.6rem; margin: 0;" th:text="${user != null and user.fullName != null and user.fullName != '' ? user.fullName : currentUser}">Student Full Name</h2>
+                    <span class="badge bg-purple px-2 py-1" style="font-size: 0.8rem;" th:text="'Lvl ' + ${user.level}">Lvl 1</span>
+                </div>
                 <div th:if="${user != null and user.title != null and user.title != ''}" class="font-mono text-blue" style="font-size: 0.85rem; margin-bottom: 12px; font-weight: 500;" th:text="${user.title}">Full-Stack Engineering Path Student</div>
                 
                 <p style="margin: 0 0 16px; opacity: 0.85; font-family: var(--font-mono); font-size: 0.9rem; color: var(--text-main); line-height: 1.6;" th:text="${user != null and user.bio != null and user.bio != '' ? user.bio : 'Добро пожаловать в личный кабинет студента. Настройте свой профиль, заполните информацию о ваших целях обучения и загрузите фотографию, чтобы ваши менторы могли узнать вас поближе.'}">
@@ -79,10 +82,10 @@
                     </div>
                     <span class="font-mono" style="font-size: 0.7rem; color: var(--text-dim); background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 4px;">XP_SYSTEM</span>
                 </div>
-                <h4 style="margin: 0 0 4px; font-size: 0.85rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 0.05em;">Academy Points</h4>
+                <h4 style="margin: 0 0 4px; font-size: 0.85rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 0.05em;">Academy Experience</h4>
                 <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 12px;">
                     <span style="font-size: 2rem; font-weight: 700; color: #bc8cff;" th:text="${totalPoints}">0</span>
-                    <span style="font-size: 1rem; color: var(--text-dim);">pts</span>
+                    <span style="font-size: 1rem; color: var(--text-dim);">XP</span>
                 </div>
                 <p style="margin: 0; font-size: 0.75rem; color: var(--text-dim);">
                     <i class="bi bi-patch-check"></i> <span th:text="${passedQuizzesCount}">0</span> quizzes successfully passed
@@ -108,6 +111,27 @@
                     <div th:each="i : ${#numbers.sequence(1, totalCoursesCount > 0 ? totalCoursesCount : 1)}" 
                          style="flex: 1; height: 6px; border-radius: 3px;"
                          th:styleappend="${i <= #lists.size(completedCourses)} ? 'background: var(--accent-green);' : 'background: rgba(255,255,255,0.1);'"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Unlocked Achievements -->
+        <div th:if="${!#lists.isEmpty(unlockedAchievements)}" style="margin-bottom: 32px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                <h3 style="font-size: 1.2rem; margin: 0; font-weight: 600;">
+                    <i class="bi bi-trophy-fill text-warning"></i> Badges & Achievements
+                </h3>
+                <a th:href="@{/leaderboard}" class="btn btn-sm btn-outline" style="border-color: var(--border-subtle);">View Leaderboard</a>
+            </div>
+            <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                <div th:each="achievement : ${unlockedAchievements}" class="card-glass" style="padding: 16px; display: flex; align-items: center; gap: 16px; border-radius: 12px; min-width: 250px; flex: 1;">
+                    <div style="width: 48px; height: 48px; background: rgba(255, 193, 7, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #ffc107;">
+                        <i th:class="${achievement.iconClass}"></i>
+                    </div>
+                    <div>
+                        <h5 style="margin: 0 0 4px; font-size: 1rem; font-weight: 600;" th:text="${achievement.name}">Achievement Name</h5>
+                        <p style="margin: 0; font-size: 0.8rem; color: var(--text-dim);" th:text="${achievement.description}">Description</p>
+                    </div>
                 </div>
             </div>
         </div>

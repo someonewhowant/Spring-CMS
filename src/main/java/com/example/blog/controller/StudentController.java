@@ -14,6 +14,7 @@ import com.example.blog.repository.QuizRepository;
 import com.example.blog.service.CourseService;
 import com.example.blog.service.QuizService;
 import com.example.blog.service.NotificationService;
+import com.example.blog.service.GamificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -36,6 +37,7 @@ public class StudentController {
     private final CourseService courseService;
     private final QuizService quizService;
     private final NotificationService notificationService;
+    private final GamificationService gamificationService;
 
     @GetMapping("/dashboard")
     public String dashboard(Principal principal, Model model) {
@@ -66,7 +68,9 @@ public class StudentController {
         
         model.addAttribute("totalAttempts", totalAttempts);
         model.addAttribute("passedQuizzesCount", passedQuizzesCount);
-        model.addAttribute("totalPoints", totalPoints);
+        model.addAttribute("totalPoints", user.getExperiencePoints() != null ? user.getExperiencePoints() : 0);
+        
+        model.addAttribute("unlockedAchievements", gamificationService.getUnlockedAchievements(user.getId()));
         
         double averageScore = 0.0;
         if (totalAttempts > 0) {
