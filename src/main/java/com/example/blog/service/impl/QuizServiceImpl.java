@@ -105,10 +105,15 @@ public class QuizServiceImpl implements QuizService {
 
         // Award XP
         if (score >= 3) {
-            gamificationService.awardXp(userId, 50, "Quiz Passed");
+            int xpAmount = 50;
+            String reason = "Quiz Passed";
+            
             if (score == 5) {
-                gamificationService.awardXp(userId, 20, "Perfect Score Bonus");
+                xpAmount += 20;
+                reason = "Quiz Passed with Perfect Score";
             }
+            
+            gamificationService.awardXp(userId, xpAmount, reason);
         }
 
         // Notify teachers about quiz completion

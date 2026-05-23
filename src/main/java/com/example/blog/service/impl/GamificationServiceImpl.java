@@ -26,16 +26,21 @@ public class GamificationServiceImpl implements GamificationService {
     private final UserQuizResultRepository userQuizResultRepository;
     private final NotificationService notificationService;
 
-    // Formula for XP required for the NEXT level (e.g., Level 1->2 requires 100 XP, 2->3 requires 150)
+    // Formula for XP required for the NEXT level (e.g., Level 1->2 requires 100 XP, 2->3 requires 200)
     private int getXpRequiredForLevel(int level) {
-        return level * 100;
+        return Math.max(100, level * 100);
     }
 
     @Override
     @Transactional
     public void awardXp(Long userId, int amount, String reason) {
-        User user = userRepository.findById(userId).orElseThrow();
-        user.setExperiencePoints(user.getExperiencePoints() + amount);
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        
+        int currentXp = user.getExperiencePoints() != null ? user.getExperiencePoints() : 0;
+        user.setExperiencePoints(currentXp + amount);
+
+        int currentLevel = user.getLevel() != null && user.getLevel() > 0 ? user.getLevel() : 1;
+        user.setLevel(currentLevel);
 
         int requiredXp = getXpRequiredForLevel(user.getLevel());
         
@@ -64,13 +69,16 @@ public class GamificationServiceImpl implements GamificationService {
     @Override
     @Transactional
     public void evaluateAchievements(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow();
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
         List<Achievement> allAchievements = achievementRepository.findAll();
         List<UserAchievement> unlocked = userAchievementRepository.findByUserId(userId);
         
-        List<Long> unlockedIds = unlocked.stream()
+        java.util.Set<Long> unlockedIds = unlocked.stream()
                 .map(ua -> ua.getAchievement().getId())
-                .collect(Collectors.toList());
+                .collect(java.util.stream.Collectors.toSet());
+
+        // Pre-fetch quiz results to avoid multiple database calls in the loop
+        List<com.example.blog.entity.UserQuizResult> quizResults = userQuizResultRepository.findByUserId(userId);
 
         for (Achievement achievement : allAchievements) {
             if (unlockedIds.contains(achievement.getId())) {
@@ -80,14 +88,14 @@ public class GamificationServiceImpl implements GamificationService {
             boolean shouldUnlock = false;
             
             if (achievement.getConditionType() == Achievement.ConditionType.QUIZZES_PASSED) {
-                long passedCount = userQuizResultRepository.findByUserId(userId).stream()
+                long passedCount = quizResults.stream()
                         .filter(r -> r.getScore() >= 3)
                         .count();
                 if (passedCount >= achievement.getRequiredValue()) {
                     shouldUnlock = true;
                 }
             } else if (achievement.getConditionType() == Achievement.ConditionType.PERFECT_SCORES) {
-                long perfectCount = userQuizResultRepository.findByUserId(userId).stream()
+                long perfectCount = quizResults.stream()
                         .filter(r -> r.getScore() == 5)
                         .count();
                 if (perfectCount >= achievement.getRequiredValue()) {
@@ -101,6 +109,7 @@ public class GamificationServiceImpl implements GamificationService {
                         .achievement(achievement)
                         .build();
                 userAchievementRepository.save(ua);
+                unlockedIds.add(achievement.getId()); // Add to set to avoid duplicates in the same run
                 
                 notificationService.createNotification(
                         user,

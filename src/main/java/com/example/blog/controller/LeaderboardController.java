@@ -20,7 +20,11 @@ public class LeaderboardController {
     @GetMapping("/leaderboard")
     public String leaderboard(Model model) {
         List<User> topStudents = userRepository.findByRole(Role.STUDENT).stream()
-                .sorted((u1, u2) -> Integer.compare(u2.getExperiencePoints(), u1.getExperiencePoints()))
+                .sorted((u1, u2) -> {
+                    int xp1 = u1.getExperiencePoints() != null ? u1.getExperiencePoints() : 0;
+                    int xp2 = u2.getExperiencePoints() != null ? u2.getExperiencePoints() : 0;
+                    return Integer.compare(xp2, xp1);
+                })
                 .limit(50)
                 .collect(Collectors.toList());
 

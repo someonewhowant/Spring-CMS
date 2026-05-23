@@ -3,6 +3,9 @@ package com.example.blog.service;
 import com.example.blog.entity.Quiz;
 import com.example.blog.entity.Question;
 import com.example.blog.entity.QuestionOption;
+import com.example.blog.entity.User;
+import com.example.blog.entity.UserQuizResult;
+import com.example.blog.entity.Role;
 import com.example.blog.repository.CourseRepository;
 import com.example.blog.repository.QuestionRepository;
 import com.example.blog.repository.QuizRepository;
@@ -14,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -112,5 +116,31 @@ class QuizServiceTest {
         assertEquals("What is the entry point of a Java program?", q2.getText());
         assertEquals(3, q2.getOptions().size());
         assertTrue(q2.getOptions().get(1).isCorrect());
+    }
+
+    @Test
+    void testSaveQuizResult() {
+        User user = User.builder()
+                .id(1L)
+                .username("student")
+                .fullName("Test Student")
+                .experiencePoints(0)
+                .level(1)
+                .build();
+        
+        Quiz quiz = Quiz.builder()
+                .id(1L)
+                .title("Test Quiz")
+                .build();
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(quizRepository.findById(1L)).thenReturn(Optional.of(quiz));
+        when(userQuizResultRepository.findByUserIdAndQuizId(1L, 1L)).thenReturn(Optional.empty());
+        when(userRepository.findByRole(Role.TEACHER)).thenReturn(new ArrayList<>());
+
+        quizService.saveQuizResult(1L, 1L, 5);
+
+        verify(userQuizResultRepository).save(any(UserQuizResult.class));
+        verify(gamificationService).awardXp(eq(1L), eq(70), eq("Quiz Passed with Perfect Score"));
     }
 }
