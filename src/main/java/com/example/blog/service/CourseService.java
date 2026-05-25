@@ -2,12 +2,13 @@ package com.example.blog.service;
 
 import com.example.blog.entity.Course;
 import com.example.blog.entity.CourseModule;
+import com.example.blog.entity.User;
 import java.util.List;
 
 public interface CourseService {
     List<Course> getAllCourses();
     Course getCourseById(Long id);
-    Course createCourse(Course course);
+    Course createCourse(Course course, User teacher);
     Course updateCourse(Long id, Course course);
     void deleteCourse(Long id);
 

@@ -122,14 +122,16 @@ public class TeacherController {
     @PostMapping("/add-course")
     public String addCourse(@ModelAttribute Course course, 
                             @RequestParam("image") MultipartFile image,
-                            @RequestParam(value = "markdownFile", required = false) MultipartFile markdownFile) throws IOException {
+                            @RequestParam(value = "markdownFile", required = false) MultipartFile markdownFile,
+                            Principal principal) throws IOException {
+        com.example.blog.entity.User user = userRepository.findByUsername(principal.getName()).orElse(null);
         if (!image.isEmpty()) {
             course.setImageUrl(fileStorageService.storeFile(image));
         }
         if (markdownFile != null && !markdownFile.isEmpty()) {
             course.setContent(new String(markdownFile.getBytes(), StandardCharsets.UTF_8));
         }
-        courseService.createCourse(course);
+        courseService.createCourse(course, user);
         return "redirect:/teacher/courses";
     }
 

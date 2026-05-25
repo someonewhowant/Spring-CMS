@@ -38,6 +38,27 @@ public class GamificationInitializer implements CommandLineRunner {
                             .iconClass("bi bi-stars")
                             .conditionType(Achievement.ConditionType.PERFECT_SCORES)
                             .requiredValue(1)
+                            .build(),
+                    Achievement.builder()
+                            .name("Academic Pioneer")
+                            .description("Created your first course.")
+                            .iconClass("bi bi-journal-plus")
+                            .conditionType(Achievement.ConditionType.COURSES_CREATED)
+                            .requiredValue(1)
+                            .build(),
+                    Achievement.builder()
+                            .name("Course Architect")
+                            .description("Created 5 courses.")
+                            .iconClass("bi bi-stack")
+                            .conditionType(Achievement.ConditionType.COURSES_CREATED)
+                            .requiredValue(5)
+                            .build(),
+                    Achievement.builder()
+                            .name("Active Mentor")
+                            .description("Sent 10 messages to students.")
+                            .iconClass("bi bi-chat-heart")
+                            .conditionType(Achievement.ConditionType.FEEDBACK_GIVEN)
+                            .requiredValue(10)
                             .build()
             );
             

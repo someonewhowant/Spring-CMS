@@ -3,10 +3,12 @@ package com.example.blog.service.impl;
 import com.example.blog.entity.Course;
 import com.example.blog.entity.CourseModule;
 import com.example.blog.entity.Quiz;
+import com.example.blog.entity.User;
 import com.example.blog.repository.CourseModuleRepository;
 import com.example.blog.repository.CourseRepository;
 import com.example.blog.repository.QuizRepository;
 import com.example.blog.service.CourseService;
+import com.example.blog.service.GamificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +22,7 @@ public class CourseServiceImpl implements CourseService {
     private final CourseRepository courseRepository;
     private final CourseModuleRepository moduleRepository;
     private final QuizRepository quizRepository;
+    private final GamificationService gamificationService;
 
     @Override
     public List<Course> getAllCourses() {
@@ -34,8 +37,11 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @Transactional
-    public Course createCourse(Course course) {
-        return courseRepository.save(course);
+    public Course createCourse(Course course, User teacher) {
+        course.setTeacher(teacher);
+        Course saved = courseRepository.save(course);
+        gamificationService.evaluateAchievements(teacher.getId());
+        return saved;
     }
 
     @Override

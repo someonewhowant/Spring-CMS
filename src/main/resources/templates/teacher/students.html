@@ -38,22 +38,60 @@
             text-align: center;
         }
         .achievement-mini-badge {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1rem;
-            background: rgba(188, 140, 255, 0.1);
-            color: var(--accent-purple);
-            border: 1px solid rgba(188, 140, 255, 0.2);
-            transition: all 0.2s ease;
+            font-size: 1.1rem;
+            background: linear-gradient(135deg, rgba(188, 140, 255, 0.15), rgba(88, 166, 255, 0.15));
+            color: var(--text-main);
+            border: 1px solid rgba(188, 140, 255, 0.3);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: help;
+            position: relative;
         }
         .achievement-mini-badge:hover {
-            transform: scale(1.1);
-            background: var(--accent-purple);
+            transform: scale(1.15) rotate(5deg);
+            border-color: var(--accent-purple);
+            box-shadow: 0 0 15px rgba(188, 140, 255, 0.4);
+        }
+        .achievement-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-10px);
+            background: rgba(20, 20, 20, 0.95);
             color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s ease;
+            border: 1px solid var(--accent-purple);
+            z-index: 100;
+            pointer-events: none;
+        }
+        .achievement-mini-badge:hover .achievement-tooltip {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(-5px);
+        }
+        .xp-progress-container {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+        .xp-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-green));
+            box-shadow: 0 0 10px rgba(88, 166, 255, 0.2);
         }
         .lms-status-badge {
             font-size: 0.7rem;
@@ -160,15 +198,20 @@
 
                 <!-- Achievement Showcase -->
                 <div style="margin-bottom: 24px;">
-                    <div style="font-size: 0.75rem; color: var(--text-dim); font-family: var(--font-mono); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-                        <i class="bi bi-award"></i> UNLOCKED_BADGES
+                    <div style="font-size: 0.75rem; color: var(--text-dim); font-family: var(--font-mono); margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+                        <span style="display: flex; align-items: center; gap: 8px;"><i class="bi bi-award"></i> UNLOCKED_BADGES</span>
+                        <span th:if="${!#lists.isEmpty(item.student.achievements)}" class="text-blue" style="font-size: 0.65rem;" th:text="${#lists.size(item.student.achievements)} + ' total'"></span>
                     </div>
-                    <div style="display: flex; gap: 8px; flex-wrap: wrap; min-height: 32px;">
-                        <div th:if="${#lists.isEmpty(item.student.achievements)}" class="text-dim" style="font-size: 0.75rem; font-style: italic;">
-                            No achievements yet
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; min-height: 36px;">
+                        <div th:if="${#lists.isEmpty(item.student.achievements)}" class="text-dim" style="font-size: 0.75rem; font-style: italic; background: rgba(255,255,255,0.02); border-radius: 8px; padding: 8px 12px; width: 100%; border: 1px dashed var(--border-subtle);">
+                            No achievements unlocked yet.
                         </div>
-                        <div th:each="ua : ${item.student.achievements}" class="achievement-mini-badge" th:title="${ua.achievement.name}">
+                        <div th:each="ua : ${item.student.achievements}" class="achievement-mini-badge">
                             <i th:class="${ua.achievement.iconClass}"></i>
+                            <div class="achievement-tooltip">
+                                <strong th:text="${ua.achievement.name}">Name</strong><br/>
+                                <span style="opacity: 0.8;" th:text="${ua.achievement.description}">Desc</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -177,10 +220,10 @@
                 <div style="margin-bottom: 24px;">
                     <div style="display: flex; justify-content: space-between; font-size: 0.7rem; font-family: var(--font-mono); margin-bottom: 6px;">
                         <span class="text-dim">ACADEMY_RANK_XP</span>
-                        <span class="text-main" th:text="${item.student.experiencePoints} + ' XP'">0 XP</span>
+                        <span class="text-main fw-bold" th:text="${item.student.experiencePoints} + ' XP'">0 XP</span>
                     </div>
-                    <div style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden;">
-                        <div th:style="'width: ' + (${item.student.experiencePoints} % 100) + '%; height: 100%; background: linear-gradient(90deg, var(--accent-blue), var(--accent-green));'"></div>
+                    <div class="xp-progress-container">
+                        <div class="xp-progress-fill" th:style="'width: ' + (${item.student.experiencePoints} % 100) + '%;'"></div>
                     </div>
                 </div>
 

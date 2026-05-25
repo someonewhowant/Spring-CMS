@@ -423,76 +423,78 @@
         </div>
 
         <!-- Recent Quiz Results (Replaces Simulated Progress Console) -->
-        <div class="card-glass" style="margin-top: 32px; padding: 24px;">
-            <div
-                style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 12px;">
-                <h3 style="font-size: 1.2rem; margin: 0; font-weight: 600;">
-                    <i class="bi bi-clock-history"></i> Recent Quiz Results
-                </h3>
-            </div>
+        <div class="card-glass" style="margin-top: 32px; padding: 24px;" id="quizResultsContainer">
+            <div th:fragment="quizResultsTable">
+                <div
+                    style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 12px;">
+                    <h3 style="font-size: 1.2rem; margin: 0; font-weight: 600;">
+                        <i class="bi bi-clock-history"></i> Recent Quiz Results
+                    </h3>
+                </div>
 
-            <div th:if="${#lists.isEmpty(quizResults)}" class="text-center py-l" style="color: var(--text-dim);">
-                <i class="bi bi-inbox"
-                    style="font-size: 2.5rem; display: block; margin-bottom: 16px; opacity: 0.5;"></i>
-                <p>No quiz attempts found. Start a course to see your progress here.</p>
-            </div>
+                <div th:if="${#lists.isEmpty(quizResults)}" class="text-center py-l" style="color: var(--text-dim);">
+                    <i class="bi bi-inbox"
+                        style="font-size: 2.5rem; display: block; margin-bottom: 16px; opacity: 0.5;"></i>
+                    <p>No quiz attempts found. Start a course to see your progress here.</p>
+                </div>
 
-            <table th:if="${!#lists.isEmpty(quizResults)}"
-                style="width: 100%; border-collapse: collapse; text-align: left;">
-                <thead>
-                    <tr
-                        style="border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--text-dim); font-size: 0.85rem;">
-                        <th style="padding: 12px 16px; font-weight: 500;">Quiz Assessment</th>
-                        <th style="padding: 12px 16px; font-weight: 500;">Score</th>
-                        <th style="padding: 12px 16px; font-weight: 500;">Accuracy</th>
-                        <th style="padding: 12px 16px; font-weight: 500;">Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="result : ${quizResults}" style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                        <td style="padding: 16px; color: var(--text-main); font-weight: 500;"
-                            th:text="${result.quiz.title}">Quiz Title</td>
-                        <td style="padding: 16px;" th:text="${result.score} + ' / 5'">0 / 5</td>
-                        <td style="padding: 16px;">
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <span th:text="${result.score * 20} + '%'">0%</span>
-                                <div
-                                    style="width: 60px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px;">
+                <table th:if="${!#lists.isEmpty(quizResults)}"
+                    style="width: 100%; border-collapse: collapse; text-align: left;">
+                    <thead>
+                        <tr
+                            style="border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--text-dim); font-size: 0.85rem;">
+                            <th style="padding: 12px 16px; font-weight: 500;">Quiz Assessment</th>
+                            <th style="padding: 12px 16px; font-weight: 500;">Score</th>
+                            <th style="padding: 12px 16px; font-weight: 500;">Accuracy</th>
+                            <th style="padding: 12px 16px; font-weight: 500;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="result : ${quizResults}" style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 16px; color: var(--text-main); font-weight: 500;"
+                                th:text="${result.quiz.title}">Quiz Title</td>
+                            <td style="padding: 16px;" th:text="${result.score} + ' / 5'">0 / 5</td>
+                            <td style="padding: 16px;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span th:text="${result.score * 20} + '%'">0%</span>
                                     <div
-                                        th:style="'width: ' + (${result.score * 20}) + '%; height: 100%; border-radius: 2px; background: ' + (${result.score >= 3 ? 'var(--accent-green)' : 'var(--accent-orange)'})">
+                                        style="width: 60px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px;">
+                                        <div
+                                            th:style="'width: ' + (${result.score * 20}) + '%; height: 100%; border-radius: 2px; background: ' + (${result.score >= 3 ? 'var(--accent-green)' : 'var(--accent-orange)'})">
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </td>
-                        <td style="padding: 16px;">
-                            <span class="badge"
-                                th:classappend="${result.score >= 3} ? 'bg-green text-green bg-opacity-10' : 'bg-orange text-orange bg-opacity-10'"
-                                style="padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;"
-                                th:text="${result.score >= 3} ? 'PASSED' : 'RETRY'">PASSED</span>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            
-            <!-- Pagination Controls -->
-            <div th:if="${totalPages > 1}" style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.05); font-family: var(--font-mono); font-size: 0.85rem;">
-                <span style="color: var(--text-dim);">
-                    Showing page <span class="text-blue" th:text="${currentPage + 1}">1</span> of <span th:text="${totalPages}">1</span>
-                </span>
-                <div style="display: flex; gap: 8px;">
-                    <a th:href="@{/student/dashboard(page=${currentPage - 1})}" th:if="${hasPrev}" class="btn btn-outline btn-xs" style="border-radius: 4px; padding: 6px 12px; display: inline-flex; align-items: center; gap: 4px;">
-                        <i class="bi bi-chevron-left"></i> Previous
-                    </a>
-                    <span th:if="${!hasPrev}" class="btn btn-outline btn-xs" style="border-radius: 4px; padding: 6px 12px; opacity: 0.4; cursor: not-allowed; display: inline-flex; align-items: center; gap: 4px;">
-                        <i class="bi bi-chevron-left"></i> Previous
+                            </td>
+                            <td style="padding: 16px;">
+                                <span class="badge"
+                                    th:classappend="${result.score >= 3} ? 'bg-green text-green bg-opacity-10' : 'bg-orange text-orange bg-opacity-10'"
+                                    style="padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;"
+                                    th:text="${result.score >= 3} ? 'PASSED' : 'RETRY'">PASSED</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <!-- Pagination Controls -->
+                <div th:if="${totalPages > 1}" style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.05); font-family: var(--font-mono); font-size: 0.85rem;">
+                    <span style="color: var(--text-dim);">
+                        Showing page <span class="text-blue" th:text="${currentPage + 1}">1</span> of <span th:text="${totalPages}">1</span>
                     </span>
-                    
-                    <a th:href="@{/student/dashboard(page=${currentPage + 1})}" th:if="${hasNext}" class="btn btn-outline btn-xs" style="border-radius: 4px; padding: 6px 12px; display: inline-flex; align-items: center; gap: 4px;">
-                        Next <i class="bi bi-chevron-right"></i>
-                    </a>
-                    <span th:if="${!hasNext}" class="btn btn-outline btn-xs" style="border-radius: 4px; padding: 6px 12px; opacity: 0.4; cursor: not-allowed; display: inline-flex; align-items: center; gap: 4px;">
-                        Next <i class="bi bi-chevron-right"></i>
-                    </span>
+                    <div style="display: flex; gap: 8px;">
+                        <button th:onclick="'loadQuizResults(' + ${currentPage - 1} + ')'" th:if="${hasPrev}" class="btn btn-outline btn-xs" style="border-radius: 4px; padding: 6px 12px; display: inline-flex; align-items: center; gap: 4px;">
+                            <i class="bi bi-chevron-left"></i> Previous
+                        </button>
+                        <span th:if="${!hasPrev}" class="btn btn-outline btn-xs" style="border-radius: 4px; padding: 6px 12px; opacity: 0.4; cursor: not-allowed; display: inline-flex; align-items: center; gap: 4px;">
+                            <i class="bi bi-chevron-left"></i> Previous
+                        </span>
+                        
+                        <button th:onclick="'loadQuizResults(' + ${currentPage + 1} + ')'" th:if="${hasNext}" class="btn btn-outline btn-xs" style="border-radius: 4px; padding: 6px 12px; display: inline-flex; align-items: center; gap: 4px;">
+                            Next <i class="bi bi-chevron-right"></i>
+                        </button>
+                        <span th:if="${!hasNext}" class="btn btn-outline btn-xs" style="border-radius: 4px; padding: 6px 12px; opacity: 0.4; cursor: not-allowed; display: inline-flex; align-items: center; gap: 4px;">
+                            Next <i class="bi bi-chevron-right"></i>
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -521,6 +523,25 @@
         </div>
         
         <script>
+            function loadQuizResults(page) {
+                const container = document.getElementById('quizResultsContainer');
+                container.style.opacity = '0.5';
+                container.style.pointerEvents = 'none';
+                
+                fetch(`/student/dashboard/quiz-results?page=${page}`)
+                    .then(response => response.text())
+                    .then(html => {
+                        container.innerHTML = html;
+                        container.style.opacity = '1';
+                        container.style.pointerEvents = 'all';
+                    })
+                    .catch(error => {
+                        console.error('Error loading quiz results:', error);
+                        container.style.opacity = '1';
+                        container.style.pointerEvents = 'all';
+                    });
+            }
+
             function openResetModal() {
                 const modal = document.getElementById('resetModal');
                 modal.style.display = 'flex';

@@ -35,6 +35,8 @@ public class Achievement {
     public enum ConditionType {
         QUIZZES_PASSED,
         PERFECT_SCORES,
-        COURSES_COMPLETED
+        COURSES_COMPLETED,
+        COURSES_CREATED,
+        FEEDBACK_GIVEN
     }
 }

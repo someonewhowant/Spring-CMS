@@ -24,6 +24,7 @@ public class GamificationServiceImpl implements GamificationService {
     private final AchievementRepository achievementRepository;
     private final UserAchievementRepository userAchievementRepository;
     private final UserQuizResultRepository userQuizResultRepository;
+    private final com.example.blog.repository.CourseRepository courseRepository;
     private final NotificationService notificationService;
     private final com.example.blog.repository.ChatMessageRepository chatMessageRepository;
 
@@ -100,6 +101,16 @@ public class GamificationServiceImpl implements GamificationService {
                         .filter(r -> r.getScore() == 5)
                         .count();
                 if (perfectCount >= achievement.getRequiredValue()) {
+                    shouldUnlock = true;
+                }
+            } else if (achievement.getConditionType() == Achievement.ConditionType.COURSES_CREATED) {
+                long coursesCount = courseRepository.countByTeacherId(userId);
+                if (coursesCount >= achievement.getRequiredValue()) {
+                    shouldUnlock = true;
+                }
+            } else if (achievement.getConditionType() == Achievement.ConditionType.FEEDBACK_GIVEN) {
+                long feedbackCount = chatMessageRepository.countBySenderId(userId);
+                if (feedbackCount >= achievement.getRequiredValue()) {
                     shouldUnlock = true;
                 }
             }

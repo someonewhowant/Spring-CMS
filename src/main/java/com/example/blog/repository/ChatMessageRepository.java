@@ -28,4 +28,6 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
     @org.springframework.data.jpa.repository.Modifying
     @org.springframework.data.jpa.repository.Query("DELETE FROM ChatMessage m WHERE m.sender.id = :userId OR m.recipient.id = :userId")
     void deleteBySenderIdOrRecipientId(@Param("userId") Long userId);
+
+    long countBySenderId(Long senderId);
 }

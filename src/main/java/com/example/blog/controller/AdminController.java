@@ -7,6 +7,8 @@ import com.example.blog.entity.Question;
 import com.example.blog.entity.QuestionOption;
 import com.example.blog.entity.Quiz;
 import com.example.blog.entity.Post;
+import com.example.blog.entity.User;
+import com.example.blog.repository.UserRepository;
 import com.example.blog.service.CourseService;
 import com.example.blog.service.FileStorageService;
 import com.example.blog.service.PostService;
@@ -19,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +34,7 @@ public class AdminController {
     private final CourseService courseService;
     private final QuizService quizService;
     private final FileStorageService fileStorageService;
+    private final UserRepository userRepository;
 
     /**
      * Страница логина админа.
@@ -198,14 +202,16 @@ public class AdminController {
     @PostMapping("/add-course")
     public String addCourse(@ModelAttribute Course course, 
                             @RequestParam("image") MultipartFile image,
-                            @RequestParam(value = "markdownFile", required = false) MultipartFile markdownFile) throws IOException {
+                            @RequestParam(value = "markdownFile", required = false) MultipartFile markdownFile,
+                            Principal principal) throws IOException {
+        User user = userRepository.findByUsername(principal.getName()).orElse(null);
         if (!image.isEmpty()) {
             course.setImageUrl(fileStorageService.storeFile(image));
         }
         if (markdownFile != null && !markdownFile.isEmpty()) {
             course.setContent(new String(markdownFile.getBytes(), StandardCharsets.UTF_8));
         }
-        courseService.createCourse(course);
+        courseService.createCourse(course, user);
         return "redirect:/admin/courses";
     }
 

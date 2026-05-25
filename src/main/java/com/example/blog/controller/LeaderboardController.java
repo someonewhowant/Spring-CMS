@@ -21,6 +21,11 @@ public class LeaderboardController {
     public String leaderboard(Model model) {
         List<User> topStudents = userRepository.findByRole(Role.STUDENT).stream()
                 .sorted((u1, u2) -> {
+                    int lvl1 = u1.getLevel() != null ? u1.getLevel() : 1;
+                    int lvl2 = u2.getLevel() != null ? u2.getLevel() : 1;
+                    if (lvl1 != lvl2) {
+                        return Integer.compare(lvl2, lvl1);
+                    }
                     int xp1 = u1.getExperiencePoints() != null ? u1.getExperiencePoints() : 0;
                     int xp2 = u2.getExperiencePoints() != null ? u2.getExperiencePoints() : 0;
                     return Integer.compare(xp2, xp1);

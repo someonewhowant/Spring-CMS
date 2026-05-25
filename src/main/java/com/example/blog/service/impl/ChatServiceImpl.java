@@ -6,6 +6,7 @@ import com.example.blog.entity.User;
 import com.example.blog.repository.ChatMessageRepository;
 import com.example.blog.repository.UserRepository;
 import com.example.blog.service.ChatService;
+import com.example.blog.service.GamificationService;
 import com.example.blog.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ public class ChatServiceImpl implements ChatService {
     private final ChatMessageRepository chatMessageRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
+    private final GamificationService gamificationService;
     private final org.springframework.messaging.simp.SimpMessagingTemplate messagingTemplate;
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ChatServiceImpl.class);
 
@@ -41,6 +43,11 @@ public class ChatServiceImpl implements ChatService {
                 .build();
 
         chatMessageRepository.save(message);
+
+        // Evaluate teacher achievements for feedback
+        if (sender.getRole() == com.example.blog.entity.Role.TEACHER) {
+            gamificationService.evaluateAchievements(sender.getId());
+        }
 
         ChatMessageDto dto = convertToDto(message);
 

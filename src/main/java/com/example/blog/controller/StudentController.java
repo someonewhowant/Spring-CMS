@@ -231,6 +231,25 @@ public class StudentController {
         return "student/teacher-profile";
     }
 
+    @GetMapping("/dashboard/quiz-results")
+    public String quizResultsFragment(@RequestParam(defaultValue = "0") int page, Principal principal, Model model) {
+        User user = userRepository.findByUsername(principal.getName()).orElse(null);
+        if (user == null) {
+            return "partials/fragments :: quizResultsTable";
+        }
+        
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, 5);
+        org.springframework.data.domain.Page<UserQuizResult> quizResultsPage = userQuizResultRepository.findByUserIdOrderByIdDesc(user.getId(), pageable);
+        
+        model.addAttribute("quizResults", quizResultsPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", quizResultsPage.getTotalPages());
+        model.addAttribute("hasNext", quizResultsPage.hasNext());
+        model.addAttribute("hasPrev", quizResultsPage.hasPrevious());
+        
+        return "student/dashboard :: quizResultsTable";
+    }
+
     @PostMapping("/reset-stats")
     public String resetStats(Principal principal, RedirectAttributes redirectAttributes) {
         if (principal == null) {
