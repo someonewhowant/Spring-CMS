@@ -28,6 +28,7 @@ public class ProfileController {
     private final QuizRepository quizRepository;
     private final PostRepository postRepository;
     private final FileStorageService fileStorageService;
+    private final com.example.blog.service.GamificationService gamificationService;
 
     @GetMapping("/u/{username}")
     public String publicProfile(@PathVariable String username, Model model) {
@@ -154,5 +155,29 @@ public class ProfileController {
 
         redirectAttributes.addFlashAttribute("success", "Profile settings updated successfully!");
         return "redirect:/profile/settings";
+    }
+
+    @PostMapping("/delete")
+    @org.springframework.transaction.annotation.Transactional
+    public String deleteProfile(Principal principal, jakarta.servlet.http.HttpServletRequest request, RedirectAttributes redirectAttributes) {
+        if (principal == null) {
+            return "redirect:/admin/login";
+        }
+        Optional<User> userOpt = userRepository.findByUsername(principal.getName());
+        if (userOpt.isEmpty()) {
+            return "redirect:/admin/login";
+        }
+        User user = userOpt.get();
+        
+        gamificationService.deleteUser(user.getId());
+        
+        try {
+            request.logout();
+        } catch (jakarta.servlet.ServletException e) {
+            // ignore
+        }
+        
+        redirectAttributes.addFlashAttribute("registered", "Ваш аккаунт был успешно удален.");
+        return "redirect:/admin/login?registered";
     }
 }

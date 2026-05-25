@@ -19,8 +19,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 import java.util.List;
@@ -40,7 +43,7 @@ public class StudentController {
     private final GamificationService gamificationService;
 
     @GetMapping("/dashboard")
-    public String dashboard(Principal principal, Model model) {
+    public String dashboard(@RequestParam(defaultValue = "0") int page, Principal principal, Model model) {
         if (principal == null) {
             return "redirect:/admin/login";
         }
@@ -53,18 +56,27 @@ public class StudentController {
         model.addAttribute("currentUser", user.getUsername());
         model.addAttribute("currentUserRole", "ROLE_" + user.getRole().name());
 
-        List<UserQuizResult> quizResults = userQuizResultRepository.findByUserId(user.getId());
-        model.addAttribute("quizResults", quizResults);
+        List<UserQuizResult> allQuizResults = userQuizResultRepository.findByUserId(user.getId());
         
-        int totalAttempts = quizResults.size();
+        int totalAttempts = allQuizResults.size();
         int passedQuizzesCount = 0;
         int totalPoints = 0;
-        for (UserQuizResult res : quizResults) {
+        for (UserQuizResult res : allQuizResults) {
             totalPoints += res.getScore();
             if (res.getScore() >= 3) {
                 passedQuizzesCount++;
             }
         }
+
+        // Paginate for the recent quiz results table
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, 5);
+        org.springframework.data.domain.Page<UserQuizResult> quizResultsPage = userQuizResultRepository.findByUserIdOrderByIdDesc(user.getId(), pageable);
+        
+        model.addAttribute("quizResults", quizResultsPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", quizResultsPage.getTotalPages());
+        model.addAttribute("hasNext", quizResultsPage.hasNext());
+        model.addAttribute("hasPrev", quizResultsPage.hasPrevious());
         
         model.addAttribute("totalAttempts", totalAttempts);
         model.addAttribute("passedQuizzesCount", passedQuizzesCount);
@@ -130,7 +142,7 @@ public class StudentController {
             boolean hasAttemptsInCourse = false;
             
             for (Quiz q : courseQuizzes) {
-                for (UserQuizResult res : quizResults) {
+                for (UserQuizResult res : allQuizResults) {
                     if (res.getQuiz().getId().equals(q.getId())) {
                         hasAttemptsInCourse = true;
                         if (res.getScore() >= 3) {
@@ -217,5 +229,19 @@ public class StudentController {
         model.addAttribute("currentUser", student.getUsername());
 
         return "student/teacher-profile";
+    }
+
+    @PostMapping("/reset-stats")
+    public String resetStats(Principal principal, RedirectAttributes redirectAttributes) {
+        if (principal == null) {
+            return "redirect:/admin/login";
+        }
+        User user = userRepository.findByUsername(principal.getName()).orElse(null);
+        if (user == null) {
+            return "redirect:/admin/login";
+        }
+        gamificationService.resetUserStats(user.getId());
+        redirectAttributes.addFlashAttribute("success", "Ваша статистика успешно обнулена!");
+        return "redirect:/student/dashboard";
     }
 }

@@ -2,9 +2,19 @@ package com.example.blog.repository;
 
 import com.example.blog.entity.UserQuizResult;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.Optional;
 
 public interface UserQuizResultRepository extends JpaRepository<UserQuizResult, Long> {
     Optional<UserQuizResult> findByUserIdAndQuizId(Long userId, Long quizId);
     java.util.List<UserQuizResult> findByUserId(Long userId);
+    Page<UserQuizResult> findByUserIdOrderByIdDesc(Long userId, Pageable pageable);
+
+    @Modifying
+    @Query("DELETE FROM UserQuizResult r WHERE r.user.id = :userId")
+    void deleteByUserId(@Param("userId") Long userId);
 }

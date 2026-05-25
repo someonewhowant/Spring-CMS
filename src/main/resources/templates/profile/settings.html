@@ -93,6 +93,9 @@
                 <li class="settings-nav-item">
                     <a href="#security-settings"><i class="bi bi-shield-lock"></i> security_keys</a>
                 </li>
+                <li class="settings-nav-item" style="border-top:1px solid rgba(255,110,50,0.15);margin-top:12px;padding-top:12px;">
+                    <a href="#danger-settings" style="color:#ff6e32;"><i class="bi bi-exclamation-triangle"></i> danger_zone</a>
+                </li>
             </ul>
         </aside>
 
@@ -199,6 +202,27 @@
                     </div>
                 </div>
 
+                <!-- ── Section: Danger Zone ── -->
+                <div id="danger-settings" style="margin-top:40px; border-top:1px solid rgba(255, 110, 50, 0.2); padding-top:28px;">
+                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+                        <div style="width:36px;height:36px;border-radius:8px;background:rgba(255,110,50,0.12);color:#ff6e32;display:flex;align-items:center;justify-content:center;font-size:1rem;"><i class="bi bi-exclamation-triangle-fill"></i></div>
+                        <div>
+                            <h2 class="font-mono" style="font-size:1rem;margin:0;color:#ff6e32;">[ danger_zone ]</h2>
+                            <p style="font-size:0.8rem;color:var(--text-dim);margin:2px 0 0;">Irreversible destructive operations on user state.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card-glass" style="border: 1px solid rgba(255,110,50,0.2); padding: 20px; background: rgba(255,110,50,0.02); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 20px;">
+                        <div>
+                            <strong style="color: var(--text-main); font-size: 0.9rem; display: block; margin-bottom: 4px;">Delete Academic Account</strong>
+                            <span style="color: var(--text-dim); font-size: 0.8rem; display: block;">Once deleted, all quiz attempts, achievements, and notifications will be permanently purged.</span>
+                        </div>
+                        <button type="button" class="btn btn-outline" style="border-color: rgba(255,110,50,0.4); color: #ff6e32;" onclick="openDeleteModal()">
+                            <i class="bi bi-trash"></i> Delete Account
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Submit -->
                 <div style="margin-top:40px;border-top:1px solid var(--border-subtle);padding-top:24px;display:flex;justify-content:flex-end;gap:12px;">
                     <a th:href="@{/profile/settings}" class="btn btn-outline">reset_changes()</a>
@@ -232,6 +256,29 @@
                     <button type="button" id="cancelCropBtn" class="btn btn-outline">cancel()</button>
                     <button type="button" id="confirmCropBtn" class="btn btn-primary"><i class="bi bi-check-lg"></i> crop_and_apply()</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Account Deletion Confirmation Modal -->
+    <div id="deleteModal" class="modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px); z-index: 9500; align-items: center; justify-content: center;">
+        <div class="card-glass" style="width: 100%; max-width: 480px; padding: 32px; border-radius: 12px; border: 1px solid rgba(255, 110, 50, 0.4); background: rgba(20, 20, 20, 0.95); box-shadow: 0 24px 64px rgba(0,0,0,0.8); text-align: center; transform: scale(0.9); transition: transform 0.3s ease;">
+            <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(255, 110, 50, 0.1); border: 2px solid rgba(255, 110, 50, 0.4); color: #ff6e32; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; margin: 0 auto 20px;">
+                <i class="bi bi-shield-slash"></i>
+            </div>
+            <h3 class="font-mono" style="margin: 0 0 12px; font-size: 1.5rem; color: #ff6e32; font-weight: 700;">PERMANENT DELETION?</h3>
+            <p style="color: var(--text-dim); font-size: 0.95rem; line-height: 1.6; margin-bottom: 28px;">
+                Are you absolutely sure you want to delete your account? This will cascade-delete all your achievements, message histories, statistics, and profile. This action is irreversible.
+            </p>
+            <div style="display: flex; gap: 16px; justify-content: center;">
+                <button type="button" class="btn btn-outline" style="border-radius: 20px; flex: 1; padding: 10px;" onclick="closeDeleteModal()">
+                    Cancel
+                </button>
+                <form th:action="@{/profile/delete}" method="POST" style="margin: 0; flex: 1;">
+                    <button type="submit" class="btn" style="background: #ff6e32; color: white; border-radius: 20px; width: 100%; padding: 10px; font-weight: 600; border: none; transition: background 0.2s;" onmouseover="this.style.background='#ff8c5a'" onmouseout="this.style.background='#ff6e32'">
+                        Delete Forever
+                    </button>
+                </form>
             </div>
         </div>
     </div>
@@ -344,6 +391,21 @@
             this.closest('.settings-nav-item').classList.add('active');
         });
     });
+
+    window.openDeleteModal = function() {
+        var modal = document.getElementById('deleteModal');
+        modal.style.display = 'flex';
+        setTimeout(function() {
+            modal.firstElementChild.style.transform = 'scale(1)';
+        }, 10);
+    };
+    window.closeDeleteModal = function() {
+        var modal = document.getElementById('deleteModal');
+        modal.firstElementChild.style.transform = 'scale(0.9)';
+        setTimeout(function() {
+            modal.style.display = 'none';
+        }, 150);
+    };
 })();
 </script>
 <style>

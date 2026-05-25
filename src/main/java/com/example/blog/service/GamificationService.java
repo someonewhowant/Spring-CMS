@@ -8,4 +8,7 @@ public interface GamificationService {
     void awardXp(Long userId, int amount, String reason);
     void evaluateAchievements(Long userId);
     List<Achievement> getUnlockedAchievements(Long userId);
+    void resetUserStats(Long userId);
+    void resetAllStudentStats();
+    void deleteUser(Long userId);
 }

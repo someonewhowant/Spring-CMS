@@ -92,28 +92,43 @@ public class QuizServiceImpl implements QuizService {
         Quiz quiz = getQuizById(quizId);
         
         UserQuizResult result = userQuizResultRepository.findByUserIdAndQuizId(userId, quizId)
-                .orElse(new UserQuizResult());
+                .orElse(null);
         
-        result.setUser(user);
-        result.setQuiz(quiz);
-        // We save the best score
-        if (score > result.getScore()) {
-            result.setScore(score);
+        int previousScore = 0;
+        if (result != null) {
+            previousScore = result.getScore();
+        } else {
+            result = new UserQuizResult();
+            result.setUser(user);
+            result.setQuiz(quiz);
         }
         
-        userQuizResultRepository.save(result);
+        // We save the best score
+        if (score > previousScore) {
+            result.setScore(score);
+            userQuizResultRepository.save(result);
 
-        // Award XP
-        if (score >= 3) {
-            int xpAmount = 50;
-            String reason = "Quiz Passed";
+            // Calculate and award differential XP
+            int xpToAward = 0;
+            String reason = "";
             
-            if (score == 5) {
-                xpAmount += 20;
-                reason = "Quiz Passed with Perfect Score";
+            if (previousScore < 3 && score >= 3) {
+                // First time passing
+                xpToAward = 50;
+                reason = "Quiz Passed";
+                if (score == 5) {
+                    xpToAward += 20; // 70 total
+                    reason = "Quiz Passed with Perfect Score";
+                }
+            } else if (previousScore >= 3 && previousScore < 5 && score == 5) {
+                // Improved from pass to perfect score
+                xpToAward = 20;
+                reason = "Quiz Score Improved to Perfect";
             }
             
-            gamificationService.awardXp(userId, xpAmount, reason);
+            if (xpToAward > 0) {
+                gamificationService.awardXp(userId, xpToAward, reason);
+            }
         }
 
         // Notify teachers about quiz completion
