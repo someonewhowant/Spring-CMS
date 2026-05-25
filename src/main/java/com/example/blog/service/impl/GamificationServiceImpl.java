@@ -25,6 +25,7 @@ public class GamificationServiceImpl implements GamificationService {
     private final UserAchievementRepository userAchievementRepository;
     private final UserQuizResultRepository userQuizResultRepository;
     private final NotificationService notificationService;
+    private final com.example.blog.repository.ChatMessageRepository chatMessageRepository;
 
     // Formula for XP required for the NEXT level (e.g., Level 1->2 requires 100 XP, 2->3 requires 200)
     private int getXpRequiredForLevel(int level) {
@@ -125,5 +126,38 @@ public class GamificationServiceImpl implements GamificationService {
         return userAchievementRepository.findByUserId(userId).stream()
                 .map(UserAchievement::getAchievement)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void resetUserStats(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        userQuizResultRepository.deleteByUserId(userId);
+        userAchievementRepository.deleteByUserId(userId);
+        user.setExperiencePoints(0);
+        user.setLevel(1);
+        user.setLastOpenedCourseId(null);
+        user.setLastOpenedModuleId(null);
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void resetAllStudentStats() {
+        List<User> students = userRepository.findByRole(com.example.blog.entity.Role.STUDENT);
+        for (User student : students) {
+            resetUserStats(student.getId());
+        }
+    }
+
+    @Override
+    @Transactional
+    public void deleteUser(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        userQuizResultRepository.deleteByUserId(userId);
+        userAchievementRepository.deleteByUserId(userId);
+        notificationService.clearAll(userId);
+        chatMessageRepository.deleteBySenderIdOrRecipientId(userId);
+        userRepository.delete(user);
     }
 }

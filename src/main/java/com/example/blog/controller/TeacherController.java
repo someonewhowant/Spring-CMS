@@ -41,6 +41,7 @@ public class TeacherController {
     private final CourseRepository courseRepository;
     private final QuizRepository quizRepository;
     private final NotificationService notificationService;
+    private final com.example.blog.service.GamificationService gamificationService;
 
     @GetMapping("/dashboard")
     public String dashboard(Principal principal, Model model) {
@@ -499,6 +500,26 @@ public class TeacherController {
         model.addAttribute("students", studentProgressList);
         model.addAttribute("searchQuery", search);
         return "teacher/students";
+    }
+
+    @PostMapping("/reset-stats")
+    public String resetAllStudentStats(Principal principal, org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        if (principal == null) {
+            return "redirect:/admin/login";
+        }
+        gamificationService.resetAllStudentStats();
+        redirectAttributes.addFlashAttribute("success", "Вся статистика студентов академии успешно сброшена!");
+        return "redirect:/teacher/dashboard";
+    }
+
+    @PostMapping("/students/{id}/reset-stats")
+    public String resetSingleStudentStats(@PathVariable Long id, Principal principal, org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        if (principal == null) {
+            return "redirect:/admin/login";
+        }
+        gamificationService.resetUserStats(id);
+        redirectAttributes.addFlashAttribute("success", "Статистика студента успешно сброшена!");
+        return "redirect:/teacher/students/" + id;
     }
 
     @lombok.Getter
