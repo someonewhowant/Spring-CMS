@@ -447,7 +447,33 @@ public class TeacherController {
                 }
             }
             
-            courseProgress.add(new StudentCourseProgressDto(course, pct, status, passedInCourse, totalCourseQuizzes));
+            Long nextModuleId = null;
+            for (CourseModule m : course.getModules()) {
+                boolean completed = false;
+                if (m.getQuiz() != null) {
+                    completed = quizService.isQuizPassed(student.getId(), m.getQuiz().getId());
+                } else {
+                    if (student.getLastOpenedModuleId() != null) {
+                        for (CourseModule other : course.getModules()) {
+                            if (other.getId().equals(student.getLastOpenedModuleId())) {
+                                if (other.getOrderIndex() >= m.getOrderIndex()) {
+                                    completed = true;
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (!completed) {
+                    nextModuleId = m.getId();
+                    break;
+                }
+            }
+            if (nextModuleId == null && !course.getModules().isEmpty()) {
+                nextModuleId = course.getModules().get(0).getId();
+            }
+            
+            courseProgress.add(new StudentCourseProgressDto(course, pct, status, passedInCourse, totalCourseQuizzes, nextModuleId));
         }
 
         model.addAttribute("courseProgress", courseProgress);
