@@ -87,10 +87,17 @@ document.addEventListener('DOMContentLoaded', function() {
             // Add transition class to body
             bodyElement.classList.add('theme-transitioning');
             
+            const themeEl = document.getElementById('prismTheme');
             if (theme === 'light-theme') {
                 htmlElement.classList.add('light-theme');
+                if (themeEl) {
+                    themeEl.href = 'https://cdn.jsdelivr.net/gh/joseluisgp/prism-intellij-light@master/prism-intellij-light.min.css';
+                }
             } else {
                 htmlElement.classList.remove('light-theme');
+                if (themeEl) {
+                    themeEl.href = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css';
+                }
             }
             
             // Remove transition class after transition completes
@@ -216,7 +223,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Skip animations if explicitly disabled on the body or container
         if (document.body.classList.contains('no-animations')) return;
 
-        const revealElements = document.querySelectorAll('.article-card, .hero-minimal, .section-title, .category-nav, .post-header, .post-content > *, .reveal-on-scroll');
+        const revealElements = document.querySelectorAll('.article-card, .hero-minimal, .section-title, .category-nav, .reveal-on-scroll');
         revealElements.forEach(el => {
             // Skip elements that are inside course-related layouts to fulfill the request of removing animations there
             if (el.closest('.course-layout') || el.closest('.courses-grid') || el.closest('.courses-hero')) return;

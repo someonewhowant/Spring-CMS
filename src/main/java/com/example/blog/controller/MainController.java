@@ -31,8 +31,11 @@ public class MainController {
      * Главная страница блога с пагинацией.
      */
     @GetMapping("")
-    public String index(@RequestParam(defaultValue = "1") int page, Model model) {
-        Page<Post> postPage = postService.getAllPosts(page);
+    public String index(Model model) {
+        List<Post> posts = postService.getAllPosts().stream()
+                .map(this::mapPostForDisplay)
+                .collect(Collectors.toList());
+        model.addAttribute("data", posts);
         
         // Добавляем последние курсы (топ 3)
         List<Course> recentCourses = courseService.getAllCourses().stream()
@@ -40,7 +43,9 @@ public class MainController {
                 .collect(Collectors.toList());
         model.addAttribute("recentCourses", recentCourses);
         
-        return populateModelAndReturn(postPage, page, "CodeBlog", "A modern blog platform built with Spring Boot 3.", model, "index");
+        model.addAttribute("title", "CodeBlog");
+        model.addAttribute("description", "A modern blog platform built with Spring Boot 3.");
+        return "index";
     }
 
     /**

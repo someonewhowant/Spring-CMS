@@ -106,7 +106,7 @@
             <nav th:replace="~{partials/fragments :: categoryNav(@{/})}"></nav>
 
             <ul class="article-grid">
-                <li th:each="post : ${data}" class="article-card">
+                <li th:each="post : ${data}" class="article-card" th:attr="data-category=${post.category != null ? post.category.slug : 'none'}">
                     <div class="article-card__image-container">
                         <img th:if="${post.imageUrl}" th:src="${post.imageUrl}" th:alt="${post.title}"
                             class="article-card__image" loading="lazy">
@@ -133,6 +133,14 @@
                     </div>
                 </li>
             </ul>
+
+            <div id="noArticlesMessage" class="empty-state" style="display: none; text-align: center; padding: 40px;">
+                <div class="empty-state-icon" style="font-size: 3rem; color: var(--text-dim); margin-bottom: 20px;">
+                    <i class="bi bi-search"></i>
+                </div>
+                <h3 style="color: var(--text-main); margin-bottom: 8px;">No articles found</h3>
+                <p class="text-dim">Try selecting a different category.</p>
+            </div>
 
             <div class="text-center mt-l">
                 <a th:href="@{/articles}" class="btn btn-outline">
@@ -175,6 +183,72 @@
             </div>
         </section>
     </div>
+
+    <th:block layout:fragment="scripts">
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const nav = document.querySelector('.category-nav');
+                const grid = document.querySelector('.article-grid');
+                const emptyState = document.getElementById('noArticlesMessage');
+                if (!nav || !grid) return;
+
+                const links = nav.querySelectorAll('.category-link');
+                const cards = grid.querySelectorAll('.article-card');
+
+                function filterArticles(categorySlug) {
+                    let count = 0;
+                    cards.forEach(card => {
+                        const cat = card.dataset.category || '';
+                        const matches = (categorySlug === 'all' || cat === categorySlug);
+                        if (matches) {
+                            if (count < 4) {
+                                card.style.display = 'flex';
+                                count++;
+                            } else {
+                                card.style.display = 'none';
+                            }
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+
+                    if (emptyState) {
+                        if (count === 0) {
+                            emptyState.style.display = 'block';
+                        } else {
+                            emptyState.style.display = 'none';
+                        }
+                    }
+                }
+
+                // Initial filter runs to show latest 4 posts
+                filterArticles('all');
+
+                nav.addEventListener('click', function (e) {
+                    const link = e.target.closest('.category-link');
+                    if (!link) return;
+                    
+                    e.preventDefault();
+
+                    // Update active category class
+                    links.forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+
+                    // Extract the category slug safely
+                    let slug = 'all';
+                    const href = link.getAttribute('href');
+                    if (href) {
+                        const match = href.match(/\/category\/([^\/\?#]+)/);
+                        if (match) {
+                            slug = match[1];
+                        }
+                    }
+
+                    filterArticles(slug);
+                });
+            });
+        </script>
+    </th:block>
 
 </body>
 
