@@ -3,65 +3,79 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layouts/main}">
 <head>
-    <title>Sudo Authenticate</title>
+    <title>Sign In — CodeBlog Academy</title>
 </head>
 <body>
-    <div layout:fragment="content" class="fade-in" style="max-width: 480px; margin: 40px auto; padding: 0 var(--space-s);">
-        <div class="card-glass" style="padding: clamp(2rem, 5vw, 3.5rem); position: relative; overflow: hidden;">
-            <!-- Subtle glow effect inside login card -->
-            <div style="position: absolute; top: -50px; left: -50px; width: 150px; height: 150px; background: radial-gradient(circle, rgba(88, 166, 255, 0.1) 0%, transparent 70%); pointer-events: none;"></div>
-            
-            <div style="text-align: center; margin-bottom: 40px;">
-                <div class="header__logo" style="font-size: 2.2rem; margin-bottom: 12px; justify-content: center; float: none;"><span>{</span> code_blog <span>}</span></div>
-                <h1 class="text-accent-mono" style="font-size: 1.1rem; letter-spacing: 0.05em; margin: 0; text-transform: uppercase;">
-                    <i class="bi bi-shield-lock"></i> sudo_authenticate()
-                </h1>
-                <p style="font-size: 0.85rem; color: var(--text-dim); margin-top: 8px;">Establish secure session to cabinet</p>
-            </div>
-            
-            <!-- Alert box -->
-            <div th:if="${param.error}" class="alert alert-error" style="border-left: 3px solid var(--accent-red); background: rgba(255, 123, 114, 0.05); padding: 12px 16px; border-radius: var(--radius); font-family: var(--font-mono); font-size: 0.8rem; color: #ff7b72; margin-bottom: 24px;">
-                <i class="bi bi-exclamation-triangle"></i> ERROR: Access denied. Invalid credentials.
-            </div>
-            
-            <div th:if="${param.registered}" class="alert alert-success" style="border-left: 3px solid var(--accent-green); background: rgba(63, 185, 80, 0.05); padding: 12px 16px; border-radius: var(--radius); font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent-green); margin-bottom: 24px;">
-                <i class="bi bi-check-circle"></i> SUCCESS: Account initialized. Please authenticate.
-            </div>
+    <div layout:fragment="content" class="fade-in">
 
-            <form th:action="@{/admin/login}" method="POST">
-                <div class="form-group">
-                    <label class="form-label" style="color: var(--accent-blue); font-weight: 500;">// CHAR: username</label>
-                    <div style="position: relative;">
-                        <span style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-dim); font-family: var(--font-mono); font-size: 0.9rem; pointer-events: none;">@</span>
-                        <input type="text" name="username" placeholder="developer" class="form-control" style="padding-left: 36px;" required autocomplete="username">
+        <!-- Animated Background Orbs -->
+        <div class="auth-orb auth-orb--blue"></div>
+        <div class="auth-orb auth-orb--purple"></div>
+        <div class="auth-orb auth-orb--green"></div>
+
+        <div class="auth-wrapper">
+            <div class="auth-card">
+                <!-- Top glow effect -->
+                <div class="auth-card__glow"></div>
+
+                <!-- Header -->
+                <div class="auth-header">
+                    <div class="auth-header__icon">
+                        <i class="bi bi-person-circle"></i>
                     </div>
+                    <h1 class="auth-header__title">Welcome Back</h1>
+                    <p class="auth-header__subtitle">Sign in to continue your learning journey</p>
                 </div>
-                
-                <div class="form-group">
-                    <label class="form-label" style="color: var(--accent-purple); font-weight: 500;">// SECURE: access_key</label>
-                    <div style="position: relative;">
-                        <span style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-dim); pointer-events: none;"><i class="bi bi-key-fill" style="font-size: 0.9rem;"></i></span>
-                        <input type="password" name="password" placeholder="••••••••" class="form-control" style="padding-left: 36px;" required autocomplete="current-password">
+
+                <!-- Error Alert -->
+                <div th:if="${param.error}" class="auth-alert auth-alert--error">
+                    <i class="bi bi-exclamation-circle"></i>
+                    Invalid username or password. Please try again.
+                </div>
+
+                <!-- Success Alert -->
+                <div th:if="${param.registered}" class="auth-alert auth-alert--success">
+                    <i class="bi bi-check-circle"></i>
+                    Account created successfully! Please sign in.
+                </div>
+
+                <!-- Login Form -->
+                <form th:action="@{/admin/login}" method="POST">
+                    <div class="auth-input-group">
+                        <label class="auth-input-group__label">Username</label>
+                        <div class="auth-input-group__field">
+                            <input type="text" name="username" placeholder="Enter your username"
+                                   class="auth-input-group__input" required autocomplete="username">
+                            <i class="bi bi-person auth-input-group__icon"></i>
+                        </div>
                     </div>
-                </div>
-                
-                <div style="margin-top: 32px;">
-                    <button type="submit" class="btn btn-primary" style="width: 100%; height: 50px; font-weight: 600;">
-                        <i class="bi bi-terminal"></i> execute_login()
-                    </button>
-                </div>
-                
-                <div style="margin-top: 24px; text-align: center; border-top: 1px solid rgba(48, 54, 61, 0.3); padding-top: 20px;">
-                    <a th:href="@{/register}" style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-dim); text-decoration: none;" onmouseover="this.style.color='var(--accent-blue)'" onmouseout="this.style.color='var(--text-dim)'">
-                        [ new_user? create_account() ]
+
+                    <div class="auth-input-group">
+                        <label class="auth-input-group__label">Password</label>
+                        <div class="auth-input-group__field">
+                            <input type="password" name="password" placeholder="Enter your password"
+                                   class="auth-input-group__input" required autocomplete="current-password">
+                            <i class="bi bi-lock auth-input-group__icon"></i>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 28px;">
+                        <button type="submit" class="auth-btn auth-btn--primary">
+                            <i class="bi bi-box-arrow-in-right"></i> Sign In
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Footer Links -->
+                <div class="auth-footer">
+                    <p style="font-size: 0.9rem; color: var(--text-dim); margin-bottom: 16px;">
+                        Don't have an account?
+                        <a th:href="@{/register}" class="auth-link--highlight">Sign up</a>
+                    </p>
+                    <a th:href="@{/}" class="auth-link">
+                        <i class="bi bi-arrow-left"></i> Back to Home
                     </a>
                 </div>
-            </form>
-            
-            <div style="margin-top: 24px; text-align: center;">
-                <a th:href="@{/}" class="btn btn-outline btn-xs" style="border-color: transparent;">
-                    <i class="bi bi-arrow-left"></i> cd ../home
-                </a>
             </div>
         </div>
     </div>

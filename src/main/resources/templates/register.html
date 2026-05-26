@@ -3,40 +3,63 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layouts/main}">
 <head>
-    <title>Registration - Select Access Level</title>
+    <title>Join the Academy — CodeBlog</title>
 </head>
 <body>
-    <div layout:fragment="content" class="fade-in" style="max-width: 680px; margin: 50px auto; padding: 0 var(--space-s);">
-        <div class="card-glass" style="padding: clamp(2rem, 5vw, 3.5rem); text-align: center; position: relative; overflow: hidden;">
-            <!-- Background gradient glow -->
-            <div style="position: absolute; top: -100px; left: 50%; transform: translateX(-50%); width: 300px; height: 300px; background: radial-gradient(circle, rgba(188, 140, 255, 0.05) 0%, transparent 70%); pointer-events: none;"></div>
-            
-            <h1 class="text-green font-mono" style="font-size: 2.2rem; margin-bottom: 8px;"><span>$</span> register_init</h1>
-            <p style="color: var(--text-dim); font-size: 0.95rem; margin-bottom: 32px;">Select your workspace security privileges & layout role</p>
-            
-            <div class="choice-grid">
-                <!-- Student choice card -->
-                <a th:href="@{/register/student}" class="choice-card choice-card-student">
-                    <i class="bi bi-mortarboard"></i>
-                    <h3>student_apprentice</h3>
-                    <p>Access learning courses, take interactive quizzes, verify skills, and track progress.</p>
-                    <span class="choice-badge">ROLE_STUDENT</span>
-                </a>
-                
-                <!-- Teacher choice card -->
-                <a th:href="@{/register/teacher}" class="choice-card choice-card-teacher">
-                    <i class="bi bi-terminal-split"></i>
-                    <h3>mentor_architect</h3>
-                    <p>Build custom syllabus modules, structure courses, compose quizzes, and instruct students.</p>
-                    <span class="choice-badge">ROLE_TEACHER</span>
-                </a>
-            </div>
-            
-            <div style="margin-top: 36px; border-top: 1px solid rgba(48, 54, 61, 0.3); padding-top: 24px;">
-                <p style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 12px;">Already established credentials?</p>
-                <a th:href="@{/admin/login}" class="btn btn-outline btn-xs" style="font-family: var(--font-mono); border-color: var(--border-subtle); padding: 8px 20px;">
-                    <i class="bi bi-shield-lock"></i> authenticate_session()
-                </a>
+    <div layout:fragment="content" class="fade-in">
+
+        <!-- Animated Background Orbs -->
+        <div class="auth-orb auth-orb--blue"></div>
+        <div class="auth-orb auth-orb--purple"></div>
+        <div class="auth-orb auth-orb--green"></div>
+
+        <div class="auth-wrapper auth-wrapper--wide">
+            <div class="auth-card">
+                <!-- Top glow effect -->
+                <div class="auth-card__glow"></div>
+
+                <!-- Header -->
+                <div class="auth-header">
+                    <div class="auth-header__icon">
+                        <i class="bi bi-rocket-takeoff"></i>
+                    </div>
+                    <h1 class="auth-header__title">Join the Academy</h1>
+                    <p class="auth-header__subtitle">Choose how you'd like to use the platform</p>
+                </div>
+
+                <!-- Role Selection Cards -->
+                <div class="auth-choice-grid">
+                    <!-- Student -->
+                    <a th:href="@{/register/student}" class="auth-choice-card auth-choice-card--student">
+                        <div class="auth-choice-card__icon">
+                            <i class="bi bi-mortarboard"></i>
+                        </div>
+                        <h3 class="auth-choice-card__title">I'm a Student</h3>
+                        <p class="auth-choice-card__desc">Access courses, take quizzes, track your progress, and earn achievements.</p>
+                        <span class="auth-choice-card__cta">Start Learning <i class="bi bi-arrow-right"></i></span>
+                    </a>
+
+                    <!-- Teacher -->
+                    <a th:href="@{/register/teacher}" class="auth-choice-card auth-choice-card--teacher">
+                        <div class="auth-choice-card__icon">
+                            <i class="bi bi-easel2"></i>
+                        </div>
+                        <h3 class="auth-choice-card__title">I'm a Teacher</h3>
+                        <p class="auth-choice-card__desc">Build courses, create quizzes, manage students, and track their progress.</p>
+                        <span class="auth-choice-card__cta">Start Teaching <i class="bi bi-arrow-right"></i></span>
+                    </a>
+                </div>
+
+                <!-- Footer -->
+                <div class="auth-footer">
+                    <p style="font-size: 0.9rem; color: var(--text-dim); margin-bottom: 16px;">
+                        Already have an account?
+                        <a th:href="@{/admin/login}" class="auth-link--highlight">Sign in</a>
+                    </p>
+                    <a th:href="@{/}" class="auth-link">
+                        <i class="bi bi-arrow-left"></i> Back to Home
+                    </a>
+                </div>
             </div>
         </div>
     </div>
