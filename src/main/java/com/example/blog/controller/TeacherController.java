@@ -22,6 +22,9 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.blog.repository.UserRepository;
 import com.example.blog.repository.UserQuizResultRepository;
 import java.security.Principal;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -487,6 +490,7 @@ public class TeacherController {
     @GetMapping("/students")
     public String browseStudents(Principal principal,
                                  @RequestParam(value = "search", required = false) String search,
+                                 @RequestParam(defaultValue = "0") int page,
                                  Model model) {
         if (principal == null) {
             return "redirect:/admin/login";
@@ -497,21 +501,13 @@ public class TeacherController {
         model.addAttribute("currentUserRole", "ROLE_" + (user != null ? user.getRole().name() : "TEACHER"));
         model.addAttribute("title", "Browse Students");
 
-        List<com.example.blog.entity.User> allStudents = userRepository.findByRole(Role.STUDENT);
+        String trimmedSearch = (search != null) ? search.trim() : "";
+        Pageable pageable = PageRequest.of(page, 6);
+        Page<com.example.blog.entity.User> studentPage = userRepository.findByRoleAndSearch(Role.STUDENT, trimmedSearch, pageable);
+        
         List<StudentProgressDto> studentProgressList = new ArrayList<>();
 
-        for (com.example.blog.entity.User student : allStudents) {
-            // Фильтр поиска
-            if (search != null && !search.trim().isEmpty()) {
-                String searchLower = search.toLowerCase().trim();
-                boolean matchesName = student.getFullName() != null && student.getFullName().toLowerCase().contains(searchLower);
-                boolean matchesUsername = student.getUsername() != null && student.getUsername().toLowerCase().contains(searchLower);
-                boolean matchesEmail = student.getEmail() != null && student.getEmail().toLowerCase().contains(searchLower);
-                if (!matchesName && !matchesUsername && !matchesEmail) {
-                    continue;
-                }
-            }
-
+        for (com.example.blog.entity.User student : studentPage.getContent()) {
             List<UserQuizResult> results = userQuizResultRepository.findByUserId(student.getId());
             int completedCount = results.size();
             double avgScore = 0.0;
@@ -527,6 +523,10 @@ public class TeacherController {
 
         model.addAttribute("students", studentProgressList);
         model.addAttribute("searchQuery", search);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", studentPage.getTotalPages());
+        model.addAttribute("hasNext", studentPage.hasNext());
+        model.addAttribute("hasPrev", studentPage.hasPrevious());
         return "teacher/students";
     }
 
