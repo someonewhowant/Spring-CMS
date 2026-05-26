@@ -360,8 +360,8 @@
                                 th:style="'width: ' + ${progress.progressPercentage} + '%; height: 100%; background: var(--accent-blue);'">
                             </div>
                         </div>
-                        <a th:href="@{/course/{id}(id=${progress.course.id})}" class="btn btn-outline w-full"
-                            style="border-radius: 10px; font-weight: 600; font-family: var(--font-mono); font-size: 0.85rem;">CONTINUE_STUDY</a>
+                        <a th:href="${progress.nextModuleId != null} ? @{/course/{cId}/module/{mId}(cId=${progress.course.id}, mId=${progress.nextModuleId})} : @{/course/{id}(id=${progress.course.id})}" class="btn btn-outline w-full"
+                           style="border-radius: 10px; font-weight: 600; font-family: var(--font-mono); font-size: 0.85rem;">CONTINUE_STUDY</a>
                     </div>
                 </div>
             </div>

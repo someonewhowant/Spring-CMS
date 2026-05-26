@@ -158,18 +158,71 @@ public class MainController {
         return "courses";
     }
 
+    private void populateModuleStatuses(Course course, User user, Model model, Long currentModuleId) {
+        Set<Long> completedModuleIds = new HashSet<>();
+        Set<Long> lockedModuleIds = new HashSet<>();
+        
+        if (user != null) {
+            List<CourseModule> modules = course.getModules();
+            boolean previousCompleted = true;
+            
+            int lastOpenedOrder = -1;
+            if (user.getLastOpenedCourseId() != null && user.getLastOpenedCourseId().equals(course.getId()) && user.getLastOpenedModuleId() != null) {
+                for (CourseModule m : modules) {
+                    if (m.getId().equals(user.getLastOpenedModuleId())) {
+                        lastOpenedOrder = m.getOrderIndex();
+                        break;
+                    }
+                }
+            }
+            
+            for (int i = 0; i < modules.size(); i++) {
+                CourseModule m = modules.get(i);
+                
+                if (!previousCompleted) {
+                    lockedModuleIds.add(m.getId());
+                }
+                
+                boolean isCompleted = false;
+                if (!lockedModuleIds.contains(m.getId())) {
+                    if (m.getQuiz() != null) {
+                        isCompleted = quizService.isQuizPassed(user.getId(), m.getQuiz().getId());
+                    } else {
+                        if ((currentModuleId != null && m.getId().equals(currentModuleId)) || 
+                            (lastOpenedOrder >= m.getOrderIndex())) {
+                            isCompleted = true;
+                        }
+                    }
+                }
+                
+                if (isCompleted) {
+                    completedModuleIds.add(m.getId());
+                }
+                
+                previousCompleted = !lockedModuleIds.contains(m.getId()) && (m.getQuiz() == null || isCompleted);
+            }
+        }
+        
+        model.addAttribute("completedModuleIds", completedModuleIds);
+        model.addAttribute("lockedModuleIds", lockedModuleIds);
+    }
+
     @GetMapping("/course/{id}")
     public String courseDetail(@PathVariable Long id, Principal principal, Model model) {
         Course course = courseService.getCourseById(id);
         String htmlContent = markdownService.convertToHtml(course.getContent());
+        User user = null;
 
         if (principal != null) {
-            userRepository.findByUsername(principal.getName()).ifPresent(user -> {
+            user = userRepository.findByUsername(principal.getName()).orElse(null);
+            if (user != null) {
                 user.setLastOpenedCourseId(id);
                 user.setLastOpenedModuleId(null);
                 userRepository.save(user);
-            });
+            }
         }
+        
+        populateModuleStatuses(course, user, model, null);
         
         model.addAttribute("course", course);
         model.addAttribute("htmlContent", htmlContent);
@@ -197,15 +250,18 @@ public class MainController {
         
         boolean isLocked = false;
         String lockReason = "";
+        User user = null;
+        
+        if (principal != null) {
+            user = userRepository.findByUsername(principal.getName()).orElse(null);
+        }
         
         for (int i = 0; i < modules.size(); i++) {
             if (modules.get(i).getId().equals(moduleId)) {
                 if (i > 0) {
                     prevModule = modules.get(i - 1);
                     // Check if previous module had a quiz and if it was passed
-                    if (prevModule.getQuiz() != null && principal != null) {
-                        User user = userRepository.findByUsername(principal.getName())
-                                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                    if (prevModule.getQuiz() != null && user != null) {
                         if (!quizService.isQuizPassed(user.getId(), prevModule.getQuiz().getId())) {
                             isLocked = true;
                             lockReason = "You must score at least 3 points in the quiz for module: " + prevModule.getTitle();
@@ -217,23 +273,20 @@ public class MainController {
             }
         }
 
-        if (principal != null && !isLocked) {
-            userRepository.findByUsername(principal.getName()).ifPresent(user -> {
-                user.setLastOpenedCourseId(courseId);
-                user.setLastOpenedModuleId(moduleId);
-                userRepository.save(user);
-            });
+        if (user != null && !isLocked) {
+            user.setLastOpenedCourseId(courseId);
+            user.setLastOpenedModuleId(moduleId);
+            userRepository.save(user);
         }
+        
+        populateModuleStatuses(course, user, model, moduleId);
         
         boolean isNextLocked = false;
         boolean isCurrentQuizPassed = false;
-        if (module.getQuiz() != null && principal != null) {
-            User user = userRepository.findByUsername(principal.getName()).orElse(null);
-            if (user != null) {
-                isCurrentQuizPassed = quizService.isQuizPassed(user.getId(), module.getQuiz().getId());
-                if (!isCurrentQuizPassed) {
-                    isNextLocked = true;
-                }
+        if (module.getQuiz() != null && user != null) {
+            isCurrentQuizPassed = quizService.isQuizPassed(user.getId(), module.getQuiz().getId());
+            if (!isCurrentQuizPassed) {
+                isNextLocked = true;
             }
         }
         

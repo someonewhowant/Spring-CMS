@@ -182,7 +182,33 @@ public class StudentController {
                 }
             }
             
-            StudentCourseProgressDto dto = new StudentCourseProgressDto(course, pct, status, passedInCourse, totalCourseQuizzes);
+            Long nextModuleId = null;
+            for (CourseModule m : course.getModules()) {
+                boolean completed = false;
+                if (m.getQuiz() != null) {
+                    completed = quizService.isQuizPassed(user.getId(), m.getQuiz().getId());
+                } else {
+                    if (user.getLastOpenedModuleId() != null) {
+                        for (CourseModule other : course.getModules()) {
+                            if (other.getId().equals(user.getLastOpenedModuleId())) {
+                                if (other.getOrderIndex() >= m.getOrderIndex()) {
+                                    completed = true;
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (!completed) {
+                    nextModuleId = m.getId();
+                    break;
+                }
+            }
+            if (nextModuleId == null && !course.getModules().isEmpty()) {
+                nextModuleId = course.getModules().get(0).getId();
+            }
+            
+            StudentCourseProgressDto dto = new StudentCourseProgressDto(course, pct, status, passedInCourse, totalCourseQuizzes, nextModuleId);
             if ("COMPLETED".equals(status)) {
                 completedCourses.add(dto);
             } else if ("ACTIVE".equals(status)) {

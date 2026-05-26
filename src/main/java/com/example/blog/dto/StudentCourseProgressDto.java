@@ -12,4 +12,5 @@ public class StudentCourseProgressDto {
     private final String status;
     private final int passedQuizzesCount;
     private final int totalQuizzesCount;
+    private final Long nextModuleId;
 }

@@ -167,7 +167,7 @@
                 <div style="display: flex; justify-content: center; gap: 12px; margin-top: 32px;">
                     <a th:if="${profileUser.githubUrl != null and profileUser.githubUrl != ''}" th:href="${profileUser.githubUrl}" target="_blank" class="btn btn-outline" style="border-radius: 12px; padding: 10px 24px;"><i class="bi bi-github me-2"></i> GitHub</a>
                     <a th:if="${profileUser.linkedinUrl != null and profileUser.linkedinUrl != ''}" th:href="${profileUser.linkedinUrl}" target="_blank" class="btn btn-outline" style="border-radius: 12px; padding: 10px 24px;"><i class="bi bi-linkedin me-2"></i> LinkedIn</a>
-                    <a th:if="${#authentication.name == profileUser.username}" th:href="@{/profile/settings}" class="btn btn-blue" style="border-radius: 12px; padding: 10px 24px;"><i class="bi bi-gear me-2"></i> Edit Profile</a>
+                    <a th:if="${#authentication != null and !#strings.equals(#authentication.getName(), 'anonymousUser') and #strings.equals(#authentication.getName(), profileUser.username)}" th:href="@{/profile/settings}" class="btn btn-blue" style="border-radius: 12px; padding: 10px 24px;"><i class="bi bi-gear me-2"></i> Edit Profile</a>
                 </div>
             </div>
         </div>
