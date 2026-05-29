@@ -1,6 +1,7 @@
 package com.example.blog.controller;
 
 import com.example.blog.entity.*;
+import com.example.blog.service.CommentService;
 import com.example.blog.service.CourseService;
 import com.example.blog.service.MarkdownService;
 import com.example.blog.service.PostService;
@@ -12,6 +13,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 import java.util.*;
@@ -24,6 +26,7 @@ public class MainController {
     private final PostService postService;
     private final CourseService courseService;
     private final QuizService quizService;
+    private final CommentService commentService;
     private final MarkdownService markdownService;
     private final UserRepository userRepository;
 
@@ -77,8 +80,69 @@ public class MainController {
 
         model.addAttribute("post", displayPost);
         model.addAttribute("title", post.getTitle());
+
+        // Комментарии к статье
+        List<Comment> comments = commentService.getCommentsByPostId(id);
+        model.addAttribute("comments", comments);
+        model.addAttribute("commentCount", commentService.getCommentCount(id));
         
         return "post";
+    }
+
+    /**
+     * Добавление комментария к посту.
+     */
+    @PostMapping("/post/{id}/comment")
+    public String addComment(@PathVariable Long id,
+                             @RequestParam("body") String body,
+                             Principal principal,
+                             RedirectAttributes redirectAttributes) {
+        if (principal == null) {
+            return "redirect:/admin/login";
+        }
+
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        Post post = postService.getPostById(id);
+
+        String trimmedBody = body.trim();
+        if (trimmedBody.isEmpty() || trimmedBody.length() > 2000) {
+            redirectAttributes.addFlashAttribute("commentError", "Comment must be between 1 and 2000 characters.");
+            return "redirect:/post/" + id;
+        }
+
+        commentService.addComment(post, user, trimmedBody);
+        redirectAttributes.addFlashAttribute("commentSuccess", "Comment posted successfully!");
+        return "redirect:/post/" + id + "#comments";
+    }
+
+    /**
+     * Удаление комментария (автор или админ/преподаватель).
+     */
+    @PostMapping("/post/{postId}/comment/{commentId}/delete")
+    public String deleteComment(@PathVariable Long postId,
+                                @PathVariable Long commentId,
+                                Principal principal,
+                                RedirectAttributes redirectAttributes) {
+        if (principal == null) {
+            return "redirect:/admin/login";
+        }
+
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        Comment comment = commentService.getCommentById(commentId);
+
+        // Разрешаем удаление только автору или админу/преподавателю
+        boolean isOwner = comment.getUser().getId().equals(user.getId());
+        boolean isAdmin = user.getRole() == Role.ADMIN || user.getRole() == Role.TEACHER;
+        if (!isOwner && !isAdmin) {
+            redirectAttributes.addFlashAttribute("commentError", "You don't have permission to delete this comment.");
+            return "redirect:/post/" + postId + "#comments";
+        }
+
+        commentService.deleteComment(commentId);
+        redirectAttributes.addFlashAttribute("commentSuccess", "Comment deleted.");
+        return "redirect:/post/" + postId + "#comments";
     }
 
     /**

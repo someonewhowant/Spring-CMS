@@ -19,6 +19,8 @@
                     <span><i class="bi bi-calendar3"></i> <span th:text="${#temporals.format(post.createdAt, 'MMMM dd, yyyy')}">Date</span></span>
                     <span class="meta-sep">|</span>
                     <span><i class="bi bi-person"></i> code_admin</span>
+                    <span class="meta-sep">|</span>
+                    <span><i class="bi bi-chat-dots"></i> <span th:text="${commentCount}">0</span> comments</span>
                 </div>
             </header>
 
@@ -37,6 +39,114 @@
                    th:text="'#' + ${tag.name}"
                    class="badge-tag">#tag</a>
             </div>
+
+            <!-- ===== COMMENTS SECTION ===== -->
+            <section class="comments-section" id="comments">
+                <div class="comments-header">
+                    <h2 class="comments-header__title">
+                        <i class="bi bi-chat-square-text"></i>
+                        <span>Discussion</span>
+                        <span class="comments-header__count" th:text="${commentCount}">0</span>
+                    </h2>
+                </div>
+
+                <!-- Comment Form -->
+                <div th:if="${currentUser != null}" class="comment-form-wrapper">
+                    <!-- Flash Messages -->
+                    <div th:if="${commentError}" class="comment-alert comment-alert--error">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <span th:text="${commentError}">Error</span>
+                    </div>
+                    <div th:if="${commentSuccess}" class="comment-alert comment-alert--success">
+                        <i class="bi bi-check-circle"></i>
+                        <span th:text="${commentSuccess}">Success</span>
+                    </div>
+
+                    <form th:action="@{/post/{id}/comment(id=${post.id})}" method="post" class="comment-form" id="commentForm">
+                        <div class="comment-form__avatar">
+                            <img th:if="${currentUserObj != null and currentUserObj.avatarUrl != null}" 
+                                 th:src="${currentUserObj.avatarUrl}" 
+                                 alt="Avatar" class="comment-avatar-img"/>
+                            <div th:unless="${currentUserObj != null and currentUserObj.avatarUrl != null}" class="comment-avatar-placeholder">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                        </div>
+                        <div class="comment-form__body">
+                            <textarea name="body" 
+                                      id="commentBody"
+                                      class="comment-form__input" 
+                                      placeholder="Share your thoughts..." 
+                                      rows="3" 
+                                      maxlength="2000"
+                                      required></textarea>
+                            <div class="comment-form__footer">
+                                <span class="comment-form__chars">
+                                    <span id="charCount">0</span> / 2000
+                                </span>
+                                <button type="submit" class="comment-form__submit" id="commentSubmitBtn">
+                                    <i class="bi bi-send-fill"></i> Post Comment
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Login prompt for unauthenticated users -->
+                <div th:unless="${currentUser != null}" class="comment-login-prompt">
+                    <i class="bi bi-lock"></i>
+                    <p>
+                        <a th:href="@{/admin/login}" class="comment-login-link">Sign in</a> 
+                        to join the discussion
+                    </p>
+                </div>
+
+                <!-- Comments List -->
+                <div class="comments-list" id="commentsList">
+                    <div th:each="comment : ${comments}" class="comment-card" th:id="'comment-' + ${comment.id}">
+                        <div class="comment-card__avatar">
+                            <img th:if="${comment.user.avatarUrl != null}" 
+                                 th:src="${comment.user.avatarUrl}" 
+                                 alt="Avatar" class="comment-avatar-img"/>
+                            <div th:unless="${comment.user.avatarUrl != null}" class="comment-avatar-placeholder">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                        </div>
+                        <div class="comment-card__content">
+                            <div class="comment-card__header">
+                                <span class="comment-card__author" th:text="${comment.user.fullName != null ? comment.user.fullName : comment.user.username}">User</span>
+                                <span class="comment-card__role" th:if="${comment.user.role.name() == 'TEACHER'}" data-role="teacher">
+                                    <i class="bi bi-patch-check-fill"></i> Instructor
+                                </span>
+                                <span class="comment-card__role" th:if="${comment.user.role.name() == 'ADMIN'}" data-role="admin">
+                                    <i class="bi bi-shield-fill-check"></i> Admin
+                                </span>
+                                <span class="comment-card__time" th:text="${#temporals.format(comment.createdAt, 'MMM dd, yyyy HH:mm')}">Time</span>
+                            </div>
+                            <div class="comment-card__body" th:text="${comment.body}">
+                                Comment text...
+                            </div>
+                            <div class="comment-card__actions">
+                                <!-- Delete button for comment author or admin/teacher -->
+                                <form th:if="${currentUserObj != null and (currentUserObj.id == comment.user.id or currentUserObj.role.name() == 'ADMIN' or currentUserObj.role.name() == 'TEACHER')}"
+                                      th:action="@{/post/{postId}/comment/{commentId}/delete(postId=${post.id}, commentId=${comment.id})}" 
+                                      method="post" 
+                                      class="comment-delete-form"
+                                      onsubmit="return confirm('Delete this comment?');">
+                                    <button type="submit" class="comment-action-btn comment-action-btn--delete" title="Delete comment">
+                                        <i class="bi bi-trash3"></i> Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Empty state -->
+                    <div th:if="${#lists.isEmpty(comments)}" class="comments-empty">
+                        <i class="bi bi-chat-square-dots"></i>
+                        <p>No comments yet. Be the first to share your thoughts!</p>
+                    </div>
+                </div>
+            </section>
             
             <footer class="post-footer mt-3xl">
                 <a th:href="@{/}" class="btn btn-outline">
@@ -49,5 +159,46 @@
             </footer>
         </article>
     </div>
+
+    <th:block layout:fragment="scripts">
+        <script>
+            (function() {
+                const textarea = document.getElementById('commentBody');
+                const charCount = document.getElementById('charCount');
+                const submitBtn = document.getElementById('commentSubmitBtn');
+
+                if (textarea && charCount) {
+                    textarea.addEventListener('input', function() {
+                        const len = this.value.length;
+                        charCount.textContent = len;
+                        
+                        if (len > 1800) {
+                            charCount.style.color = 'var(--accent-orange)';
+                        } else if (len > 1950) {
+                            charCount.style.color = '#ff7b72';
+                        } else {
+                            charCount.style.color = '';
+                        }
+                    });
+
+                    // Auto-resize textarea
+                    textarea.addEventListener('input', function() {
+                        this.style.height = 'auto';
+                        this.style.height = Math.min(this.scrollHeight, 300) + 'px';
+                    });
+                }
+
+                // Smooth scroll to comments if hash is present
+                if (window.location.hash === '#comments') {
+                    setTimeout(function() {
+                        const section = document.getElementById('comments');
+                        if (section) {
+                            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    }, 100);
+                }
+            })();
+        </script>
+    </th:block>
 </body>
 </html>
