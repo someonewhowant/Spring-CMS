@@ -10,7 +10,9 @@
         <h1 class="author__heading mb-xl text-xl">
             grep -r "<span class="text-green" th:text="${searchTerm}"></span>" .
         </h1>
-        
+
+        <!-- Posts Results -->
+        <h2 class="section-title">Articles</h2>
         <ul class="article-grid" th:if="${not #lists.isEmpty(data)}">
             <li th:each="post : ${data}" class="article-card">
                 <div class="article-card__image-container">
@@ -41,14 +43,43 @@
                 </div>
             </li>
         </ul>
-        
-        <div th:if="${#lists.isEmpty(data)}" class="text-center py-3xl bg-surface rounded border-active border-dashed">
-            <div class="font-mono text-3xl text-orange opacity-50 mb-l">404</div>
-            <p class="font-mono text-l text-main">STDOUT: No results found for current query.</p>
-            <p class="text-dim mt-s">Try refining your search parameters.</p>
+        <div th:if="${#lists.isEmpty(data)}" class="text-dim">No articles found.</div>
+
+        <!-- Courses Results -->
+        <h2 class="section-title mt-2xl">Courses</h2>
+        <div class="courses-grid" th:if="${not #lists.isEmpty(courses)}">
+            <div th:each="course : ${courses}" class="card-glass course-card" th:attr="data-level=${course.level}">
+                <span class="course-card__badge" th:classappend="${course.level == 'Beginner'} ? ' badge-beginner' : (${course.level == 'Advanced'} ? ' badge-advanced' : ' badge-intermediate')" th:text="${course.level}">Level</span>
+                <div class="course-card__icon" th:classappend="${course.level == 'Beginner'} ? 'level-beginner' : (${course.level == 'Advanced'} ? 'level-advanced' : 'level-intermediate')">
+                    <i th:class="${course.level == 'Beginner'} ? 'bi bi-database-check' : (${course.level == 'Advanced'} ? 'bi bi-layers-half' : 'bi bi-lightning-charge')"></i>
+                </div>
+                <h3 class="course-card__title" th:text="${course.title}">Course Title</h3>
+                <p class="course-card__description" th:text="${#strings.abbreviate(course.description, 130)}"></p>
+                <div class="course-card__meta">
+                    <span><i class="bi bi-clock"></i> <span th:text="${course.duration}">12 Hours</span></span>
+                    <span><i class="bi bi-bar-chart"></i> <span th:text="${course.level}">Level</span></span>
+                </div>
+                <a th:href="@{/course/{id}(id=${course.id})}" class="btn btn-outline w-full mt-m">Start Learning <i class="bi bi-arrow-right ms-2"></i></a>
+            </div>
         </div>
+        <div th:if="${#lists.isEmpty(courses)}" class="text-dim">No courses found.</div>
+
+        <!-- Teachers Results -->
+        <h2 class="section-title mt-2xl">Teachers</h2>
+        <div class="courses-grid" th:if="${not #lists.isEmpty(teachers)}">
+            <div th:each="teacher : ${teachers}" class="card-glass course-card">
+                <div class="course-card__icon level-advanced" style="border-radius: 50%; overflow: hidden; padding: 0;">
+                    <img th:if="${teacher.avatarUrl != null}" th:src="${teacher.avatarUrl}" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                    <i th:unless="${teacher.avatarUrl != null}" class="bi bi-person-fill"></i>
+                </div>
+                <h3 class="course-card__title" th:text="${teacher.fullName != null ? teacher.fullName : teacher.username}">Name</h3>
+                <p class="course-card__description text-dim" th:text="${teacher.title != null ? teacher.title : 'Instructor'}">Title</p>
+                <a th:href="@{/profile/{username}(username=${teacher.username})}" class="btn btn-outline w-full mt-m">View Profile</a>
+            </div>
+        </div>
+        <div th:if="${#lists.isEmpty(teachers)}" class="text-dim">No teachers found.</div>
         
-        <div class="mt-2xl">
+        <div class="mt-3xl">
             <a th:href="@{/}" class="btn btn-outline">
                 <i class="bi bi-chevron-left"></i> cd ..
             </a>

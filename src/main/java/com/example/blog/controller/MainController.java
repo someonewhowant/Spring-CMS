@@ -176,10 +176,15 @@ public class MainController {
                          @RequestParam(defaultValue = "1") int page, 
                          Model model) {
         Page<Post> searchResults = postService.searchPosts(searchTerm, page);
-        
         List<Post> posts = searchResults.getContent().stream().map(this::mapPostForDisplay).collect(Collectors.toList());
-
         model.addAttribute("data", posts);
+        
+        List<Course> courses = courseService.searchCourses(searchTerm);
+        model.addAttribute("courses", courses);
+        
+        Page<User> teacherResults = userRepository.findByRoleAndSearch(Role.TEACHER, searchTerm, org.springframework.data.domain.PageRequest.of(0, 50));
+        model.addAttribute("teachers", teacherResults.getContent());
+
         model.addAttribute("searchTerm", searchTerm);
         model.addAttribute("title", "Search Results");
         

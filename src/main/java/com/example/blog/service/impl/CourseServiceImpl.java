@@ -30,6 +30,11 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    public List<Course> searchCourses(String keyword) {
+        return courseRepository.searchByKeyword(keyword);
+    }
+
+    @Override
     public Course getCourseById(Long id) {
         return courseRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Course not found with id: " + id));
