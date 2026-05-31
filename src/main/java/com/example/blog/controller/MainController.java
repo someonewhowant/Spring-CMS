@@ -29,6 +29,7 @@ public class MainController {
     private final CommentService commentService;
     private final MarkdownService markdownService;
     private final UserRepository userRepository;
+    private final com.example.blog.service.BookmarkService bookmarkService;
 
     /**
      * Главная страница блога с пагинацией.
@@ -64,7 +65,7 @@ public class MainController {
      * Просмотр конкретного поста по ID.
      */
     @GetMapping("/post/{id}")
-    public String post(@PathVariable Long id, Model model) {
+    public String post(@PathVariable Long id, Principal principal, Model model) {
         Post post = postService.getPostById(id);
         String htmlBody = markdownService.convertToHtml(post.getBody());
         
@@ -80,6 +81,15 @@ public class MainController {
 
         model.addAttribute("post", displayPost);
         model.addAttribute("title", post.getTitle());
+
+        boolean isBookmarked = false;
+        if (principal != null) {
+            User user = userRepository.findByUsername(principal.getName()).orElse(null);
+            if (user != null) {
+                isBookmarked = bookmarkService.isPostBookmarked(user.getId(), id);
+            }
+        }
+        model.addAttribute("isBookmarked", isBookmarked);
 
         // Комментарии к статье
         List<Comment> comments = commentService.getCommentsByPostId(id);
@@ -281,6 +291,7 @@ public class MainController {
         Course course = courseService.getCourseById(id);
         String htmlContent = markdownService.convertToHtml(course.getContent());
         User user = null;
+        boolean isBookmarked = false;
 
         if (principal != null) {
             user = userRepository.findByUsername(principal.getName()).orElse(null);
@@ -288,9 +299,11 @@ public class MainController {
                 user.setLastOpenedCourseId(id);
                 user.setLastOpenedModuleId(null);
                 userRepository.save(user);
+                isBookmarked = bookmarkService.isCourseBookmarked(user.getId(), id);
             }
         }
         
+        model.addAttribute("isBookmarked", isBookmarked);
         populateModuleStatuses(course, user, model, null);
         
         model.addAttribute("course", course);

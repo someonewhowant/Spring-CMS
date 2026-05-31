@@ -74,9 +74,17 @@
                     <header style="margin-bottom: 40px;">
                         <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
                             <span class="profile-role-badge" style="background: rgba(88, 166, 255, 0.1); color: var(--accent-blue); border-color: rgba(88, 166, 255, 0.3);" th:text="${isOverview ? course.level : 'MODULE ' + (module.orderIndex + 1)}">LEVEL / MODULE X</span>
-                            <div th:if="${isOverview}" style="display: flex; gap: 12px; font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-dim);">
+                            <div th:if="${isOverview}" style="display: flex; gap: 12px; font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-dim); align-items: center;">
                                 <span><i class="bi bi-clock text-blue"></i> <span th:text="${course.duration}">12 Hours</span></span>
                                 <span><i class="bi bi-calendar3 text-purple"></i> <span th:text="${#temporals.format(course.createdAt, 'dd MMM yyyy')}">Date</span></span>
+                                
+                                <span class="meta-sep" th:if="${currentUser != null}">|</span>
+                                <form th:if="${currentUser != null}" th:action="@{/bookmark/course/{id}(id=${course.id})}" method="post" style="display:inline;">
+                                    <button type="submit" class="btn btn-outline" style="padding: 2px 8px; font-size: 0.8rem;">
+                                        <i class="bi" th:classappend="${isBookmarked ? 'bi-bookmark-fill text-accent-blue' : 'bi-bookmark'}"></i>
+                                        <span th:text="${isBookmarked ? 'Saved' : 'Save'}">Save</span>
+                                    </button>
+                                </form>
                             </div>
                         </div>
                         

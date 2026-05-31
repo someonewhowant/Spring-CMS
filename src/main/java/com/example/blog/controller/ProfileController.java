@@ -29,6 +29,7 @@ public class ProfileController {
     private final PostRepository postRepository;
     private final FileStorageService fileStorageService;
     private final com.example.blog.service.GamificationService gamificationService;
+    private final com.example.blog.service.BookmarkService bookmarkService;
 
     @GetMapping("/u/{username}")
     public String publicProfile(@PathVariable String username, Model model) {
@@ -48,6 +49,24 @@ public class ProfileController {
         model.addAttribute("xpProgressPct", progressPct);
         
         return "profile/public";
+    }
+
+    @GetMapping("/bookmarks")
+    public String profileBookmarks(Principal principal, Model model) {
+        if (principal == null) {
+            return "redirect:/admin/login";
+        }
+        Optional<User> userOpt = userRepository.findByUsername(principal.getName());
+        if (userOpt.isEmpty()) {
+            return "redirect:/admin/login";
+        }
+        User user = userOpt.get();
+        model.addAttribute("user", user);
+        
+        java.util.List<com.example.blog.entity.Bookmark> bookmarks = bookmarkService.getUserBookmarks(user.getId());
+        model.addAttribute("bookmarks", bookmarks);
+        
+        return "profile/bookmarks";
     }
 
     @GetMapping("/settings")

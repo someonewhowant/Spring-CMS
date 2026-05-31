@@ -74,7 +74,7 @@
                 </div>
                 <h3 class="course-card__title" th:text="${teacher.fullName != null ? teacher.fullName : teacher.username}">Name</h3>
                 <p class="course-card__description text-dim" th:text="${teacher.title != null ? teacher.title : 'Instructor'}">Title</p>
-                <a th:href="@{/profile/{username}(username=${teacher.username})}" class="btn btn-outline w-full mt-m">View Profile</a>
+                <a th:href="@{/profile/u/{username}(username=${teacher.username})}" class="btn btn-outline w-full mt-m">View Profile</a>
             </div>
         </div>
         <div th:if="${#lists.isEmpty(teachers)}" class="text-dim">No teachers found.</div>

@@ -21,6 +21,15 @@
                     <span><i class="bi bi-person"></i> code_admin</span>
                     <span class="meta-sep">|</span>
                     <span><i class="bi bi-chat-dots"></i> <span th:text="${commentCount}">0</span> comments</span>
+                    
+                    <!-- Bookmark Form -->
+                    <span class="meta-sep" th:if="${currentUser != null}">|</span>
+                    <form th:if="${currentUser != null}" th:action="@{/bookmark/post/{id}(id=${post.id})}" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-outline" style="padding: 2px 8px; font-size: 0.8rem;">
+                            <i class="bi" th:classappend="${isBookmarked ? 'bi-bookmark-fill text-accent-blue' : 'bi-bookmark'}"></i>
+                            <span th:text="${isBookmarked ? 'Saved' : 'Save'}">Save</span>
+                        </button>
+                    </form>
                 </div>
             </header>
 
