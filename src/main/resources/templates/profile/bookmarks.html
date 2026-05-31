@@ -51,14 +51,14 @@
                     </div>
 
                     <div th:if="${not #lists.isEmpty(bookmarks)}" style="display: grid; gap: 16px;">
-                        <div th:each="bookmark : ${bookmarks}" class="card-glass" style="padding: 20px; display: flex; justify-content: space-between; align-items: center; gap: 16px;">
+                        <div th:each="bookmark : ${bookmarks}" class="card-glass" style="padding: 20px; display: flex; justify-content: space-between; align-items: center; gap: 16px; position: relative; transition: all 0.2s;">
                             
                             <div th:if="${bookmark.post != null}" style="flex: 1;">
                                 <div style="display: flex; gap: 8px; margin-bottom: 8px;">
                                     <span style="font-family: var(--font-mono); font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; background: rgba(88, 166, 255, 0.1); color: var(--accent-blue);">ARTICLE</span>
                                 </div>
                                 <h3 style="margin: 0 0 8px; font-size: 1.1rem;">
-                                    <a th:href="@{/post/{id}(id=${bookmark.post.id})}" th:text="${bookmark.post.title}" style="color: var(--text-main); text-decoration: none;">Title</a>
+                                    <a th:href="@{/post/{id}(id=${bookmark.post.id})}" class="stretched-link" th:text="${bookmark.post.title}" style="color: var(--text-main); text-decoration: none;">Title</a>
                                 </h3>
                                 <p style="margin: 0; font-size: 0.85rem; color: var(--text-dim);" th:text="${#temporals.format(bookmark.createdAt, 'MMM dd, yyyy HH:mm')}">Date</p>
                             </div>
@@ -68,12 +68,12 @@
                                     <span style="font-family: var(--font-mono); font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; background: rgba(188, 140, 255, 0.1); color: var(--accent-purple);">COURSE</span>
                                 </div>
                                 <h3 style="margin: 0 0 8px; font-size: 1.1rem;">
-                                    <a th:href="@{/course/{id}(id=${bookmark.course.id})}" th:text="${bookmark.course.title}" style="color: var(--text-main); text-decoration: none;">Title</a>
+                                    <a th:href="@{/course/{id}(id=${bookmark.course.id})}" class="stretched-link" th:text="${bookmark.course.title}" style="color: var(--text-main); text-decoration: none;">Title</a>
                                 </h3>
                                 <p style="margin: 0; font-size: 0.85rem; color: var(--text-dim);" th:text="${#temporals.format(bookmark.createdAt, 'MMM dd, yyyy HH:mm')}">Date</p>
                             </div>
 
-                            <div style="flex-shrink: 0;">
+                            <div style="flex-shrink: 0; position: relative; z-index: 2;">
                                 <form th:if="${bookmark.post != null}" th:action="@{/bookmark/post/{id}(id=${bookmark.post.id})}" method="post">
                                     <button type="submit" class="btn btn-outline" style="padding: 6px 12px; color: #ff7b72; border-color: rgba(255, 123, 114, 0.3);">
                                         <i class="bi bi-trash"></i> Remove
