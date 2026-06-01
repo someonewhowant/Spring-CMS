@@ -12,28 +12,30 @@
         <div class="chat-container">
             <aside class="chat-sidebar">
                 <div class="chat-sidebar-header">
-                    <h2 th:text="${currentUserObj.role == T(com.example.blog.entity.Role).STUDENT ? '■ MENTORS' : '■ STUDENTS'}">■ CHATS</h2>
-                    <div id="connection-status" style="font-size: 0.65rem; font-family: var(--font-mono); margin-top: 8px; letter-spacing: 1px;">
+                    <h2
+                        th:text="${currentUserObj.role == T(com.example.blog.entity.Role).STUDENT ? '■ MENTORS' : '■ STUDENTS'}">
+                        ■ CHATS</h2>
+                    <div id="connection-status"
+                        style="font-size: 0.65rem; font-family: var(--font-mono); margin-top: 8px; letter-spacing: 1px;">
                         STATUS: <span id="status-text" class="text-dim">INITIALIZING...</span>
                     </div>
                 </div>
                 <div class="chat-partners-list">
-                    <div th:each="partner : ${chatPartners}" 
-                         class="chat-partner-item" 
-                         th:classappend="${activePartnerId == partner.id ? 'active' : ''}"
-                         th:onclick="'selectPartner(' + ${partner.id} + ')'"
-                         th:id="'partner-' + ${partner.id}">
-                        <img th:src="${partner.avatarUrl != null ? partner.avatarUrl : '/img/hero-image.webp'}" class="chat-partner-avatar" alt="">
+                    <div th:each="partner : ${chatPartners}" class="chat-partner-item"
+                        th:classappend="${activePartnerId == partner.id ? 'active' : ''}"
+                        th:onclick="'selectPartner(' + ${partner.id} + ')'" th:id="'partner-' + ${partner.id}">
+                        <img th:src="${partner.avatarUrl != null ? partner.avatarUrl : '/img/hero-image.webp'}"
+                            class="chat-partner-avatar" alt="">
                         <div class="chat-partner-info">
                             <span class="chat-partner-name" th:text="${partner.fullName}">Partner Name</span>
-                            <span class="chat-partner-status" th:text="${partner.title != null ? partner.title : (partner.role == T(com.example.blog.entity.Role).TEACHER ? 'Mentor' : 'Student')}">Status</span>
+                            <span class="chat-partner-status"
+                                th:text="${partner.title != null ? partner.title : (partner.role == T(com.example.blog.entity.Role).TEACHER ? 'Mentor' : 'Student')}">Status</span>
                         </div>
-                        <span th:if="${unreadCounts.get(partner.id) > 0}" 
-                              class="unread-badge" 
-                              th:text="${unreadCounts.get(partner.id)}"
-                              th:id="'unread-' + ${partner.id}">3</span>
+                        <span th:if="${unreadCounts.get(partner.id) > 0}" class="unread-badge"
+                            th:text="${unreadCounts.get(partner.id)}" th:id="'unread-' + ${partner.id}">3</span>
                     </div>
-                    <div th:if="${#lists.isEmpty(chatPartners)}" class="text-center p-4 text-dim font-mono" style="font-size: 0.8rem;">
+                    <div th:if="${#lists.isEmpty(chatPartners)}" class="text-center p-4 text-dim font-mono"
+                        style="font-size: 0.8rem;">
                         ↳ NO_CONTACTS_FOUND
                     </div>
                 </div>
@@ -43,7 +45,8 @@
                 <div id="chat-content" style="display: none;">
                     <div class="chat-main-header">
                         <div class="header-info">
-                            <img id="active-partner-avatar" src="" class="chat-partner-avatar" style="width: 38px; height: 38px;" alt="">
+                            <img id="active-partner-avatar" src="" class="chat-partner-avatar"
+                                style="width: 38px; height: 38px;" alt="">
                             <div>
                                 <span id="active-partner-name" class="chat-partner-name">Partner Name</span>
                                 <span id="active-partner-status" class="chat-partner-status">Online</span>
@@ -59,7 +62,8 @@
                     <form class="chat-input-area" id="chat-form">
                         <input type="hidden" id="recipient-id" value="">
                         <div class="chat-input-wrapper">
-                            <input type="text" id="message-input" class="chat-input" placeholder="Type a message..." autocomplete="off">
+                            <input type="text" id="message-input" class="chat-input" placeholder="Type a message..."
+                                autocomplete="off">
                         </div>
                         <button type="submit" class="chat-send-btn">
                             <i class="bi bi-send-fill" style="font-size: 1.2rem;"></i>
@@ -69,7 +73,8 @@
 
                 <div id="no-chat-placeholder" class="no-chat-selected">
                     <i class="bi bi-chat-dots" style="font-size: 3rem; margin-bottom: 16px; opacity: 0.3;"></i>
-                    <p class="font-mono" style="letter-spacing: 2px; font-size: 0.8rem;">[ SELECT_CONVERSATION_TO_START ]</p>
+                    <p class="font-mono" style="letter-spacing: 2px; font-size: 0.8rem;">[ SELECT_CONVERSATION_TO_START
+                        ]</p>
                 </div>
             </main>
         </div>
@@ -112,7 +117,7 @@
 
                 const socket = new SockJS('/ws');
                 stompClient = Stomp.over(socket);
-                stompClient.debug = null; 
+                stompClient.debug = null;
 
                 stompClient.connect({}, function (frame) {
                     statusText.innerText = 'ONLINE (WS)';
@@ -123,7 +128,7 @@
                         const msg = JSON.parse(message.body);
                         handleIncomingMessage(msg);
                     });
-                }, function(error) {
+                }, function (error) {
                     statusText.innerText = 'OFFLINE (POLLING...)';
                     statusText.className = 'text-purple';
                     startPolling();
@@ -154,7 +159,7 @@
                             }
                         }
                     }
-                } catch (error) {}
+                } catch (error) { }
             }
 
             function handleIncomingMessage(msg) {
@@ -192,7 +197,7 @@
                     if (unreadBadge) unreadBadge.style.display = 'none';
                     loadMessages(id);
                     const newUrl = window.location.pathname + '?with=' + id;
-                    window.history.pushState({path: newUrl}, '', newUrl);
+                    window.history.pushState({ path: newUrl }, '', newUrl);
                 }
             }
 
@@ -223,28 +228,28 @@
                 const container = document.getElementById('message-container');
                 if (!container) return;
                 const isScrolledToBottom = container.scrollHeight - container.clientHeight <= container.scrollTop + 100;
-                
+
                 // Clear existing messages
                 container.innerHTML = '';
-                
+
                 // Append messages safely as DOM nodes
                 messages.forEach(msg => {
                     const msgDiv = document.createElement('div');
                     msgDiv.className = 'message ' + (msg.senderId === currentUserId ? 'message-sent' : 'message-received');
-                    
+
                     const contentDiv = document.createElement('div');
                     contentDiv.className = 'message-content';
                     contentDiv.textContent = msg.content;
-                    
+
                     const timeSpan = document.createElement('span');
                     timeSpan.className = 'message-time';
                     timeSpan.textContent = formatTime(msg.timestamp);
-                    
+
                     msgDiv.appendChild(contentDiv);
                     msgDiv.appendChild(timeSpan);
                     container.appendChild(msgDiv);
                 });
-                
+
                 if (isScrolledToBottom) {
                     container.scrollTop = container.scrollHeight;
                 }

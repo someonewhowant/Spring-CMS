@@ -3,7 +3,80 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layouts/main}">
 <head>
-    <title>My Bookmarks</title>
+    <title>My Bookmarks — CodeBlog</title>
+    <style>
+        /* Custom profile filters */
+        .profile-filter-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            background: transparent;
+            color: var(--text-dim);
+            border: none;
+            text-align: left;
+            cursor: pointer;
+            font-family: var(--font-sans);
+            font-size: 0.95rem;
+            width: 100%;
+            transition: all 0.2s ease;
+        }
+        
+        .profile-filter-btn:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.03);
+        }
+        
+        .profile-filter-btn.active.articles-active {
+            background: rgba(88, 166, 255, 0.1);
+            color: var(--accent-blue);
+            font-weight: 600;
+        }
+        
+        .profile-filter-btn.active.courses-active {
+            background: rgba(188, 140, 255, 0.1);
+            color: var(--accent-purple);
+            font-weight: 600;
+        }
+
+        /* Trash button styles */
+        .btn-remove-bookmark {
+            background: transparent;
+            border: 1px solid rgba(255, 123, 114, 0.2);
+            color: #ff7b72;
+            padding: 8px 12px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .btn-remove-bookmark:hover {
+            background: rgba(255, 123, 114, 0.12);
+            border-color: rgba(255, 123, 114, 0.4);
+            transform: translateY(-1px);
+        }
+
+        /* Sections transitions */
+        .section-fade {
+            animation: sectionFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes sectionFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
 </head>
 <body>
     <div layout:fragment="content" class="container py-l fade-in">
@@ -11,87 +84,192 @@
         <div class="profile-layout" style="display: grid; grid-template-columns: 280px 1fr; gap: 32px; align-items: start;">
             
             <!-- Sidebar Navigation -->
-            <aside class="profile-sidebar card-glass" style="padding: 24px;">
-                <div class="profile-sidebar__user" style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
-                    <div style="width: 48px; height: 48px; border-radius: 50%; overflow: hidden; border: 2px solid var(--accent-blue);">
-                        <img th:if="${user.avatarUrl != null}" th:src="${user.avatarUrl}" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;">
-                        <div th:unless="${user.avatarUrl != null}" style="width: 100%; height: 100%; background: var(--bg-surface); display: flex; align-items: center; justify-content: center; color: var(--text-dim);">
-                            <i class="bi bi-person-fill"></i>
-                        </div>
-                    </div>
-                    <div>
-                        <div style="font-weight: 600; color: var(--text-main); font-size: 1rem;" th:text="${user.username}">Username</div>
-                        <div style="font-size: 0.8rem; color: var(--text-dim);" th:text="${user.role}">Role</div>
-                    </div>
-                </div>
-
+            <aside class="profile-sidebar card-glass" style="padding: 24px; position: sticky; top: 100px;">
+                <h3 class="font-mono text-dim" style="font-size: 0.75rem; margin: 0 0 16px; text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid var(--border-subtle); padding-bottom: 8px;">
+                    <i class="bi bi-funnel"></i> Filter Bookmarks
+                </h3>
                 <nav style="display: flex; flex-direction: column; gap: 8px;">
-                    <a th:href="@{/profile/settings}" style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: var(--radius); color: var(--text-dim); text-decoration: none; transition: all 0.2s;">
-                        <i class="bi bi-gear"></i> Settings
-                    </a>
-                    <a th:href="@{/profile/bookmarks}" style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: var(--radius); background: rgba(88, 166, 255, 0.1); color: var(--accent-blue); font-weight: 600; text-decoration: none; transition: all 0.2s;">
-                        <i class="bi bi-bookmark-fill"></i> Bookmarks
-                    </a>
-                    <a th:href="@{/profile/u/{username}(username=${user.username})}" style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: var(--radius); color: var(--text-dim); text-decoration: none; transition: all 0.2s;">
-                        <i class="bi bi-person-badge"></i> Public Profile
-                    </a>
+                    <button id="filterArticlesBtn" class="profile-filter-btn active articles-active" data-target="articles">
+                        <i class="bi bi-file-earmark-text"></i> Articles
+                    </button>
+                    <button id="filterCoursesBtn" class="profile-filter-btn" data-target="courses">
+                        <i class="bi bi-mortarboard"></i> Courses
+                    </button>
                 </nav>
+                
+                <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border-subtle);">
+                    <a th:href="@{/profile/settings}" style="display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-radius: var(--radius); color: var(--text-dim); text-decoration: none; font-size: 0.9rem; transition: all 0.2s;">
+                        <i class="bi bi-arrow-left-short"></i> Back to Settings
+                    </a>
+                </div>
             </aside>
 
             <!-- Main Content -->
             <main class="profile-main">
                 <div class="card-glass" style="padding: 32px;">
+                    <!-- Heading: Dynamic via JS -->
                     <h1 class="font-mono" style="font-size: 1.5rem; margin-bottom: 24px; color: var(--text-main); display: flex; align-items: center; gap: 12px;">
-                        <i class="bi bi-bookmarks text-blue"></i> Saved Items
+                        <i id="bookmarksTitleIcon" class="bi bi-journal-bookmark text-blue"></i>
+                        <span id="bookmarksTitle">Saved Articles</span>
                     </h1>
 
-                    <div th:if="${#lists.isEmpty(bookmarks)}" class="text-center py-2xl w-full">
-                        <i class="bi bi-inbox" style="font-size: 3rem; color: var(--text-dim); display: block; margin-bottom: var(--space-m);"></i>
-                        <p class="text-dim">No bookmarks yet. Save articles or courses to find them here later!</p>
+                    <!-- ARTICLES SECTION -->
+                    <div id="articlesSection" class="section-fade">
+                        <div th:if="${#lists.isEmpty(articleBookmarks)}" class="text-center py-2xl w-full">
+                            <i class="bi bi-inbox" style="font-size: 3rem; color: var(--text-dim); display: block; margin-bottom: var(--space-m);"></i>
+                            <p class="text-dim">No saved articles yet. Save articles from the blog to find them here later!</p>
+                            <a th:href="@{/articles}" class="btn btn-outline mt-m" style="display: inline-flex; align-items: center; gap: 8px;">
+                                <i class="bi bi-search"></i> Browse Articles
+                            </a>
+                        </div>
+                        
+                        <ul th:if="${not #lists.isEmpty(articleBookmarks)}" class="article-grid">
+                            <li th:each="bookmark : ${articleBookmarks}" class="article-card">
+                                <div class="article-card__image-container">
+                                    <img th:if="${bookmark.post.imageUrl}" th:src="${bookmark.post.imageUrl}" th:alt="${bookmark.post.title}"
+                                         class="article-card__image" loading="lazy">
+                                    <div th:unless="${bookmark.post.imageUrl}" class="article-card__placeholder"></div>
+                                </div>
+                                <div class="article-card__content">
+                                    <div class="article-card__meta">
+                                        <span class="article-card__date"
+                                              th:text="${#temporals.format(bookmark.post.createdAt, 'MMMM dd, yyyy')}">Date</span>
+                                        <span th:if="${bookmark.post.category}" class="article-card__separator">•</span>
+                                        <th:block th:replace="~{partials/fragments :: categoryBadge(${bookmark.post.category}, 'article-card__category')}"></th:block>
+                                    </div>
+                                    <h3 class="article-card__title">
+                                        <a th:href="@{/post/{id}(id=${bookmark.post.id})}" th:text="${bookmark.post.title}">Post Title</a>
+                                    </h3>
+                                    <p class="article-card__excerpt" th:text="${#strings.abbreviate(bookmark.post.body, 120)}"></p>
+                                    
+                                    <div class="article-card__footer" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                        <a th:href="@{/post/{id}(id=${bookmark.post.id})}" class="read-more">Read <i class="bi bi-arrow-right"></i></a>
+                                        
+                                        <form th:action="@{/bookmark/post/{id}(id=${bookmark.post.id})}" method="post" style="margin: 0;">
+                                            <button type="submit" class="btn-remove-bookmark">
+                                                <i class="bi bi-trash"></i> Remove
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
                     </div>
 
-                    <div th:if="${not #lists.isEmpty(bookmarks)}" style="display: grid; gap: 16px;">
-                        <div th:each="bookmark : ${bookmarks}" class="card-glass" style="padding: 20px; display: flex; justify-content: space-between; align-items: center; gap: 16px; position: relative; transition: all 0.2s;">
-                            
-                            <div th:if="${bookmark.post != null}" style="flex: 1;">
-                                <div style="display: flex; gap: 8px; margin-bottom: 8px;">
-                                    <span style="font-family: var(--font-mono); font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; background: rgba(88, 166, 255, 0.1); color: var(--accent-blue);">ARTICLE</span>
-                                </div>
-                                <h3 style="margin: 0 0 8px; font-size: 1.1rem;">
-                                    <a th:href="@{/post/{id}(id=${bookmark.post.id})}" class="stretched-link" th:text="${bookmark.post.title}" style="color: var(--text-main); text-decoration: none;">Title</a>
-                                </h3>
-                                <p style="margin: 0; font-size: 0.85rem; color: var(--text-dim);" th:text="${#temporals.format(bookmark.createdAt, 'MMM dd, yyyy HH:mm')}">Date</p>
-                            </div>
-                            
-                            <div th:if="${bookmark.course != null}" style="flex: 1;">
-                                <div style="display: flex; gap: 8px; margin-bottom: 8px;">
-                                    <span style="font-family: var(--font-mono); font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; background: rgba(188, 140, 255, 0.1); color: var(--accent-purple);">COURSE</span>
-                                </div>
-                                <h3 style="margin: 0 0 8px; font-size: 1.1rem;">
-                                    <a th:href="@{/course/{id}(id=${bookmark.course.id})}" class="stretched-link" th:text="${bookmark.course.title}" style="color: var(--text-main); text-decoration: none;">Title</a>
-                                </h3>
-                                <p style="margin: 0; font-size: 0.85rem; color: var(--text-dim);" th:text="${#temporals.format(bookmark.createdAt, 'MMM dd, yyyy HH:mm')}">Date</p>
-                            </div>
-
-                            <div style="flex-shrink: 0; position: relative; z-index: 2;">
-                                <form th:if="${bookmark.post != null}" th:action="@{/bookmark/post/{id}(id=${bookmark.post.id})}" method="post">
-                                    <button type="submit" class="btn btn-outline" style="padding: 6px 12px; color: #ff7b72; border-color: rgba(255, 123, 114, 0.3);">
-                                        <i class="bi bi-trash"></i> Remove
-                                    </button>
-                                </form>
-                                <form th:if="${bookmark.course != null}" th:action="@{/bookmark/course/{id}(id=${bookmark.course.id})}" method="post">
-                                    <button type="submit" class="btn btn-outline" style="padding: 6px 12px; color: #ff7b72; border-color: rgba(255, 123, 114, 0.3);">
-                                        <i class="bi bi-trash"></i> Remove
-                                    </button>
-                                </form>
-                            </div>
-
+                    <!-- COURSES SECTION -->
+                    <div id="coursesSection" class="section-fade" style="display: none;">
+                        <div th:if="${#lists.isEmpty(courseBookmarks)}" class="text-center py-2xl w-full">
+                            <i class="bi bi-inbox" style="font-size: 3rem; color: var(--text-dim); display: block; margin-bottom: var(--space-m);"></i>
+                            <p class="text-dim">No saved courses yet. Save courses from the academy to find them here later!</p>
+                            <a th:href="@{/courses}" class="btn btn-outline mt-m" style="display: inline-flex; align-items: center; gap: 8px;">
+                                <i class="bi bi-search"></i> Browse Courses
+                            </a>
                         </div>
+                        
+                        <ul th:if="${not #lists.isEmpty(courseBookmarks)}" class="article-grid">
+                            <li th:each="bookmark : ${courseBookmarks}" class="article-card">
+                                <div class="article-card__image-container">
+                                    <img th:if="${bookmark.course.imageUrl}" th:src="${bookmark.course.imageUrl}" th:alt="${bookmark.course.title}"
+                                         class="article-card__image" loading="lazy">
+                                    <div th:unless="${bookmark.course.imageUrl}" class="article-card__placeholder" style="background: linear-gradient(135deg, rgba(188, 140, 255, 0.15) 0%, rgba(88, 166, 255, 0.15) 100%);"></div>
+                                </div>
+                                <div class="article-card__content">
+                                    <div class="article-card__meta">
+                                        <span><i class="bi bi-clock"></i> <span th:text="${bookmark.course.duration}">12 Hours</span></span>
+                                        <span class="article-card__separator">•</span>
+                                        <span class="article-card__category" style="color: var(--accent-purple);" th:text="${bookmark.course.level}">Level</span>
+                                    </div>
+                                    <h3 class="article-card__title">
+                                        <a th:href="@{/course/{id}(id=${bookmark.course.id})}" th:text="${bookmark.course.title}">Course Title</a>
+                                    </h3>
+                                    <p class="article-card__excerpt" th:text="${#strings.abbreviate(bookmark.course.description, 120)}"></p>
+                                    
+                                    <div class="article-card__footer" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                        <a th:href="@{/course/{id}(id=${bookmark.course.id})}" class="read-more" style="color: var(--accent-purple);">Study <i class="bi bi-arrow-right"></i></a>
+                                        
+                                        <form th:action="@{/bookmark/course/{id}(id=${bookmark.course.id})}" method="post" style="margin: 0;">
+                                            <button type="submit" class="btn-remove-bookmark">
+                                                <i class="bi bi-trash"></i> Remove
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
                     </div>
 
                 </div>
             </main>
         </div>
     </div>
+
+    <!-- Script to handle switching tabs and dynamic headings -->
+    <th:block layout:fragment="scripts">
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const filterArticlesBtn = document.getElementById('filterArticlesBtn');
+                const filterCoursesBtn = document.getElementById('filterCoursesBtn');
+                
+                const articlesSection = document.getElementById('articlesSection');
+                const coursesSection = document.getElementById('coursesSection');
+                
+                const bookmarksTitle = document.getElementById('bookmarksTitle');
+                const bookmarksTitleIcon = document.getElementById('bookmarksTitleIcon');
+
+                // Function to switch to Articles tab
+                function showArticles() {
+                    // Update buttons active status
+                    filterArticlesBtn.classList.add('active', 'articles-active');
+                    filterCoursesBtn.classList.remove('active', 'courses-active');
+                    
+                    // Toggle sections visibility
+                    articlesSection.style.display = 'block';
+                    coursesSection.style.display = 'none';
+                    
+                    // Add animation class
+                    articlesSection.classList.remove('section-fade');
+                    void articlesSection.offsetWidth; // Trigger reflow
+                    articlesSection.classList.add('section-fade');
+                    
+                    // Update heading and icon
+                    bookmarksTitle.textContent = 'Saved Articles';
+                    bookmarksTitleIcon.className = 'bi bi-journal-bookmark text-blue';
+                }
+
+                // Function to switch to Courses tab
+                function showCourses() {
+                    // Update buttons active status
+                    filterCoursesBtn.classList.add('active', 'courses-active');
+                    filterArticlesBtn.classList.remove('active', 'articles-active');
+                    
+                    // Toggle sections visibility
+                    coursesSection.style.display = 'block';
+                    articlesSection.style.display = 'none';
+                    
+                    // Add animation class
+                    coursesSection.classList.remove('section-fade');
+                    void coursesSection.offsetWidth; // Trigger reflow
+                    coursesSection.classList.add('section-fade');
+                    
+                    // Update heading and icon
+                    bookmarksTitle.textContent = 'Saved Courses';
+                    bookmarksTitleIcon.className = 'bi bi-mortarboard text-purple';
+                }
+
+                // Click event listeners
+                filterArticlesBtn.addEventListener('click', showArticles);
+                filterCoursesBtn.addEventListener('click', showCourses);
+
+                // Optional: Check URL hash/query to default to a specific tab
+                const urlParams = new URLSearchParams(window.location.search);
+                const filterParam = urlParams.get('filter');
+                if (filterParam === 'courses') {
+                    showCourses();
+                } else {
+                    showArticles();
+                }
+            });
+        </script>
+    </th:block>
 </body>
 </html>

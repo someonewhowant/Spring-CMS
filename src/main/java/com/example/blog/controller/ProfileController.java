@@ -66,6 +66,15 @@ public class ProfileController {
         java.util.List<com.example.blog.entity.Bookmark> bookmarks = bookmarkService.getUserBookmarks(user.getId());
         model.addAttribute("bookmarks", bookmarks);
         
+        java.util.List<com.example.blog.entity.Bookmark> articleBookmarks = bookmarks.stream()
+                .filter(b -> b.getPost() != null)
+                .collect(java.util.stream.Collectors.toList());
+        java.util.List<com.example.blog.entity.Bookmark> courseBookmarks = bookmarks.stream()
+                .filter(b -> b.getCourse() != null)
+                .collect(java.util.stream.Collectors.toList());
+        model.addAttribute("articleBookmarks", articleBookmarks);
+        model.addAttribute("courseBookmarks", courseBookmarks);
+        
         return "profile/bookmarks";
     }
 
