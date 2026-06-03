@@ -1,6 +1,8 @@
 package com.example.blog.entity;
 
 import jakarta.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 import lombok.*;
 
 @Entity
@@ -29,11 +31,9 @@ public class User {
     @Column(name = "full_name")
     private String fullName;
 
-    @Column
-    private String email;
+    @Column private String email;
 
-    @Column
-    private String title;
+    @Column private String title;
 
     @Column(columnDefinition = "TEXT")
     private String bio;
@@ -64,8 +64,7 @@ public class User {
     @Column(name = "lms_status")
     private String lmsStatus;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
-    private java.util.Set<UserAchievement> achievements = new java.util.HashSet<>();
+    private Set<UserAchievement> achievements = new HashSet<>();
 }
-

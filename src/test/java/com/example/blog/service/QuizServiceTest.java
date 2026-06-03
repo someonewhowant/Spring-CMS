@@ -1,67 +1,69 @@
 package com.example.blog.service;
 
-import com.example.blog.entity.Quiz;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
 import com.example.blog.entity.Question;
-import com.example.blog.entity.QuestionOption;
+import com.example.blog.entity.Quiz;
+import com.example.blog.entity.Role;
 import com.example.blog.entity.User;
 import com.example.blog.entity.UserQuizResult;
-import com.example.blog.entity.Role;
 import com.example.blog.repository.CourseRepository;
 import com.example.blog.repository.QuestionRepository;
 import com.example.blog.repository.QuizRepository;
-import com.example.blog.repository.UserRepository;
 import com.example.blog.repository.UserQuizResultRepository;
+import com.example.blog.repository.UserRepository;
 import com.example.blog.service.impl.QuizServiceImpl;
+import java.util.ArrayList;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.ArrayList;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
 class QuizServiceTest {
 
     private QuizServiceImpl quizService;
 
-    @Mock
-    private QuizRepository quizRepository;
-    @Mock
-    private QuestionRepository questionRepository;
-    @Mock
-    private CourseRepository courseRepository;
-    @Mock
-    private UserRepository userRepository;
-    @Mock
-    private UserQuizResultRepository userQuizResultRepository;
-    @Mock
-    private NotificationService notificationService;
-    @Mock
-    private GamificationService gamificationService;
+    @Mock private QuizRepository quizRepository;
+    @Mock private QuestionRepository questionRepository;
+    @Mock private CourseRepository courseRepository;
+    @Mock private UserRepository userRepository;
+    @Mock private UserQuizResultRepository userQuizResultRepository;
+    @Mock private NotificationService notificationService;
+    @Mock private GamificationService gamificationService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        quizService = new QuizServiceImpl(quizRepository, questionRepository, courseRepository, userRepository, userQuizResultRepository, notificationService, gamificationService);
+        quizService =
+                new QuizServiceImpl(
+                        quizRepository,
+                        questionRepository,
+                        courseRepository,
+                        userRepository,
+                        userQuizResultRepository,
+                        notificationService,
+                        gamificationService);
     }
 
     @Test
     void testImportQuizFromMarkdown() {
-        String markdown = "# Test Quiz\n\n" +
-                "## Question 1\n" +
-                "- [ ] Option 1\n" +
-                "- [x] Option 2\n" +
-                "- [ ] Option 3\n\n" +
-                "## Question 2\n" +
-                "- [x] Correct\n" +
-                "- [ ] Incorrect";
+        String markdown =
+                "# Test Quiz\n\n"
+                        + "## Question 1\n"
+                        + "- [ ] Option 1\n"
+                        + "- [x] Option 2\n"
+                        + "- [ ] Option 3\n\n"
+                        + "## Question 2\n"
+                        + "- [x] Correct\n"
+                        + "- [ ] Incorrect";
 
-        when(courseRepository.findById(1L)).thenReturn(Optional.of(new com.example.blog.entity.Course()));
-        when(quizRepository.save(any(Quiz.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(courseRepository.findById(1L))
+                .thenReturn(Optional.of(new com.example.blog.entity.Course()));
+        when(quizRepository.save(any(Quiz.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         Quiz quiz = quizService.importQuizFromMarkdown(1L, markdown);
 
@@ -85,20 +87,23 @@ class QuizServiceTest {
 
     @Test
     void testImportQuizFromGift() {
-        String gift = "::Java Basics::Which keyword is used to create a class in Java? {\n" +
-                "    ~struct\n" +
-                "    =class\n" +
-                "    ~create\n" +
-                "}\n" +
-                "\n" +
-                "What is the entry point of a Java program? {\n" +
-                "    ~start()\n" +
-                "    =main()\n" +
-                "    ~init()\n" +
-                "}";
+        String gift =
+                "::Java Basics::Which keyword is used to create a class in Java? {\n"
+                        + "    ~struct\n"
+                        + "    =class\n"
+                        + "    ~create\n"
+                        + "}\n"
+                        + "\n"
+                        + "What is the entry point of a Java program? {\n"
+                        + "    ~start()\n"
+                        + "    =main()\n"
+                        + "    ~init()\n"
+                        + "}";
 
-        when(courseRepository.findById(1L)).thenReturn(Optional.of(new com.example.blog.entity.Course()));
-        when(quizRepository.save(any(Quiz.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(courseRepository.findById(1L))
+                .thenReturn(Optional.of(new com.example.blog.entity.Course()));
+        when(quizRepository.save(any(Quiz.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         Quiz quiz = quizService.importQuizFromGift(1L, gift);
 
@@ -120,18 +125,16 @@ class QuizServiceTest {
 
     @Test
     void testSaveQuizResult() {
-        User user = User.builder()
-                .id(1L)
-                .username("student")
-                .fullName("Test Student")
-                .experiencePoints(0)
-                .level(1)
-                .build();
-        
-        Quiz quiz = Quiz.builder()
-                .id(1L)
-                .title("Test Quiz")
-                .build();
+        User user =
+                User.builder()
+                        .id(1L)
+                        .username("student")
+                        .fullName("Test Student")
+                        .experiencePoints(0)
+                        .level(1)
+                        .build();
+
+        Quiz quiz = Quiz.builder().id(1L).title("Test Quiz").build();
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(quizRepository.findById(1L)).thenReturn(Optional.of(quiz));

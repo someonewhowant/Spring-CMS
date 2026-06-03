@@ -1,12 +1,12 @@
 package com.example.blog.controller;
 
-import com.example.blog.entity.Role;
-import com.example.blog.entity.User;
-import com.example.blog.repository.UserRepository;
+import com.example.blog.dto.UserRegisterRequest;
+import com.example.blog.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
@@ -14,8 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class RegistrationController {
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final UserService userService;
 
     @GetMapping("")
     public String registerChoice() {
@@ -32,25 +31,31 @@ public class RegistrationController {
     }
 
     @PostMapping("/{role}")
-    public String registerUser(@PathVariable String role, 
-                               @RequestParam String username, 
-                               @RequestParam String password,
-                               Model model) {
-        if (userRepository.findByUsername(username).isPresent()) {
-            model.addAttribute("error", "Username already exists");
+    public String registerUser(
+            @PathVariable String role,
+            @Valid @ModelAttribute("registerRequest") UserRegisterRequest registerRequest,
+            BindingResult bindingResult,
+            Model model) {
+        if (!role.equalsIgnoreCase("student") && !role.equalsIgnoreCase("teacher")) {
+            return "redirect:/register";
+        }
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("error", bindingResult.getAllErrors().get(0).getDefaultMessage());
             model.addAttribute("role", role);
             return "register-form";
         }
 
-        Role userRole = role.equalsIgnoreCase("teacher") ? Role.TEACHER : Role.STUDENT;
-        
-        User user = User.builder()
-                .username(username)
-                .password(passwordEncoder.encode(password))
-                .role(userRole)
-                .build();
-        
-        userRepository.save(user);
+        registerRequest.setRole(role);
+
+        try {
+            userService.register(registerRequest);
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("error", e.getMessage());
+            model.addAttribute("role", role);
+            return "register-form";
+        }
+
         return "redirect:/admin/login?registered";
     }
 }

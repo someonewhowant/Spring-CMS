@@ -1,13 +1,13 @@
 package com.example.blog.service;
 
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class FileStorageService {
@@ -30,13 +30,14 @@ public class FileStorageService {
             String originalFilename = file.getOriginalFilename();
             String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
             String filename = UUID.randomUUID().toString() + extension;
-            
-            Path destinationFile = this.rootLocation.resolve(Paths.get(filename)).normalize().toAbsolutePath();
-            
+
+            Path destinationFile =
+                    this.rootLocation.resolve(Paths.get(filename)).normalize().toAbsolutePath();
+
             try (var inputStream = file.getInputStream()) {
                 Files.copy(inputStream, destinationFile, StandardCopyOption.REPLACE_EXISTING);
             }
-            
+
             return "/uploads/" + filename;
         } catch (IOException e) {
             throw new RuntimeException("Failed to store file", e);

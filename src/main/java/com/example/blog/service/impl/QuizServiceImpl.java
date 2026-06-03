@@ -1,25 +1,25 @@
 package com.example.blog.service.impl;
 
 import com.example.blog.entity.Course;
-import com.example.blog.entity.Quiz;
 import com.example.blog.entity.Question;
 import com.example.blog.entity.QuestionOption;
+import com.example.blog.entity.Quiz;
+import com.example.blog.entity.Role;
 import com.example.blog.entity.User;
 import com.example.blog.entity.UserQuizResult;
-import com.example.blog.entity.Role;
 import com.example.blog.repository.CourseRepository;
-import com.example.blog.repository.QuizRepository;
 import com.example.blog.repository.QuestionRepository;
-import com.example.blog.repository.UserRepository;
+import com.example.blog.repository.QuizRepository;
 import com.example.blog.repository.UserQuizResultRepository;
-import com.example.blog.service.QuizService;
-import com.example.blog.service.NotificationService;
+import com.example.blog.repository.UserRepository;
 import com.example.blog.service.GamificationService;
+import com.example.blog.service.NotificationService;
+import com.example.blog.service.QuizService;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -40,15 +40,18 @@ public class QuizServiceImpl implements QuizService {
 
     @Override
     public Quiz getQuizById(Long id) {
-        return quizRepository.findById(id)
+        return quizRepository
+                .findById(id)
                 .orElseThrow(() -> new RuntimeException("Quiz not found with id: " + id));
     }
 
     @Override
     @Transactional
     public Quiz createQuiz(Long courseId, Quiz quiz) {
-        Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new RuntimeException("Course not found"));
+        Course course =
+                courseRepository
+                        .findById(courseId)
+                        .orElseThrow(() -> new RuntimeException("Course not found"));
         quiz.setCourse(course);
         return quizRepository.save(quiz);
     }
@@ -87,13 +90,15 @@ public class QuizServiceImpl implements QuizService {
     @Override
     @Transactional
     public void saveQuizResult(Long userId, Long quizId, int score) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User user =
+                userRepository
+                        .findById(userId)
+                        .orElseThrow(() -> new RuntimeException("User not found"));
         Quiz quiz = getQuizById(quizId);
-        
-        UserQuizResult result = userQuizResultRepository.findByUserIdAndQuizId(userId, quizId)
-                .orElse(null);
-        
+
+        UserQuizResult result =
+                userQuizResultRepository.findByUserIdAndQuizId(userId, quizId).orElse(null);
+
         int previousScore = 0;
         if (result != null) {
             previousScore = result.getScore();
@@ -102,7 +107,7 @@ public class QuizServiceImpl implements QuizService {
             result.setUser(user);
             result.setQuiz(quiz);
         }
-        
+
         // We save the best score
         if (score > previousScore) {
             result.setScore(score);
@@ -111,7 +116,7 @@ public class QuizServiceImpl implements QuizService {
             // Calculate and award differential XP
             int xpToAward = 0;
             String reason = "";
-            
+
             if (previousScore < 3 && score >= 3) {
                 // First time passing
                 xpToAward = 50;
@@ -125,23 +130,31 @@ public class QuizServiceImpl implements QuizService {
                 xpToAward = 20;
                 reason = "Quiz Score Improved to Perfect";
             }
-            
+
             if (xpToAward > 0) {
                 gamificationService.awardXp(userId, xpToAward, reason);
             }
         }
 
         // Notify teachers about quiz completion
-        String message = "Student " + user.getFullName() + " completed quiz: " + quiz.getTitle() + " with score " + score + "/5";
+        String message =
+                "Student "
+                        + user.getFullName()
+                        + " completed quiz: "
+                        + quiz.getTitle()
+                        + " with score "
+                        + score
+                        + "/5";
         String link = "/teacher/students/" + userId;
-        userRepository.findByRole(Role.TEACHER).forEach(teacher -> 
-            notificationService.createNotification(teacher, message, link)
-        );
+        userRepository
+                .findByRole(Role.TEACHER)
+                .forEach(teacher -> notificationService.createNotification(teacher, message, link));
     }
 
     @Override
     public int getUserScore(Long userId, Long quizId) {
-        return userQuizResultRepository.findByUserIdAndQuizId(userId, quizId)
+        return userQuizResultRepository
+                .findByUserIdAndQuizId(userId, quizId)
                 .map(UserQuizResult::getScore)
                 .orElse(0);
     }
@@ -156,7 +169,7 @@ public class QuizServiceImpl implements QuizService {
     public Quiz importQuizFromMarkdown(Long courseId, String content) {
         String[] lines = content.split("\n");
         Quiz quiz = new Quiz();
-        
+
         for (String line : lines) {
             String trimmedLine = line.trim();
             if (trimmedLine.startsWith("# ")) {
@@ -186,7 +199,7 @@ public class QuizServiceImpl implements QuizService {
     public Quiz importQuizFromGift(Long courseId, String content) {
         Quiz quiz = new Quiz();
         quiz.setTitle("Imported GIFT Quiz");
-        
+
         // Try to find a title in GIFT format (often at the beginning)
         if (content.contains("::")) {
             int firstColons = content.indexOf("::");
@@ -233,8 +246,9 @@ public class QuizServiceImpl implements QuizService {
                 currentQuestion.setText(trimmedLine.substring(3).trim());
                 currentQuestion.setQuiz(quiz);
                 currentQuestion.setOptions(new ArrayList<>());
-            } else if (trimmedLine.startsWith("- [ ] ") || trimmedLine.startsWith("- [x] ") || 
-                       trimmedLine.startsWith("- [] ")) {
+            } else if (trimmedLine.startsWith("- [ ] ")
+                    || trimmedLine.startsWith("- [x] ")
+                    || trimmedLine.startsWith("- [] ")) {
                 if (currentQuestion != null) {
                     QuestionOption option = new QuestionOption();
                     boolean isCorrect = trimmedLine.startsWith("- [x] ");
@@ -246,7 +260,7 @@ public class QuizServiceImpl implements QuizService {
                 }
             }
         }
-        
+
         if (currentQuestion != null) {
             questionRepository.save(currentQuestion);
             quiz.getQuestions().add(currentQuestion);
@@ -255,7 +269,7 @@ public class QuizServiceImpl implements QuizService {
 
     private void parseGift(Quiz quiz, String content) {
         String[] blocks = content.split("\n\\s*\n");
-        
+
         for (String block : blocks) {
             String trimmedBlock = block.trim();
             if (trimmedBlock.isEmpty() || trimmedBlock.startsWith("//")) continue;
@@ -266,14 +280,14 @@ public class QuizServiceImpl implements QuizService {
             if (openBrace != -1 && closeBrace != -1) {
                 Question question = new Question();
                 String header = trimmedBlock.substring(0, openBrace).trim();
-                
+
                 if (header.startsWith("::")) {
                     int secondColons = header.indexOf("::", 2);
                     if (secondColons != -1) {
                         header = header.substring(secondColons + 2).trim();
                     }
                 }
-                
+
                 question.setText(header);
                 question.setQuiz(quiz);
                 question.setOptions(new ArrayList<>());
@@ -298,7 +312,7 @@ public class QuizServiceImpl implements QuizService {
                     option.setQuestion(question);
                     question.getOptions().add(option);
                 }
-                
+
                 if (!question.getOptions().isEmpty()) {
                     questionRepository.save(question);
                     quiz.getQuestions().add(question);

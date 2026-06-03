@@ -1,11 +1,10 @@
 package com.example.blog.entity;
 
 import jakarta.persistence.*;
+import java.time.Instant;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "notifications")
@@ -36,5 +35,5 @@ public class Notification {
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
-    private java.time.Instant createdAt;
+    private Instant createdAt;
 }

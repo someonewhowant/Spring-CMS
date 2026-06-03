@@ -4,17 +4,18 @@ import com.example.blog.entity.Achievement;
 import com.example.blog.entity.User;
 import com.example.blog.entity.UserAchievement;
 import com.example.blog.repository.AchievementRepository;
+import com.example.blog.repository.ChatMessageRepository;
+import com.example.blog.repository.CourseRepository;
 import com.example.blog.repository.UserAchievementRepository;
-import com.example.blog.repository.UserRepository;
 import com.example.blog.repository.UserQuizResultRepository;
+import com.example.blog.repository.UserRepository;
 import com.example.blog.service.GamificationService;
 import com.example.blog.service.NotificationService;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -24,11 +25,12 @@ public class GamificationServiceImpl implements GamificationService {
     private final AchievementRepository achievementRepository;
     private final UserAchievementRepository userAchievementRepository;
     private final UserQuizResultRepository userQuizResultRepository;
-    private final com.example.blog.repository.CourseRepository courseRepository;
+    private final CourseRepository courseRepository;
     private final NotificationService notificationService;
-    private final com.example.blog.repository.ChatMessageRepository chatMessageRepository;
+    private final ChatMessageRepository chatMessageRepository;
 
-    // Formula for XP required for the NEXT level (e.g., Level 1->2 requires 100 XP, 2->3 requires 200)
+    // Formula for XP required for the NEXT level (e.g., Level 1->2 requires 100 XP, 2->3 requires
+    // 200)
     private int getXpRequiredForLevel(int level) {
         return Math.max(100, level * 100);
     }
@@ -36,8 +38,11 @@ public class GamificationServiceImpl implements GamificationService {
     @Override
     @Transactional
     public void awardXp(Long userId, int amount, String reason) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        
+        User user =
+                userRepository
+                        .findById(userId)
+                        .orElseThrow(() -> new RuntimeException("User not found"));
+
         int currentXp = user.getExperiencePoints() != null ? user.getExperiencePoints() : 0;
         user.setExperiencePoints(currentXp + amount);
 
@@ -45,7 +50,7 @@ public class GamificationServiceImpl implements GamificationService {
         user.setLevel(currentLevel);
 
         int requiredXp = getXpRequiredForLevel(user.getLevel());
-        
+
         boolean leveledUp = false;
         while (user.getExperiencePoints() >= requiredXp) {
             user.setExperiencePoints(user.getExperiencePoints() - requiredXp);
@@ -58,10 +63,7 @@ public class GamificationServiceImpl implements GamificationService {
 
         if (leveledUp) {
             notificationService.createNotification(
-                    user, 
-                    "Level Up! You have reached Level " + user.getLevel(), 
-                    "/profile"
-            );
+                    user, "Level Up! You have reached Level " + user.getLevel(), "/profile");
         }
 
         // Check if any new achievements were unlocked due to this action
@@ -71,16 +73,21 @@ public class GamificationServiceImpl implements GamificationService {
     @Override
     @Transactional
     public void evaluateAchievements(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        User user =
+                userRepository
+                        .findById(userId)
+                        .orElseThrow(() -> new RuntimeException("User not found"));
         List<Achievement> allAchievements = achievementRepository.findAll();
         List<UserAchievement> unlocked = userAchievementRepository.findByUserId(userId);
-        
-        java.util.Set<Long> unlockedIds = unlocked.stream()
-                .map(ua -> ua.getAchievement().getId())
-                .collect(java.util.stream.Collectors.toSet());
+
+        java.util.Set<Long> unlockedIds =
+                unlocked.stream()
+                        .map(ua -> ua.getAchievement().getId())
+                        .collect(java.util.stream.Collectors.toSet());
 
         // Pre-fetch quiz results to avoid multiple database calls in the loop
-        List<com.example.blog.entity.UserQuizResult> quizResults = userQuizResultRepository.findByUserId(userId);
+        List<com.example.blog.entity.UserQuizResult> quizResults =
+                userQuizResultRepository.findByUserId(userId);
 
         for (Achievement achievement : allAchievements) {
             if (unlockedIds.contains(achievement.getId())) {
@@ -88,22 +95,19 @@ public class GamificationServiceImpl implements GamificationService {
             }
 
             boolean shouldUnlock = false;
-            
+
             if (achievement.getConditionType() == Achievement.ConditionType.QUIZZES_PASSED) {
-                long passedCount = quizResults.stream()
-                        .filter(r -> r.getScore() >= 3)
-                        .count();
+                long passedCount = quizResults.stream().filter(r -> r.getScore() >= 3).count();
                 if (passedCount >= achievement.getRequiredValue()) {
                     shouldUnlock = true;
                 }
             } else if (achievement.getConditionType() == Achievement.ConditionType.PERFECT_SCORES) {
-                long perfectCount = quizResults.stream()
-                        .filter(r -> r.getScore() == 5)
-                        .count();
+                long perfectCount = quizResults.stream().filter(r -> r.getScore() == 5).count();
                 if (perfectCount >= achievement.getRequiredValue()) {
                     shouldUnlock = true;
                 }
-            } else if (achievement.getConditionType() == Achievement.ConditionType.COURSES_CREATED) {
+            } else if (achievement.getConditionType()
+                    == Achievement.ConditionType.COURSES_CREATED) {
                 long coursesCount = courseRepository.countByTeacherId(userId);
                 if (coursesCount >= achievement.getRequiredValue()) {
                     shouldUnlock = true;
@@ -114,20 +118,16 @@ public class GamificationServiceImpl implements GamificationService {
                     shouldUnlock = true;
                 }
             }
-            
+
             if (shouldUnlock) {
-                UserAchievement ua = UserAchievement.builder()
-                        .user(user)
-                        .achievement(achievement)
-                        .build();
+                UserAchievement ua =
+                        UserAchievement.builder().user(user).achievement(achievement).build();
                 userAchievementRepository.save(ua);
-                unlockedIds.add(achievement.getId()); // Add to set to avoid duplicates in the same run
-                
+                unlockedIds.add(
+                        achievement.getId()); // Add to set to avoid duplicates in the same run
+
                 notificationService.createNotification(
-                        user,
-                        "Achievement Unlocked: " + achievement.getName(),
-                        "/profile"
-                );
+                        user, "Achievement Unlocked: " + achievement.getName(), "/profile");
             }
         }
     }
@@ -142,7 +142,10 @@ public class GamificationServiceImpl implements GamificationService {
     @Override
     @Transactional
     public void resetUserStats(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        User user =
+                userRepository
+                        .findById(userId)
+                        .orElseThrow(() -> new RuntimeException("User not found"));
         userQuizResultRepository.deleteByUserId(userId);
         userAchievementRepository.deleteByUserId(userId);
         user.setExperiencePoints(0);
@@ -159,16 +162,5 @@ public class GamificationServiceImpl implements GamificationService {
         for (User student : students) {
             resetUserStats(student.getId());
         }
-    }
-
-    @Override
-    @Transactional
-    public void deleteUser(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        userQuizResultRepository.deleteByUserId(userId);
-        userAchievementRepository.deleteByUserId(userId);
-        notificationService.clearAll(userId);
-        chatMessageRepository.deleteBySenderIdOrRecipientId(userId);
-        userRepository.delete(user);
     }
 }

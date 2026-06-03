@@ -3,27 +3,28 @@ package com.example.blog.controller;
 import com.example.blog.entity.Category;
 import com.example.blog.entity.Course;
 import com.example.blog.entity.CourseModule;
+import com.example.blog.entity.Post;
 import com.example.blog.entity.Question;
 import com.example.blog.entity.QuestionOption;
 import com.example.blog.entity.Quiz;
-import com.example.blog.entity.Post;
 import com.example.blog.entity.User;
 import com.example.blog.repository.UserRepository;
 import com.example.blog.service.CourseService;
 import com.example.blog.service.FileStorageService;
 import com.example.blog.service.PostService;
 import com.example.blog.service.QuizService;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.security.Principal;
-import java.util.ArrayList;
-import java.util.List;
 
 @Controller
 @RequestMapping("/admin")
@@ -36,19 +37,14 @@ public class AdminController {
     private final FileStorageService fileStorageService;
     private final UserRepository userRepository;
 
-    /**
-     * Страница логина админа.
-     */
+    /** Страница логина админа. */
     @GetMapping("/login")
     public String login(Model model) {
         model.addAttribute("title", "Admin Login");
         return "admin/index";
     }
 
-    /**
-     * Панель управления (Dashboard).
-     * Отображает список всех постов для редактирования/удаления.
-     */
+    /** Панель управления (Dashboard). Отображает список всех постов для редактирования/удаления. */
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
         List<Post> posts = postService.getAllPosts();
@@ -57,9 +53,7 @@ public class AdminController {
         return "admin/dashboard";
     }
 
-    /**
-     * Форма добавления нового поста.
-     */
+    /** Форма добавления нового поста. */
     @GetMapping("/add-post")
     public String addPostForm(Model model) {
         model.addAttribute("title", "Add Post");
@@ -68,14 +62,14 @@ public class AdminController {
         return "admin/add-post";
     }
 
-    /**
-     * Обработка создания нового поста.
-     */
+    /** Обработка создания нового поста. */
     @PostMapping("/add-post")
-    public String addPost(@ModelAttribute Post post, 
-                          @RequestParam("image") MultipartFile image,
-                          @RequestParam(value = "markdownFile", required = false) MultipartFile markdownFile,
-                          @RequestParam(value = "tagIds", required = false) List<Long> tagIds) throws IOException {
+    public String addPost(
+            @ModelAttribute Post post,
+            @RequestParam("image") MultipartFile image,
+            @RequestParam(value = "markdownFile", required = false) MultipartFile markdownFile,
+            @RequestParam(value = "tagIds", required = false) List<Long> tagIds)
+            throws IOException {
         if (!image.isEmpty()) {
             String imageUrl = fileStorageService.storeFile(image);
             post.setImageUrl(imageUrl);
@@ -85,20 +79,20 @@ public class AdminController {
             String content = new String(markdownFile.getBytes(), StandardCharsets.UTF_8);
             post.setBody(content);
         }
-        
+
         if (tagIds != null) {
-            post.setTags(new java.util.HashSet<>(postService.getAllTags().stream()
-                    .filter(t -> tagIds.contains(t.getId()))
-                    .collect(java.util.stream.Collectors.toList())));
+            post.setTags(
+                    new HashSet<>(
+                            postService.getAllTags().stream()
+                                    .filter(t -> tagIds.contains(t.getId()))
+                                    .collect(Collectors.toList())));
         }
-        
+
         postService.createPost(post);
         return "redirect:/admin/dashboard";
     }
 
-    /**
-     * Форма редактирования поста.
-     */
+    /** Форма редактирования поста. */
     @GetMapping("/edit-post/{id}")
     public String editPostForm(@PathVariable Long id, Model model) {
         Post post = postService.getPostById(id);
@@ -109,15 +103,15 @@ public class AdminController {
         return "admin/edit-post";
     }
 
-    /**
-     * Обработка обновления поста.
-     */
+    /** Обработка обновления поста. */
     @PostMapping("/edit-post/{id}")
-    public String updatePost(@PathVariable Long id, 
-                             @ModelAttribute Post post, 
-                             @RequestParam("image") MultipartFile image,
-                             @RequestParam(value = "markdownFile", required = false) MultipartFile markdownFile,
-                             @RequestParam(value = "tagIds", required = false) List<Long> tagIds) throws IOException {
+    public String updatePost(
+            @PathVariable Long id,
+            @ModelAttribute Post post,
+            @RequestParam("image") MultipartFile image,
+            @RequestParam(value = "markdownFile", required = false) MultipartFile markdownFile,
+            @RequestParam(value = "tagIds", required = false) List<Long> tagIds)
+            throws IOException {
         if (!image.isEmpty()) {
             String imageUrl = fileStorageService.storeFile(image);
             post.setImageUrl(imageUrl);
@@ -129,29 +123,27 @@ public class AdminController {
         }
 
         if (tagIds != null) {
-            post.setTags(new java.util.HashSet<>(postService.getAllTags().stream()
-                    .filter(t -> tagIds.contains(t.getId()))
-                    .collect(java.util.stream.Collectors.toList())));
+            post.setTags(
+                    new HashSet<>(
+                            postService.getAllTags().stream()
+                                    .filter(t -> tagIds.contains(t.getId()))
+                                    .collect(Collectors.toList())));
         } else {
-            post.setTags(new java.util.HashSet<>());
+            post.setTags(new HashSet<>());
         }
-        
+
         postService.updatePost(id, post);
         return "redirect:/admin/dashboard";
     }
 
-    /**
-     * Удаление поста.
-     */
+    /** Удаление поста. */
     @GetMapping("/delete-post/{id}")
     public String deletePost(@PathVariable Long id) {
         postService.deletePost(id);
         return "redirect:/admin/dashboard";
     }
 
-    /**
-     * Управление категориями.
-     */
+    /** Управление категориями. */
     @GetMapping("/categories")
     public String manageCategories(Model model) {
         model.addAttribute("categories", postService.getAllCategories());
@@ -159,27 +151,21 @@ public class AdminController {
         return "admin/categories";
     }
 
-    /**
-     * Добавление новой категории.
-     */
+    /** Добавление новой категории. */
     @PostMapping("/categories")
     public String addCategory(@ModelAttribute Category category) {
         postService.createCategory(category);
         return "redirect:/admin/categories";
     }
 
-    /**
-     * Удаление категории.
-     */
+    /** Удаление категории. */
     @GetMapping("/delete-category/{id}")
     public String deleteCategory(@PathVariable Long id) {
         postService.deleteCategory(id);
         return "redirect:/admin/categories";
     }
 
-    /**
-     * Управление курсами.
-     */
+    /** Управление курсами. */
     @GetMapping("/courses")
     public String manageCourses(Model model) {
         model.addAttribute("courses", courseService.getAllCourses());
@@ -187,23 +173,21 @@ public class AdminController {
         return "admin/courses";
     }
 
-    /**
-     * Форма добавления курса.
-     */
+    /** Форма добавления курса. */
     @GetMapping("/add-course")
     public String addCourseForm(Model model) {
         model.addAttribute("title", "Add Course");
         return "admin/add-course";
     }
 
-    /**
-     * Обработка создания курса.
-     */
+    /** Обработка создания курса. */
     @PostMapping("/add-course")
-    public String addCourse(@ModelAttribute Course course, 
-                            @RequestParam("image") MultipartFile image,
-                            @RequestParam(value = "markdownFile", required = false) MultipartFile markdownFile,
-                            Principal principal) throws IOException {
+    public String addCourse(
+            @ModelAttribute Course course,
+            @RequestParam("image") MultipartFile image,
+            @RequestParam(value = "markdownFile", required = false) MultipartFile markdownFile,
+            Principal principal)
+            throws IOException {
         User user = userRepository.findByUsername(principal.getName()).orElse(null);
         if (!image.isEmpty()) {
             course.setImageUrl(fileStorageService.storeFile(image));
@@ -215,9 +199,7 @@ public class AdminController {
         return "redirect:/admin/courses";
     }
 
-    /**
-     * Форма редактирования курса.
-     */
+    /** Форма редактирования курса. */
     @GetMapping("/edit-course/{id}")
     public String editCourseForm(@PathVariable Long id, Model model) {
         model.addAttribute("course", courseService.getCourseById(id));
@@ -225,14 +207,14 @@ public class AdminController {
         return "admin/edit-course";
     }
 
-    /**
-     * Обработка обновления курса.
-     */
+    /** Обработка обновления курса. */
     @PostMapping("/edit-course/{id}")
-    public String updateCourse(@PathVariable Long id, 
-                               @ModelAttribute Course course, 
-                               @RequestParam("image") MultipartFile image,
-                               @RequestParam(value = "markdownFile", required = false) MultipartFile markdownFile) throws IOException {
+    public String updateCourse(
+            @PathVariable Long id,
+            @ModelAttribute Course course,
+            @RequestParam("image") MultipartFile image,
+            @RequestParam(value = "markdownFile", required = false) MultipartFile markdownFile)
+            throws IOException {
         if (!image.isEmpty()) {
             course.setImageUrl(fileStorageService.storeFile(image));
         }
@@ -243,18 +225,14 @@ public class AdminController {
         return "redirect:/admin/courses";
     }
 
-    /**
-     * Удаление курса.
-     */
+    /** Удаление курса. */
     @GetMapping("/delete-course/{id}")
     public String deleteCourse(@PathVariable Long id) {
         courseService.deleteCourse(id);
         return "redirect:/admin/courses";
     }
 
-    /**
-     * Управление модулями курса.
-     */
+    /** Управление модулями курса. */
     @GetMapping("/courses/{id}/modules")
     public String manageModules(@PathVariable Long id, Model model) {
         Course course = courseService.getCourseById(id);
@@ -265,43 +243,41 @@ public class AdminController {
         return "admin/modules";
     }
 
-    /**
-     * Установка квиза для модуля.
-     */
+    /** Установка квиза для модуля. */
     @PostMapping("/courses/{courseId}/modules/{moduleId}/quiz")
-    public String setModuleQuiz(@PathVariable Long courseId,
-                                @PathVariable Long moduleId,
-                                @RequestParam(value = "quizId", required = false) Long quizId) {
+    public String setModuleQuiz(
+            @PathVariable Long courseId,
+            @PathVariable Long moduleId,
+            @RequestParam(value = "quizId", required = false) Long quizId) {
         courseService.setModuleQuiz(moduleId, quizId);
         return "redirect:/admin/courses/" + courseId + "/modules";
     }
 
-    /**
-     * Добавление модуля.
-     */
+    /** Добавление модуля. */
     @PostMapping("/courses/{id}/modules")
-    public String addModule(@PathVariable Long id,
-                            @RequestParam("title") String title,
-                            @RequestParam(value = "content", required = false) String content,
-                            @RequestParam(value = "file", required = false) MultipartFile file) throws IOException {
+    public String addModule(
+            @PathVariable Long id,
+            @RequestParam("title") String title,
+            @RequestParam(value = "content", required = false) String content,
+            @RequestParam(value = "file", required = false) MultipartFile file)
+            throws IOException {
         CourseModule module = new CourseModule();
         module.setTitle(title);
-        
+
         if (file != null && !file.isEmpty()) {
             module.setContent(new String(file.getBytes(), StandardCharsets.UTF_8));
         } else {
             module.setContent(content);
         }
-        
+
         courseService.addModule(id, module);
         return "redirect:/admin/courses/" + id + "/modules";
     }
 
-    /**
-     * Форма редактирования модуля.
-     */
+    /** Форма редактирования модуля. */
     @GetMapping("/courses/{courseId}/modules/{moduleId}/edit")
-    public String editModuleForm(@PathVariable Long courseId, @PathVariable Long moduleId, Model model) {
+    public String editModuleForm(
+            @PathVariable Long courseId, @PathVariable Long moduleId, Model model) {
         Course course = courseService.getCourseById(courseId);
         CourseModule module = courseService.getModuleById(moduleId);
         model.addAttribute("course", course);
@@ -310,15 +286,15 @@ public class AdminController {
         return "admin/edit-module";
     }
 
-    /**
-     * Обработка обновления модуля.
-     */
+    /** Обработка обновления модуля. */
     @PostMapping("/courses/{courseId}/modules/{moduleId}/edit")
-    public String updateModule(@PathVariable Long courseId,
-                               @PathVariable Long moduleId,
-                               @RequestParam("title") String title,
-                               @RequestParam(value = "content", required = false) String content,
-                               @RequestParam(value = "file", required = false) MultipartFile file) throws IOException {
+    public String updateModule(
+            @PathVariable Long courseId,
+            @PathVariable Long moduleId,
+            @RequestParam("title") String title,
+            @RequestParam(value = "content", required = false) String content,
+            @RequestParam(value = "file", required = false) MultipartFile file)
+            throws IOException {
         CourseModule module = new CourseModule();
         module.setTitle(title);
 
@@ -332,18 +308,14 @@ public class AdminController {
         return "redirect:/admin/courses/" + courseId + "/modules";
     }
 
-    /**
-     * Удаление модуля.
-     */
+    /** Удаление модуля. */
     @GetMapping("/delete-module/{courseId}/{moduleId}")
     public String deleteModule(@PathVariable Long courseId, @PathVariable Long moduleId) {
         courseService.deleteModule(moduleId);
         return "redirect:/admin/courses/" + courseId + "/modules";
     }
 
-    /**
-     * Управление квизами курса.
-     */
+    /** Управление квизами курса. */
     @GetMapping("/courses/{id}/quizzes")
     public String manageQuizzes(@PathVariable Long id, Model model) {
         Course course = courseService.getCourseById(id);
@@ -353,13 +325,13 @@ public class AdminController {
         return "admin/quizzes";
     }
 
-    /**
-     * Добавление квиза.
-     */
+    /** Добавление квиза. */
     @PostMapping("/courses/{id}/quizzes")
-    public String addQuiz(@PathVariable Long id, 
-                          @ModelAttribute Quiz quiz,
-                          @RequestParam(value = "file", required = false) MultipartFile file) throws IOException {
+    public String addQuiz(
+            @PathVariable Long id,
+            @ModelAttribute Quiz quiz,
+            @RequestParam(value = "file", required = false) MultipartFile file)
+            throws IOException {
         if (file != null && !file.isEmpty()) {
             String content = new String(file.getBytes(), StandardCharsets.UTF_8);
             String fileName = file.getOriginalFilename();
@@ -369,7 +341,7 @@ public class AdminController {
             } else {
                 importedQuiz = quizService.importQuizFromMarkdown(id, content);
             }
-            
+
             if (quiz.getTitle() != null && !quiz.getTitle().isEmpty()) {
                 importedQuiz.setTitle(quiz.getTitle());
                 quizService.updateQuiz(importedQuiz.getId(), importedQuiz);
@@ -380,18 +352,14 @@ public class AdminController {
         return "redirect:/admin/courses/" + id + "/quizzes";
     }
 
-    /**
-     * Удаление квиза.
-     */
+    /** Удаление квиза. */
     @GetMapping("/delete-quiz/{courseId}/{quizId}")
     public String deleteQuiz(@PathVariable Long courseId, @PathVariable Long quizId) {
         quizService.deleteQuiz(quizId);
         return "redirect:/admin/courses/" + courseId + "/quizzes";
     }
 
-    /**
-     * Управление вопросами квиза.
-     */
+    /** Управление вопросами квиза. */
     @GetMapping("/quizzes/{id}/questions")
     public String manageQuestions(@PathVariable Long id, Model model) {
         Quiz quiz = quizService.getQuizById(id);
@@ -400,16 +368,16 @@ public class AdminController {
         return "admin/questions";
     }
 
-    /**
-     * Добавление вопроса.
-     */
+    /** Добавление вопроса. */
     @PostMapping("/quizzes/{id}/questions")
-    public String addQuestion(@PathVariable Long id,
-                              @RequestParam(value = "text", required = false) String text,
-                              @RequestParam(value = "optionText", required = false) List<String> optionTexts,
-                              @RequestParam(value = "correctOptionIndex", required = false) Integer correctIndex,
-                              @RequestParam(value = "file", required = false) MultipartFile file) throws IOException {
-        
+    public String addQuestion(
+            @PathVariable Long id,
+            @RequestParam(value = "text", required = false) String text,
+            @RequestParam(value = "optionText", required = false) List<String> optionTexts,
+            @RequestParam(value = "correctOptionIndex", required = false) Integer correctIndex,
+            @RequestParam(value = "file", required = false) MultipartFile file)
+            throws IOException {
+
         if (file != null && !file.isEmpty()) {
             String content = new String(file.getBytes(), StandardCharsets.UTF_8);
             String fileName = file.getOriginalFilename();
@@ -421,7 +389,7 @@ public class AdminController {
         } else if (text != null && optionTexts != null && correctIndex != null) {
             Question question = new Question();
             question.setText(text);
-            
+
             List<QuestionOption> options = new ArrayList<>();
             for (int i = 0; i < optionTexts.size(); i++) {
                 QuestionOption option = new QuestionOption();
@@ -431,16 +399,14 @@ public class AdminController {
                 options.add(option);
             }
             question.setOptions(options);
-            
+
             quizService.addQuestion(id, question);
         }
-        
+
         return "redirect:/admin/quizzes/" + id + "/questions";
     }
 
-    /**
-     * Удаление вопроса.
-     */
+    /** Удаление вопроса. */
     @GetMapping("/delete-question/{quizId}/{questionId}")
     public String deleteQuestion(@PathVariable Long quizId, @PathVariable Long questionId) {
         quizService.deleteQuestion(questionId);

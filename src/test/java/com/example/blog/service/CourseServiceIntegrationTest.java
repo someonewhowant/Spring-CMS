@@ -1,66 +1,65 @@
 package com.example.blog.service;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.example.blog.entity.Course;
 import com.example.blog.entity.CourseModule;
 import com.example.blog.entity.Quiz;
 import com.example.blog.repository.CourseModuleRepository;
 import com.example.blog.repository.CourseRepository;
 import com.example.blog.repository.QuizRepository;
+import java.util.ArrayList;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-
-import static org.junit.jupiter.api.Assertions.*;
-
 @SpringBootTest
-@org.springframework.test.context.TestPropertySource(properties = "spring.datasource.url=jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1")
+@org.springframework.test.context.TestPropertySource(
+        properties = "spring.datasource.url=jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1")
 class CourseServiceIntegrationTest {
 
-    @Autowired
-    private CourseService courseService;
+    @Autowired private CourseService courseService;
 
-    @Autowired
-    private CourseRepository courseRepository;
+    @Autowired private CourseRepository courseRepository;
 
-    @Autowired
-    private CourseModuleRepository moduleRepository;
+    @Autowired private CourseModuleRepository moduleRepository;
 
-    @Autowired
-    private QuizRepository quizRepository;
+    @Autowired private QuizRepository quizRepository;
 
     @Test
     @Transactional
     void testDeleteCourseWithModulesAndQuizzes() {
         // Create a course
-        Course course = Course.builder()
-                .title("Test Course")
-                .description("Description")
-                .content("Content")
-                .level("Beginner")
-                .duration("1 Hour")
-                .modules(new ArrayList<>())
-                .quizzes(new ArrayList<>())
-                .build();
+        Course course =
+                Course.builder()
+                        .title("Test Course")
+                        .description("Description")
+                        .content("Content")
+                        .level("Beginner")
+                        .duration("1 Hour")
+                        .modules(new ArrayList<>())
+                        .quizzes(new ArrayList<>())
+                        .build();
         course = courseRepository.save(course);
 
         // Create a module associated with the course
-        CourseModule module = CourseModule.builder()
-                .title("Test Module")
-                .content("Module Content")
-                .course(course)
-                .build();
+        CourseModule module =
+                CourseModule.builder()
+                        .title("Test Module")
+                        .content("Module Content")
+                        .course(course)
+                        .build();
         module = moduleRepository.save(module);
         course.getModules().add(module);
 
         // Create a quiz associated with the course
-        Quiz quiz = Quiz.builder()
-                .title("Test Quiz")
-                .course(course)
-                .questions(new ArrayList<>())
-                .build();
+        Quiz quiz =
+                Quiz.builder()
+                        .title("Test Quiz")
+                        .course(course)
+                        .questions(new ArrayList<>())
+                        .build();
         quiz = quizRepository.save(quiz);
         course.getQuizzes().add(quiz);
 

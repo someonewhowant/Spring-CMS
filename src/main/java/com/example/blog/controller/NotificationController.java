@@ -1,15 +1,13 @@
 package com.example.blog.controller;
 
-import com.example.blog.entity.User;
 import com.example.blog.repository.UserRepository;
 import com.example.blog.service.NotificationService;
+import java.security.Principal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
-
-import java.security.Principal;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/notifications")
@@ -20,11 +18,13 @@ public class NotificationController {
     private final UserRepository userRepository;
 
     @PostMapping("/mark-all-read")
-    public String markAllAsRead(Principal principal, @RequestHeader(value = "Referer", required = false) String referer) {
+    public String markAllAsRead(
+            Principal principal,
+            @RequestHeader(value = "Referer", required = false) String referer) {
         if (principal != null) {
-            userRepository.findByUsername(principal.getName()).ifPresent(user -> 
-                notificationService.markAllAsRead(user.getId())
-            );
+            userRepository
+                    .findByUsername(principal.getName())
+                    .ifPresent(user -> notificationService.markAllAsRead(user.getId()));
         }
         // Redirect back to the page user was on, or to dashboard as fallback
         if (referer != null && !referer.isEmpty()) {
@@ -34,11 +34,13 @@ public class NotificationController {
     }
 
     @PostMapping("/clear-all")
-    public String clearAll(Principal principal, @RequestHeader(value = "Referer", required = false) String referer) {
+    public String clearAll(
+            Principal principal,
+            @RequestHeader(value = "Referer", required = false) String referer) {
         if (principal != null) {
-            userRepository.findByUsername(principal.getName()).ifPresent(user -> 
-                notificationService.clearAll(user.getId())
-            );
+            userRepository
+                    .findByUsername(principal.getName())
+                    .ifPresent(user -> notificationService.clearAll(user.getId()));
         }
         if (referer != null && !referer.isEmpty()) {
             return "redirect:" + referer;

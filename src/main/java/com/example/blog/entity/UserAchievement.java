@@ -1,14 +1,13 @@
 package com.example.blog.entity;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import lombok.*;
 
-import java.time.LocalDateTime;
-
 @Entity
-@Table(name = "user_achievements", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"user_id", "achievement_id"})
-})
+@Table(
+        name = "user_achievements",
+        uniqueConstraints = {@UniqueConstraint(columnNames = {"user_id", "achievement_id"})})
 @Getter
 @Setter
 @NoArgsConstructor

@@ -1,9 +1,9 @@
 package com.example.blog.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.*;
 
 @Entity
 @Table(name = "quizzes")

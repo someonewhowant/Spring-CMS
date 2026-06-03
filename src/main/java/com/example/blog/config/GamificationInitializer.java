@@ -2,11 +2,10 @@ package com.example.blog.config;
 
 import com.example.blog.entity.Achievement;
 import com.example.blog.repository.AchievementRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -17,51 +16,51 @@ public class GamificationInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) {
         if (achievementRepository.count() == 0) {
-            List<Achievement> initialAchievements = List.of(
-                    Achievement.builder()
-                            .name("First Quiz")
-                            .description("Successfully pass your first academy assessment.")
-                            .iconClass("bi bi-lightning-fill")
-                            .conditionType(Achievement.ConditionType.QUIZZES_PASSED)
-                            .requiredValue(1)
-                            .build(),
-                    Achievement.builder()
-                            .name("Scholar")
-                            .description("Demonstrate consistency by passing 5 quizzes.")
-                            .iconClass("bi bi-mortarboard-fill")
-                            .conditionType(Achievement.ConditionType.QUIZZES_PASSED)
-                            .requiredValue(5)
-                            .build(),
-                    Achievement.builder()
-                            .name("Perfect Score")
-                            .description("Achieve a perfect 5/5 score on any assessment.")
-                            .iconClass("bi bi-stars")
-                            .conditionType(Achievement.ConditionType.PERFECT_SCORES)
-                            .requiredValue(1)
-                            .build(),
-                    Achievement.builder()
-                            .name("Academic Pioneer")
-                            .description("Created your first course.")
-                            .iconClass("bi bi-journal-plus")
-                            .conditionType(Achievement.ConditionType.COURSES_CREATED)
-                            .requiredValue(1)
-                            .build(),
-                    Achievement.builder()
-                            .name("Course Architect")
-                            .description("Created 5 courses.")
-                            .iconClass("bi bi-stack")
-                            .conditionType(Achievement.ConditionType.COURSES_CREATED)
-                            .requiredValue(5)
-                            .build(),
-                    Achievement.builder()
-                            .name("Active Mentor")
-                            .description("Sent 10 messages to students.")
-                            .iconClass("bi bi-chat-heart")
-                            .conditionType(Achievement.ConditionType.FEEDBACK_GIVEN)
-                            .requiredValue(10)
-                            .build()
-            );
-            
+            List<Achievement> initialAchievements =
+                    List.of(
+                            Achievement.builder()
+                                    .name("First Quiz")
+                                    .description("Successfully pass your first academy assessment.")
+                                    .iconClass("bi bi-lightning-fill")
+                                    .conditionType(Achievement.ConditionType.QUIZZES_PASSED)
+                                    .requiredValue(1)
+                                    .build(),
+                            Achievement.builder()
+                                    .name("Scholar")
+                                    .description("Demonstrate consistency by passing 5 quizzes.")
+                                    .iconClass("bi bi-mortarboard-fill")
+                                    .conditionType(Achievement.ConditionType.QUIZZES_PASSED)
+                                    .requiredValue(5)
+                                    .build(),
+                            Achievement.builder()
+                                    .name("Perfect Score")
+                                    .description("Achieve a perfect 5/5 score on any assessment.")
+                                    .iconClass("bi bi-stars")
+                                    .conditionType(Achievement.ConditionType.PERFECT_SCORES)
+                                    .requiredValue(1)
+                                    .build(),
+                            Achievement.builder()
+                                    .name("Academic Pioneer")
+                                    .description("Created your first course.")
+                                    .iconClass("bi bi-journal-plus")
+                                    .conditionType(Achievement.ConditionType.COURSES_CREATED)
+                                    .requiredValue(1)
+                                    .build(),
+                            Achievement.builder()
+                                    .name("Course Architect")
+                                    .description("Created 5 courses.")
+                                    .iconClass("bi bi-stack")
+                                    .conditionType(Achievement.ConditionType.COURSES_CREATED)
+                                    .requiredValue(5)
+                                    .build(),
+                            Achievement.builder()
+                                    .name("Active Mentor")
+                                    .description("Sent 10 messages to students.")
+                                    .iconClass("bi bi-chat-heart")
+                                    .conditionType(Achievement.ConditionType.FEEDBACK_GIVEN)
+                                    .requiredValue(10)
+                                    .build());
+
             achievementRepository.saveAll(initialAchievements);
             System.out.println("Initialized default gamification achievements.");
         }

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title th:text="${status != null ? status + ' — Error' : 'System Error'}">Error Page</title>
+</head>
+<body>
+    <div layout:fragment="content" class="fade-in">
+        <div class="auth-orb auth-orb--blue"></div>
+        <div class="auth-orb auth-orb--purple"></div>
+
+        <div class="auth-wrapper" style="min-height: calc(100vh - 200px); padding: 40px 20px;">
+            <div class="auth-card" style="max-width: 600px; text-align: center;">
+                <div class="auth-card__glow"></div>
+
+                <!-- Error Icon -->
+                <div class="auth-header__icon" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.15) 100%); color: #ef4444; border-color: rgba(239, 68, 68, 0.2); margin: 0 auto 24px auto; width: 80px; height: 80px; font-size: 32px;">
+                    <i class="bi bi-exclamation-triangle"></i>
+                </div>
+
+                <!-- Status Code -->
+                <h1 class="auth-header__title" style="font-size: 48px; font-weight: 800; background: linear-gradient(135deg, #ff4e50 0%, #f9d423 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px;" th:text="${status != null ? status : '500'}">500</h1>
+
+                <!-- Error Title -->
+                <h2 style="font-size: 22px; font-weight: 600; color: var(--text-main); margin-bottom: 16px;" th:text="${errorTitle != null ? errorTitle : 'Oops! Something went wrong'}">An Error Occurred</h2>
+
+                <!-- User-friendly message -->
+                <p style="font-size: 15px; color: var(--text-muted); line-height: 1.6; margin-bottom: 32px; max-width: 480px; margin-left: auto; margin-right: auto;" th:text="${message != null ? message : 'An unexpected error has occurred on our servers. Please try again later or contact support if the problem persists.'}">
+                    An error has occurred.
+                </p>
+
+                <!-- Navigation buttons -->
+                <div style="display: flex; gap: 16px; justify-content: center; margin-bottom: 24px;">
+                    <a th:href="@{/}" class="auth-btn auth-btn--primary" style="width: auto; padding: 12px 24px;">
+                        <i class="bi bi-house"></i> Back to Home
+                    </a>
+                    <a href="javascript:history.back()" class="auth-btn" style="width: auto; padding: 12px 24px; border: 1px solid var(--border-color); background: rgba(255, 255, 255, 0.03); color: var(--text-main);">
+                        <i class="bi bi-arrow-left"></i> Go Back
+                    </a>
+                </div>
+
+                <!-- Technical Details (collapsible, nice for debugging in development) -->
+                <div th:if="${trace != null or path != null}" style="text-align: left; margin-top: 32px; border-top: 1px solid var(--border-color); padding-top: 24px;">
+                    <details style="cursor: pointer; color: var(--text-muted); font-size: 13px;">
+                        <summary style="font-weight: 500; outline: none; margin-bottom: 12px; user-select: none;">
+                            Technical Details
+                        </summary>
+                        <div style="background: rgba(0, 0, 0, 0.2); border-radius: 8px; padding: 16px; border: 1px solid var(--border-color); margin-top: 8px; overflow-x: auto;">
+                            <p style="margin: 0 0 8px 0; font-family: var(--font-mono); font-size: 12px; color: var(--accent-blue);" th:if="${path != null}">
+                                <strong>Path:</strong> <span th:text="${path}">/url</span>
+                            </p>
+                            <pre style="margin: 0; font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); white-space: pre-wrap;" th:if="${trace != null}" th:text="${trace}">Exception trace...</pre>
+                        </div>
+                    </details>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

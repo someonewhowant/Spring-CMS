@@ -1,8 +1,8 @@
 package com.example.blog.entity;
 
 import jakarta.persistence.*;
+import java.time.Instant;
 import lombok.*;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "chat_messages")
@@ -29,7 +29,7 @@ public class ChatMessage {
     private String content;
 
     @Column(nullable = false)
-    private java.time.Instant timestamp;
+    private Instant timestamp;
 
     @Column(name = "is_read", nullable = false)
     private boolean isRead = false;

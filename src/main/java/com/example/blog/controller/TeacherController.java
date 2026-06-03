@@ -6,30 +6,33 @@ import com.example.blog.entity.CourseModule;
 import com.example.blog.entity.Question;
 import com.example.blog.entity.QuestionOption;
 import com.example.blog.entity.Quiz;
-import com.example.blog.entity.UserQuizResult;
 import com.example.blog.entity.Role;
+import com.example.blog.entity.User;
+import com.example.blog.entity.UserQuizResult;
 import com.example.blog.repository.CourseRepository;
 import com.example.blog.repository.QuizRepository;
+import com.example.blog.repository.UserQuizResultRepository;
+import com.example.blog.repository.UserRepository;
 import com.example.blog.service.CourseService;
 import com.example.blog.service.FileStorageService;
-import com.example.blog.service.QuizService;
+import com.example.blog.service.GamificationService;
 import com.example.blog.service.NotificationService;
+import com.example.blog.service.QuizService;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import com.example.blog.repository.UserRepository;
-import com.example.blog.repository.UserQuizResultRepository;
-import java.security.Principal;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.PageRequest;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/teacher")
@@ -44,29 +47,29 @@ public class TeacherController {
     private final CourseRepository courseRepository;
     private final QuizRepository quizRepository;
     private final NotificationService notificationService;
-    private final com.example.blog.service.GamificationService gamificationService;
+    private final GamificationService gamificationService;
 
     @GetMapping("/dashboard")
     public String dashboard(Principal principal, Model model) {
         if (principal == null) {
             return "redirect:/admin/login";
         }
-        com.example.blog.entity.User user = userRepository.findByUsername(principal.getName()).orElse(null);
+        User user = userRepository.findByUsername(principal.getName()).orElse(null);
         model.addAttribute("user", user);
 
-        java.util.List<Course> courses = courseService.getAllCourses();
+        List<Course> courses = courseService.getAllCourses();
         int totalCourses = courses.size();
         int totalQuizzes = 0;
         for (Course c : courses) {
             totalQuizzes += quizService.getQuizzesByCourseId(c.getId()).size();
         }
 
-        List<com.example.blog.entity.User> allStudents = userRepository.findByRole(Role.STUDENT);
+        List<User> allStudents = userRepository.findByRole(Role.STUDENT);
         int totalStudents = allStudents.size();
 
         // Fetch top students
         List<StudentProgressDto> topStudents = new ArrayList<>();
-        for (com.example.blog.entity.User student : allStudents) {
+        for (User student : allStudents) {
             List<UserQuizResult> results = userQuizResultRepository.findByUserId(student.getId());
             if (!results.isEmpty()) {
                 double total = 0.0;
@@ -89,20 +92,21 @@ public class TeacherController {
         model.addAttribute("quizzesCount", totalQuizzes);
         model.addAttribute("studentsCount", totalStudents);
         model.addAttribute("currentUser", principal.getName());
-        model.addAttribute("currentUserRole", "ROLE_" + (user != null ? user.getRole().name() : "TEACHER"));
-        
+        model.addAttribute(
+                "currentUserRole", "ROLE_" + (user != null ? user.getRole().name() : "TEACHER"));
+
         // Add notifications
         if (user != null) {
-            model.addAttribute("notifications", notificationService.getRecentNotifications(user.getId(), 5));
-            model.addAttribute("unreadNotificationsCount", notificationService.getUnreadCount(user.getId()));
+            model.addAttribute(
+                    "notifications", notificationService.getRecentNotifications(user.getId(), 5));
+            model.addAttribute(
+                    "unreadNotificationsCount", notificationService.getUnreadCount(user.getId()));
         }
 
         return "teacher/dashboard";
     }
 
-    /**
-     * Управление курсами.
-     */
+    /** Управление курсами. */
     @GetMapping("/courses")
     public String manageCourses(Model model) {
         model.addAttribute("courses", courseService.getAllCourses());
@@ -110,24 +114,22 @@ public class TeacherController {
         return "teacher/courses";
     }
 
-    /**
-     * Форма добавления курса.
-     */
+    /** Форма добавления курса. */
     @GetMapping("/add-course")
     public String addCourseForm(Model model) {
         model.addAttribute("title", "Add Course");
         return "teacher/add-course";
     }
 
-    /**
-     * Обработка создания курса.
-     */
+    /** Обработка создания курса. */
     @PostMapping("/add-course")
-    public String addCourse(@ModelAttribute Course course, 
-                            @RequestParam("image") MultipartFile image,
-                            @RequestParam(value = "markdownFile", required = false) MultipartFile markdownFile,
-                            Principal principal) throws IOException {
-        com.example.blog.entity.User user = userRepository.findByUsername(principal.getName()).orElse(null);
+    public String addCourse(
+            @ModelAttribute Course course,
+            @RequestParam("image") MultipartFile image,
+            @RequestParam(value = "markdownFile", required = false) MultipartFile markdownFile,
+            Principal principal)
+            throws IOException {
+        User user = userRepository.findByUsername(principal.getName()).orElse(null);
         if (!image.isEmpty()) {
             course.setImageUrl(fileStorageService.storeFile(image));
         }
@@ -138,9 +140,7 @@ public class TeacherController {
         return "redirect:/teacher/courses";
     }
 
-    /**
-     * Форма редактирования курса.
-     */
+    /** Форма редактирования курса. */
     @GetMapping("/edit-course/{id}")
     public String editCourseForm(@PathVariable Long id, Model model) {
         model.addAttribute("course", courseService.getCourseById(id));
@@ -148,14 +148,14 @@ public class TeacherController {
         return "teacher/edit-course";
     }
 
-    /**
-     * Обработка обновления курса.
-     */
+    /** Обработка обновления курса. */
     @PostMapping("/edit-course/{id}")
-    public String updateCourse(@PathVariable Long id, 
-                               @ModelAttribute Course course, 
-                               @RequestParam("image") MultipartFile image,
-                               @RequestParam(value = "markdownFile", required = false) MultipartFile markdownFile) throws IOException {
+    public String updateCourse(
+            @PathVariable Long id,
+            @ModelAttribute Course course,
+            @RequestParam("image") MultipartFile image,
+            @RequestParam(value = "markdownFile", required = false) MultipartFile markdownFile)
+            throws IOException {
         if (!image.isEmpty()) {
             course.setImageUrl(fileStorageService.storeFile(image));
         }
@@ -166,18 +166,14 @@ public class TeacherController {
         return "redirect:/teacher/courses";
     }
 
-    /**
-     * Удаление курса.
-     */
+    /** Удаление курса. */
     @GetMapping("/delete-course/{id}")
     public String deleteCourse(@PathVariable Long id) {
         courseService.deleteCourse(id);
         return "redirect:/teacher/courses";
     }
 
-    /**
-     * Управление модулями курса.
-     */
+    /** Управление модулями курса. */
     @GetMapping("/courses/{id}/modules")
     public String manageModules(@PathVariable Long id, Model model) {
         Course course = courseService.getCourseById(id);
@@ -188,51 +184,50 @@ public class TeacherController {
         return "teacher/modules";
     }
 
-    /**
-     * Установка квиза для модуля.
-     */
+    /** Установка квиза для модуля. */
     @PostMapping("/courses/{courseId}/modules/{moduleId}/quiz")
-    public String setModuleQuiz(@PathVariable Long courseId,
-                                @PathVariable Long moduleId,
-                                @RequestParam(value = "quizId", required = false) Long quizId) {
+    public String setModuleQuiz(
+            @PathVariable Long courseId,
+            @PathVariable Long moduleId,
+            @RequestParam(value = "quizId", required = false) Long quizId) {
         courseService.setModuleQuiz(moduleId, quizId);
         return "redirect:/teacher/courses/" + courseId + "/modules";
     }
 
-    /**
-     * Добавление модуля.
-     */
+    /** Добавление модуля. */
     @PostMapping("/courses/{id}/modules")
-    public String addModule(@PathVariable Long id,
-                            @RequestParam("title") String title,
-                            @RequestParam(value = "content", required = false) String content,
-                            @RequestParam(value = "file", required = false) MultipartFile file) throws IOException {
+    public String addModule(
+            @PathVariable Long id,
+            @RequestParam("title") String title,
+            @RequestParam(value = "content", required = false) String content,
+            @RequestParam(value = "file", required = false) MultipartFile file)
+            throws IOException {
         CourseModule module = new CourseModule();
         module.setTitle(title);
-        
+
         if (file != null && !file.isEmpty()) {
             module.setContent(new String(file.getBytes(), StandardCharsets.UTF_8));
         } else {
             module.setContent(content);
         }
-        
+
         CourseModule savedModule = courseService.addModule(id, module);
-        
+
         // Notify all students about the new module
-        String message = "New module added to course: " + savedModule.getCourse().getTitle() + " - " + title;
+        String message =
+                "New module added to course: " + savedModule.getCourse().getTitle() + " - " + title;
         String link = "/course/" + id + "/module/" + savedModule.getId();
-        userRepository.findByRole(Role.STUDENT).forEach(student -> 
-            notificationService.createNotification(student, message, link)
-        );
-        
+        userRepository
+                .findByRole(Role.STUDENT)
+                .forEach(student -> notificationService.createNotification(student, message, link));
+
         return "redirect:/teacher/courses/" + id + "/modules";
     }
 
-    /**
-     * Форма редактирования модуля.
-     */
+    /** Форма редактирования модуля. */
     @GetMapping("/courses/{courseId}/modules/{moduleId}/edit")
-    public String editModuleForm(@PathVariable Long courseId, @PathVariable Long moduleId, Model model) {
+    public String editModuleForm(
+            @PathVariable Long courseId, @PathVariable Long moduleId, Model model) {
         Course course = courseService.getCourseById(courseId);
         CourseModule module = courseService.getModuleById(moduleId);
         model.addAttribute("course", course);
@@ -241,15 +236,15 @@ public class TeacherController {
         return "teacher/edit-module";
     }
 
-    /**
-     * Обработка обновления модуля.
-     */
+    /** Обработка обновления модуля. */
     @PostMapping("/courses/{courseId}/modules/{moduleId}/edit")
-    public String updateModule(@PathVariable Long courseId,
-                               @PathVariable Long moduleId,
-                               @RequestParam("title") String title,
-                               @RequestParam(value = "content", required = false) String content,
-                               @RequestParam(value = "file", required = false) MultipartFile file) throws IOException {
+    public String updateModule(
+            @PathVariable Long courseId,
+            @PathVariable Long moduleId,
+            @RequestParam("title") String title,
+            @RequestParam(value = "content", required = false) String content,
+            @RequestParam(value = "file", required = false) MultipartFile file)
+            throws IOException {
         CourseModule module = new CourseModule();
         module.setTitle(title);
 
@@ -263,18 +258,14 @@ public class TeacherController {
         return "redirect:/teacher/courses/" + courseId + "/modules";
     }
 
-    /**
-     * Удаление модуля.
-     */
+    /** Удаление модуля. */
     @GetMapping("/delete-module/{courseId}/{moduleId}")
     public String deleteModule(@PathVariable Long courseId, @PathVariable Long moduleId) {
         courseService.deleteModule(moduleId);
         return "redirect:/teacher/courses/" + courseId + "/modules";
     }
 
-    /**
-     * Управление квизами курса.
-     */
+    /** Управление квизами курса. */
     @GetMapping("/courses/{id}/quizzes")
     public String manageQuizzes(@PathVariable Long id, Model model) {
         Course course = courseService.getCourseById(id);
@@ -284,13 +275,13 @@ public class TeacherController {
         return "teacher/quizzes";
     }
 
-    /**
-     * Добавление квиза.
-     */
+    /** Добавление квиза. */
     @PostMapping("/courses/{id}/quizzes")
-    public String addQuiz(@PathVariable Long id, 
-                          @ModelAttribute Quiz quiz,
-                          @RequestParam(value = "file", required = false) MultipartFile file) throws IOException {
+    public String addQuiz(
+            @PathVariable Long id,
+            @ModelAttribute Quiz quiz,
+            @RequestParam(value = "file", required = false) MultipartFile file)
+            throws IOException {
         Quiz savedQuiz;
         if (file != null && !file.isEmpty()) {
             String content = new String(file.getBytes(), StandardCharsets.UTF_8);
@@ -300,7 +291,7 @@ public class TeacherController {
             } else {
                 savedQuiz = quizService.importQuizFromMarkdown(id, content);
             }
-            
+
             if (quiz.getTitle() != null && !quiz.getTitle().isEmpty()) {
                 savedQuiz.setTitle(quiz.getTitle());
                 quizService.updateQuiz(savedQuiz.getId(), savedQuiz);
@@ -310,27 +301,27 @@ public class TeacherController {
         }
 
         // Notify all students about the new quiz
-        String message = "New interactive quiz available in course: " + savedQuiz.getCourse().getTitle() + " - " + savedQuiz.getTitle();
+        String message =
+                "New interactive quiz available in course: "
+                        + savedQuiz.getCourse().getTitle()
+                        + " - "
+                        + savedQuiz.getTitle();
         String link = "/course/" + id;
-        userRepository.findByRole(Role.STUDENT).forEach(student -> 
-            notificationService.createNotification(student, message, link)
-        );
+        userRepository
+                .findByRole(Role.STUDENT)
+                .forEach(student -> notificationService.createNotification(student, message, link));
 
         return "redirect:/teacher/courses/" + id + "/quizzes";
     }
 
-    /**
-     * Удаление квиза.
-     */
+    /** Удаление квиза. */
     @GetMapping("/delete-quiz/{courseId}/{quizId}")
     public String deleteQuiz(@PathVariable Long courseId, @PathVariable Long quizId) {
         quizService.deleteQuiz(quizId);
         return "redirect:/teacher/courses/" + courseId + "/quizzes";
     }
 
-    /**
-     * Управление вопросами квиза.
-     */
+    /** Управление вопросами квиза. */
     @GetMapping("/quizzes/{id}/questions")
     public String manageQuestions(@PathVariable Long id, Model model) {
         Quiz quiz = quizService.getQuizById(id);
@@ -339,16 +330,16 @@ public class TeacherController {
         return "teacher/questions";
     }
 
-    /**
-     * Добавление вопроса.
-     */
+    /** Добавление вопроса. */
     @PostMapping("/quizzes/{id}/questions")
-    public String addQuestion(@PathVariable Long id,
-                              @RequestParam(value = "text", required = false) String text,
-                              @RequestParam(value = "optionText", required = false) List<String> optionTexts,
-                              @RequestParam(value = "correctOptionIndex", required = false) Integer correctIndex,
-                              @RequestParam(value = "file", required = false) MultipartFile file) throws IOException {
-        
+    public String addQuestion(
+            @PathVariable Long id,
+            @RequestParam(value = "text", required = false) String text,
+            @RequestParam(value = "optionText", required = false) List<String> optionTexts,
+            @RequestParam(value = "correctOptionIndex", required = false) Integer correctIndex,
+            @RequestParam(value = "file", required = false) MultipartFile file)
+            throws IOException {
+
         if (file != null && !file.isEmpty()) {
             String content = new String(file.getBytes(), StandardCharsets.UTF_8);
             String fileName = file.getOriginalFilename();
@@ -360,7 +351,7 @@ public class TeacherController {
         } else if (text != null && optionTexts != null && correctIndex != null) {
             Question question = new Question();
             question.setText(text);
-            
+
             List<QuestionOption> options = new ArrayList<>();
             for (int i = 0; i < optionTexts.size(); i++) {
                 QuestionOption option = new QuestionOption();
@@ -370,16 +361,14 @@ public class TeacherController {
                 options.add(option);
             }
             question.setOptions(options);
-            
+
             quizService.addQuestion(id, question);
         }
-        
+
         return "redirect:/teacher/quizzes/" + id + "/questions";
     }
 
-    /**
-     * Удаление вопроса.
-     */
+    /** Удаление вопроса. */
     @GetMapping("/delete-question/{quizId}/{questionId}")
     public String deleteQuestion(@PathVariable Long quizId, @PathVariable Long questionId) {
         quizService.deleteQuestion(questionId);
@@ -391,13 +380,18 @@ public class TeacherController {
         if (principal == null) {
             return "redirect:/admin/login";
         }
-        com.example.blog.entity.User teacher = userRepository.findByUsername(principal.getName()).orElse(null);
-        com.example.blog.entity.User student = userRepository.findById(id).orElseThrow(() -> new RuntimeException("Student not found"));
+        User teacher = userRepository.findByUsername(principal.getName()).orElse(null);
+        User student =
+                userRepository
+                        .findById(id)
+                        .orElseThrow(() -> new RuntimeException("Student not found"));
 
         model.addAttribute("user", teacher);
         model.addAttribute("student", student);
         model.addAttribute("currentUser", principal.getName());
-        model.addAttribute("currentUserRole", "ROLE_" + (teacher != null ? teacher.getRole().name() : "TEACHER"));
+        model.addAttribute(
+                "currentUserRole",
+                "ROLE_" + (teacher != null ? teacher.getRole().name() : "TEACHER"));
         model.addAttribute("title", "Student Profile: " + student.getFullName());
 
         List<UserQuizResult> quizResults = userQuizResultRepository.findByUserId(student.getId());
@@ -412,7 +406,7 @@ public class TeacherController {
             int totalCourseQuizzes = courseQuizzes.size();
             int passedInCourse = 0;
             boolean hasAttemptsInCourse = false;
-            
+
             for (Quiz q : courseQuizzes) {
                 for (UserQuizResult res : quizResults) {
                     if (res.getQuiz().getId().equals(q.getId())) {
@@ -424,19 +418,24 @@ public class TeacherController {
                     }
                 }
             }
-            
+
             int pct = 0;
             String status = "AVAILABLE";
-            
+
             if (totalCourseQuizzes > 0) {
                 pct = (passedInCourse * 100) / totalCourseQuizzes;
                 if (pct == 100) status = "COMPLETED";
-                else if (hasAttemptsInCourse || (student.getLastOpenedCourseId() != null && student.getLastOpenedCourseId().equals(course.getId()))) status = "ACTIVE";
+                else if (hasAttemptsInCourse
+                        || (student.getLastOpenedCourseId() != null
+                                && student.getLastOpenedCourseId().equals(course.getId())))
+                    status = "ACTIVE";
             } else {
-                if (student.getLastOpenedCourseId() != null && student.getLastOpenedCourseId().equals(course.getId())) {
+                if (student.getLastOpenedCourseId() != null
+                        && student.getLastOpenedCourseId().equals(course.getId())) {
                     List<CourseModule> modules = course.getModules();
                     if (!modules.isEmpty() && student.getLastOpenedModuleId() != null) {
-                        if (student.getLastOpenedModuleId().equals(modules.get(modules.size() - 1).getId())) {
+                        if (student.getLastOpenedModuleId()
+                                .equals(modules.get(modules.size() - 1).getId())) {
                             pct = 100;
                             status = "COMPLETED";
                         } else {
@@ -449,7 +448,7 @@ public class TeacherController {
                     }
                 }
             }
-            
+
             Long nextModuleId = null;
             for (CourseModule m : course.getModules()) {
                 boolean completed = false;
@@ -475,8 +474,10 @@ public class TeacherController {
             if (nextModuleId == null && !course.getModules().isEmpty()) {
                 nextModuleId = course.getModules().get(0).getId();
             }
-            
-            courseProgress.add(new StudentCourseProgressDto(course, pct, status, passedInCourse, totalCourseQuizzes, nextModuleId));
+
+            courseProgress.add(
+                    new StudentCourseProgressDto(
+                            course, pct, status, passedInCourse, totalCourseQuizzes, nextModuleId));
         }
 
         model.addAttribute("courseProgress", courseProgress);
@@ -484,30 +485,31 @@ public class TeacherController {
         return "teacher/student-profile";
     }
 
-    /**
-     * Просмотр студентов Академии и метрик их успеваемости.
-     */
+    /** Просмотр студентов Академии и метрик их успеваемости. */
     @GetMapping("/students")
-    public String browseStudents(Principal principal,
-                                 @RequestParam(value = "search", required = false) String search,
-                                 @RequestParam(defaultValue = "0") int page,
-                                 Model model) {
+    public String browseStudents(
+            Principal principal,
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(defaultValue = "0") int page,
+            Model model) {
         if (principal == null) {
             return "redirect:/admin/login";
         }
-        com.example.blog.entity.User user = userRepository.findByUsername(principal.getName()).orElse(null);
+        User user = userRepository.findByUsername(principal.getName()).orElse(null);
         model.addAttribute("user", user);
         model.addAttribute("currentUser", principal.getName());
-        model.addAttribute("currentUserRole", "ROLE_" + (user != null ? user.getRole().name() : "TEACHER"));
+        model.addAttribute(
+                "currentUserRole", "ROLE_" + (user != null ? user.getRole().name() : "TEACHER"));
         model.addAttribute("title", "Browse Students");
 
         String trimmedSearch = (search != null) ? search.trim() : "";
         Pageable pageable = PageRequest.of(page, 6);
-        Page<com.example.blog.entity.User> studentPage = userRepository.findByRoleAndSearch(Role.STUDENT, trimmedSearch, pageable);
-        
+        Page<User> studentPage =
+                userRepository.findByRoleAndSearch(Role.STUDENT, trimmedSearch, pageable);
+
         List<StudentProgressDto> studentProgressList = new ArrayList<>();
 
-        for (com.example.blog.entity.User student : studentPage.getContent()) {
+        for (User student : studentPage.getContent()) {
             List<UserQuizResult> results = userQuizResultRepository.findByUserId(student.getId());
             int completedCount = results.size();
             double avgScore = 0.0;
@@ -518,7 +520,8 @@ public class TeacherController {
                 }
                 avgScore = Math.round((total / completedCount) * 10.0) / 10.0;
             }
-            studentProgressList.add(new StudentProgressDto(student, completedCount, avgScore, results));
+            studentProgressList.add(
+                    new StudentProgressDto(student, completedCount, avgScore, results));
         }
 
         model.addAttribute("students", studentProgressList);
@@ -531,17 +534,19 @@ public class TeacherController {
     }
 
     @PostMapping("/reset-stats")
-    public String resetAllStudentStats(Principal principal, org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+    public String resetAllStudentStats(Principal principal, RedirectAttributes redirectAttributes) {
         if (principal == null) {
             return "redirect:/admin/login";
         }
         gamificationService.resetAllStudentStats();
-        redirectAttributes.addFlashAttribute("success", "Вся статистика студентов академии успешно сброшена!");
+        redirectAttributes.addFlashAttribute(
+                "success", "Вся статистика студентов академии успешно сброшена!");
         return "redirect:/teacher/dashboard";
     }
 
     @PostMapping("/students/{id}/reset-stats")
-    public String resetSingleStudentStats(@PathVariable Long id, Principal principal, org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+    public String resetSingleStudentStats(
+            @PathVariable Long id, Principal principal, RedirectAttributes redirectAttributes) {
         if (principal == null) {
             return "redirect:/admin/login";
         }
@@ -550,10 +555,10 @@ public class TeacherController {
         return "redirect:/teacher/students/" + id;
     }
 
-    @lombok.Getter
-    @lombok.RequiredArgsConstructor
+    @Getter
+    @RequiredArgsConstructor
     public static class StudentProgressDto {
-        private final com.example.blog.entity.User student;
+        private final User student;
         private final int completedQuizzesCount;
         private final double averageScore;
         private final List<UserQuizResult> quizResults;

@@ -9,12 +9,11 @@ import com.example.blog.repository.CourseRepository;
 import com.example.blog.repository.PostRepository;
 import com.example.blog.repository.UserRepository;
 import com.example.blog.service.BookmarkService;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -34,10 +33,7 @@ public class BookmarkServiceImpl implements BookmarkService {
         } else {
             User user = userRepository.findById(userId).orElseThrow();
             Post post = postRepository.findById(postId).orElseThrow();
-            Bookmark bookmark = Bookmark.builder()
-                    .user(user)
-                    .post(post)
-                    .build();
+            Bookmark bookmark = Bookmark.builder().user(user).post(post).build();
             bookmarkRepository.save(bookmark);
         }
     }
@@ -51,10 +47,7 @@ public class BookmarkServiceImpl implements BookmarkService {
         } else {
             User user = userRepository.findById(userId).orElseThrow();
             Course course = courseRepository.findById(courseId).orElseThrow();
-            Bookmark bookmark = Bookmark.builder()
-                    .user(user)
-                    .course(course)
-                    .build();
+            Bookmark bookmark = Bookmark.builder().user(user).course(course).build();
             bookmarkRepository.save(bookmark);
         }
     }

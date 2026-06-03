@@ -4,29 +4,28 @@ import com.example.blog.dto.StudentCourseProgressDto;
 import com.example.blog.entity.Course;
 import com.example.blog.entity.CourseModule;
 import com.example.blog.entity.Quiz;
+import com.example.blog.entity.Role;
 import com.example.blog.entity.User;
 import com.example.blog.entity.UserQuizResult;
-import com.example.blog.entity.Role;
-import com.example.blog.repository.UserRepository;
-import com.example.blog.repository.UserQuizResultRepository;
 import com.example.blog.repository.CourseRepository;
 import com.example.blog.repository.QuizRepository;
+import com.example.blog.repository.UserQuizResultRepository;
+import com.example.blog.repository.UserRepository;
 import com.example.blog.service.CourseService;
-import com.example.blog.service.QuizService;
-import com.example.blog.service.NotificationService;
 import com.example.blog.service.GamificationService;
+import com.example.blog.service.NotificationService;
+import com.example.blog.service.QuizService;
+import java.security.Principal;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import java.security.Principal;
-import java.util.List;
 
 @Controller
 @RequestMapping("/student")
@@ -43,7 +42,8 @@ public class StudentController {
     private final GamificationService gamificationService;
 
     @GetMapping("/dashboard")
-    public String dashboard(@RequestParam(defaultValue = "0") int page, Principal principal, Model model) {
+    public String dashboard(
+            @RequestParam(defaultValue = "0") int page, Principal principal, Model model) {
         if (principal == null) {
             return "redirect:/admin/login";
         }
@@ -51,13 +51,13 @@ public class StudentController {
         if (user == null) {
             return "redirect:/admin/login";
         }
-        
+
         model.addAttribute("user", user);
         model.addAttribute("currentUser", user.getUsername());
         model.addAttribute("currentUserRole", "ROLE_" + user.getRole().name());
 
         List<UserQuizResult> allQuizResults = userQuizResultRepository.findByUserId(user.getId());
-        
+
         int totalAttempts = allQuizResults.size();
         int passedQuizzesCount = 0;
         int totalPoints = 0;
@@ -69,28 +69,37 @@ public class StudentController {
         }
 
         // Paginate for the recent quiz results table
-        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, 5);
-        org.springframework.data.domain.Page<UserQuizResult> quizResultsPage = userQuizResultRepository.findByUserIdOrderByIdDesc(user.getId(), pageable);
-        
+        org.springframework.data.domain.Pageable pageable =
+                org.springframework.data.domain.PageRequest.of(page, 5);
+        org.springframework.data.domain.Page<UserQuizResult> quizResultsPage =
+                userQuizResultRepository.findByUserIdOrderByIdDesc(user.getId(), pageable);
+
         model.addAttribute("quizResults", quizResultsPage.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", quizResultsPage.getTotalPages());
         model.addAttribute("hasNext", quizResultsPage.hasNext());
         model.addAttribute("hasPrev", quizResultsPage.hasPrevious());
-        
+
         model.addAttribute("totalAttempts", totalAttempts);
         model.addAttribute("passedQuizzesCount", passedQuizzesCount);
-        model.addAttribute("totalPoints", user.getExperiencePoints() != null ? user.getExperiencePoints() : 0);
-        
+        model.addAttribute(
+                "totalPoints", user.getExperiencePoints() != null ? user.getExperiencePoints() : 0);
+
         // Calculate XP progress for premium UI
         int currentLevel = user.getLevel() != null ? user.getLevel() : 1;
         int requiredXp = Math.max(100, currentLevel * 100);
-        int xpProgressPct = (model.getAttribute("totalPoints") != null ? (int)model.getAttribute("totalPoints") : 0) * 100 / requiredXp;
+        int xpProgressPct =
+                (model.getAttribute("totalPoints") != null
+                                ? (int) model.getAttribute("totalPoints")
+                                : 0)
+                        * 100
+                        / requiredXp;
         model.addAttribute("requiredXp", requiredXp);
         model.addAttribute("xpProgressPct", xpProgressPct);
-        
-        model.addAttribute("unlockedAchievements", gamificationService.getUnlockedAchievements(user.getId()));
-        
+
+        model.addAttribute(
+                "unlockedAchievements", gamificationService.getUnlockedAchievements(user.getId()));
+
         double averageScore = 0.0;
         if (totalAttempts > 0) {
             averageScore = Math.round(((double) totalPoints / totalAttempts) * 10.0) / 10.0;
@@ -117,7 +126,9 @@ public class StudentController {
                 lastCourse = courseService.getCourseById(user.getLastOpenedCourseId());
                 if (user.getLastOpenedModuleId() != null) {
                     lastModule = courseService.getModuleById(user.getLastOpenedModuleId());
-                    if (lastModule == null || lastModule.getCourse() == null || !lastModule.getCourse().getId().equals(lastCourse.getId())) {
+                    if (lastModule == null
+                            || lastModule.getCourse() == null
+                            || !lastModule.getCourse().getId().equals(lastCourse.getId())) {
                         lastModule = null;
                     }
                 }
@@ -140,7 +151,7 @@ public class StudentController {
             int totalCourseQuizzes = courseQuizzes.size();
             int passedInCourse = 0;
             boolean hasAttemptsInCourse = false;
-            
+
             for (Quiz q : courseQuizzes) {
                 for (UserQuizResult res : allQuizResults) {
                     if (res.getQuiz().getId().equals(q.getId())) {
@@ -152,23 +163,27 @@ public class StudentController {
                     }
                 }
             }
-            
+
             int pct = 0;
             String status = "AVAILABLE";
-            
+
             if (totalCourseQuizzes > 0) {
                 pct = (passedInCourse * 100) / totalCourseQuizzes;
                 if (pct == 100) {
                     status = "COMPLETED";
-                } else if (hasAttemptsInCourse || (user.getLastOpenedCourseId() != null && user.getLastOpenedCourseId().equals(course.getId()))) {
+                } else if (hasAttemptsInCourse
+                        || (user.getLastOpenedCourseId() != null
+                                && user.getLastOpenedCourseId().equals(course.getId()))) {
                     status = "ACTIVE";
                 }
             } else {
                 // No quizzes, check if any module was opened
-                if (user.getLastOpenedCourseId() != null && user.getLastOpenedCourseId().equals(course.getId())) {
+                if (user.getLastOpenedCourseId() != null
+                        && user.getLastOpenedCourseId().equals(course.getId())) {
                     List<CourseModule> modules = course.getModules();
                     if (!modules.isEmpty() && user.getLastOpenedModuleId() != null) {
-                        if (user.getLastOpenedModuleId().equals(modules.get(modules.size() - 1).getId())) {
+                        if (user.getLastOpenedModuleId()
+                                .equals(modules.get(modules.size() - 1).getId())) {
                             pct = 100;
                             status = "COMPLETED";
                         } else {
@@ -181,7 +196,7 @@ public class StudentController {
                     }
                 }
             }
-            
+
             Long nextModuleId = null;
             for (CourseModule m : course.getModules()) {
                 boolean completed = false;
@@ -207,8 +222,10 @@ public class StudentController {
             if (nextModuleId == null && !course.getModules().isEmpty()) {
                 nextModuleId = course.getModules().get(0).getId();
             }
-            
-            StudentCourseProgressDto dto = new StudentCourseProgressDto(course, pct, status, passedInCourse, totalCourseQuizzes, nextModuleId);
+
+            StudentCourseProgressDto dto =
+                    new StudentCourseProgressDto(
+                            course, pct, status, passedInCourse, totalCourseQuizzes, nextModuleId);
             if ("COMPLETED".equals(status)) {
                 completedCourses.add(dto);
             } else if ("ACTIVE".equals(status)) {
@@ -217,17 +234,19 @@ public class StudentController {
                 availableCourses.add(dto);
             }
         }
-        
+
         model.addAttribute("activeCourses", activeCourses);
         model.addAttribute("completedCourses", completedCourses);
         model.addAttribute("availableCourses", availableCourses);
 
         model.addAttribute("message", "Добро пожаловать в командный центр студента!");
         model.addAttribute("title", "Student Cabinet");
-        
+
         // Add notifications
-        model.addAttribute("notifications", notificationService.getRecentNotifications(user.getId(), 5));
-        model.addAttribute("unreadNotificationsCount", notificationService.getUnreadCount(user.getId()));
+        model.addAttribute(
+                "notifications", notificationService.getRecentNotifications(user.getId(), 5));
+        model.addAttribute(
+                "unreadNotificationsCount", notificationService.getUnreadCount(user.getId()));
 
         List<User> teachers = userRepository.findByRole(Role.TEACHER);
         model.addAttribute("teachers", teachers);
@@ -258,21 +277,24 @@ public class StudentController {
     }
 
     @GetMapping("/dashboard/quiz-results")
-    public String quizResultsFragment(@RequestParam(defaultValue = "0") int page, Principal principal, Model model) {
+    public String quizResultsFragment(
+            @RequestParam(defaultValue = "0") int page, Principal principal, Model model) {
         User user = userRepository.findByUsername(principal.getName()).orElse(null);
         if (user == null) {
             return "partials/fragments :: quizResultsTable";
         }
-        
-        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, 5);
-        org.springframework.data.domain.Page<UserQuizResult> quizResultsPage = userQuizResultRepository.findByUserIdOrderByIdDesc(user.getId(), pageable);
-        
+
+        org.springframework.data.domain.Pageable pageable =
+                org.springframework.data.domain.PageRequest.of(page, 5);
+        org.springframework.data.domain.Page<UserQuizResult> quizResultsPage =
+                userQuizResultRepository.findByUserIdOrderByIdDesc(user.getId(), pageable);
+
         model.addAttribute("quizResults", quizResultsPage.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", quizResultsPage.getTotalPages());
         model.addAttribute("hasNext", quizResultsPage.hasNext());
         model.addAttribute("hasPrev", quizResultsPage.hasPrevious());
-        
+
         return "student/dashboard :: quizResultsTable";
     }
 

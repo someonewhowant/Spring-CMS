@@ -9,11 +9,10 @@ import com.example.blog.repository.CourseRepository;
 import com.example.blog.repository.QuizRepository;
 import com.example.blog.service.CourseService;
 import com.example.blog.service.GamificationService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +35,8 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public Course getCourseById(Long id) {
-        return courseRepository.findById(id)
+        return courseRepository
+                .findById(id)
                 .orElseThrow(() -> new RuntimeException("Course not found with id: " + id));
     }
 
@@ -67,7 +67,7 @@ public class CourseServiceImpl implements CourseService {
     public void deleteCourse(Long id) {
         List<CourseModule> modules = moduleRepository.findByCourseIdOrderByOrderIndexAsc(id);
         moduleRepository.deleteAll(modules);
-        
+
         List<Quiz> quizzes = quizRepository.findByCourseId(id);
         quizRepository.deleteAll(quizzes);
 
@@ -80,16 +80,17 @@ public class CourseServiceImpl implements CourseService {
     public CourseModule addModule(Long courseId, CourseModule module) {
         Course course = getCourseById(courseId);
         module.setCourse(course);
-        
+
         // Auto-set order index if not set
         if (module.getOrderIndex() == 0) {
-            int maxOrder = course.getModules().stream()
-                    .mapToInt(CourseModule::getOrderIndex)
-                    .max()
-                    .orElse(-1);
+            int maxOrder =
+                    course.getModules().stream()
+                            .mapToInt(CourseModule::getOrderIndex)
+                            .max()
+                            .orElse(-1);
             module.setOrderIndex(maxOrder + 1);
         }
-        
+
         return moduleRepository.save(module);
     }
 
@@ -106,7 +107,8 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public CourseModule getModuleById(Long moduleId) {
-        return moduleRepository.findById(moduleId)
+        return moduleRepository
+                .findById(moduleId)
                 .orElseThrow(() -> new RuntimeException("Module not found with id: " + moduleId));
     }
 
@@ -127,8 +129,10 @@ public class CourseServiceImpl implements CourseService {
     public void setModuleQuiz(Long moduleId, Long quizId) {
         CourseModule module = getModuleById(moduleId);
         if (quizId != null) {
-            Quiz quiz = quizRepository.findById(quizId)
-                    .orElseThrow(() -> new RuntimeException("Quiz not found"));
+            Quiz quiz =
+                    quizRepository
+                            .findById(quizId)
+                            .orElseThrow(() -> new RuntimeException("Quiz not found"));
             module.setQuiz(quiz);
         } else {
             module.setQuiz(null);
