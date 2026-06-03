@@ -56,11 +56,11 @@
             width: 100%;
             max-width: 400px;
             margin: 24px auto;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(128, 128, 128, 0.1);
             height: 12px;
             border-radius: 6px;
             overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid var(--border-subtle);
         }
         .xp-bar-fill {
             height: 100%;
@@ -74,20 +74,20 @@
             gap: 20px;
         }
         .achievement-card {
-            background: rgba(255, 255, 255, 0.03);
+            background: rgba(128, 128, 128, 0.04);
             border: 1px solid var(--border-subtle);
             border-radius: 16px;
             padding: 20px;
             display: flex;
             align-items: center;
             gap: 16px;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .achievement-card:hover {
-            background: rgba(255, 255, 255, 0.06);
-            transform: translateY(-5px);
+            background: rgba(88, 166, 255, 0.06);
+            transform: translateY(-4px);
             border-color: var(--accent-blue);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         }
         .achievement-icon {
             width: 56px;

@@ -6,7 +6,7 @@
     <title th:text="${title}">Quiz</title>
 </head>
 <body>
-    <div layout:fragment="content" class="container py-l">
+    <div layout:fragment="content" class="container py-l fade-in">
         <div class="post">
             <header class="post-header fade-in">
                 <div class="post-category">QUIZ</div>
@@ -19,7 +19,20 @@
             <div class="reading-container">
                 <!-- Premium Quiz Form -->
                 <form th:if="${submitted == null}" th:action="@{/quiz/{id}/submit(id=${quiz.id})}" method="POST">
-                    <div th:each="question, qStat : ${quiz.questions}" class="quiz-question-modern reveal-on-scroll">
+                    <!-- Progress Stepper -->
+                    <div class="quiz-progress-bar-container" style="background: rgba(128, 128, 128, 0.05); border-radius: 12px; padding: 16px 20px; border: 1px solid var(--border-subtle); margin-bottom: 32px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+                        <div style="flex: 1; min-width: 200px;">
+                            <div style="display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 0.8rem; margin-bottom: 8px;">
+                                <span class="text-dim">ASSESSMENT PROGRESS</span>
+                                <span class="text-blue" id="answeredRatio">0 / <span th:text="${#lists.size(quiz.questions)}">0</span> answered</span>
+                            </div>
+                            <div style="height: 6px; background: rgba(128,128,128,0.1); border-radius: 3px; overflow: hidden;">
+                                <div id="quizProgressBar" style="width: 0%; height: 100%; background: var(--accent-blue); transition: width 0.3s ease;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div th:each="question, qStat : ${quiz.questions}" class="quiz-question-modern reveal-on-scroll" style="transition: all 0.3s ease;">
                         <div class="flex gap-xl mb-xl">
                             <span class="text-accent-mono text-blue font-bold text-xl" th:text="${#numbers.formatInteger(qStat.count, 2)}">01</span>
                             <h3 class="font-sans text-main font-semibold leading-relaxed" th:text="${question.text}">Question text</h3>
@@ -118,6 +131,71 @@
     </div>
 
     <th:block layout:fragment="scripts">
+        <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+            document.addEventListener("DOMContentLoaded", function() {
+                // Confetti celebration if passed
+                const isPassed = [[${isPassed}]];
+                if (isPassed) {
+                    var duration = 3 * 1000;
+                    var end = Date.now() + duration;
+
+                    (function frame() {
+                        confetti({
+                            particleCount: 4,
+                            angle: 60,
+                            spread: 55,
+                            origin: { x: 0, y: 0.8 },
+                            colors: ['#3fb950', '#58a6ff', '#bc8cff']
+                        });
+                        confetti({
+                            particleCount: 4,
+                            angle: 120,
+                            spread: 55,
+                            origin: { x: 1, y: 0.8 },
+                            colors: ['#3fb950', '#58a6ff', '#bc8cff']
+                        });
+
+                        if (Date.now() < end) {
+                            requestAnimationFrame(frame);
+                        }
+                    }());
+                }
+
+                // Interactive Progress Stepper/Bar for Quiz Form
+                const form = document.querySelector("form");
+                if (form) {
+                    const questions = form.querySelectorAll(".quiz-question-modern");
+                    const totalQuestions = questions.length;
+                    
+                    function updateProgress() {
+                        let answeredCount = 0;
+                        questions.forEach(q => {
+                            const checked = q.querySelector("input[type='radio']:checked");
+                            if (checked) {
+                                answeredCount++;
+                                q.style.borderColor = "rgba(88, 166, 255, 0.4)";
+                                q.style.background = "rgba(88, 166, 255, 0.02)";
+                            } else {
+                                q.style.borderColor = "var(--border-subtle)";
+                                q.style.background = "var(--bg-surface)";
+                            }
+                        });
+                        
+                        const pct = Math.round((answeredCount / totalQuestions) * 100);
+                        const progressBar = document.getElementById("quizProgressBar");
+                        const answeredRatio = document.getElementById("answeredRatio");
+                        if (progressBar) progressBar.style.width = pct + "%";
+                        if (answeredRatio) answeredRatio.innerHTML = `${answeredCount} / ${totalQuestions} answered`;
+                    }
+                    
+                    form.addEventListener("change", updateProgress);
+                    updateProgress();
+                }
+            });
+            /*]]>*/
+        </script>
         <style>
             .quiz-option-modern:last-child { margin-bottom: 0; }
             .text-success { color: var(--accent-green); }

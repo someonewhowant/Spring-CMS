@@ -4,96 +4,347 @@
       layout:decorate="~{layouts/main}">
 <head>
     <title>Courses — CodeBlog Academy</title>
+    <style>
+        .courses-hero {
+            text-align: center;
+            padding: clamp(2rem, 8vw, 5rem) 0;
+            position: relative;
+        }
+        .courses-hero::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 300px;
+            background: radial-gradient(ellipse, rgba(88, 166, 255, 0.06), transparent 70%);
+            pointer-events: none;
+        }
+        .courses-hero h1 {
+            font-size: clamp(2.2rem, 5vw, 3.2rem);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin: 0 0 12px;
+        }
+        .courses-hero p {
+            color: var(--text-dim);
+            font-size: 1.05rem;
+            max-width: 540px;
+            margin: 0 auto 28px;
+            line-height: 1.7;
+        }
+
+        /* Stats pills in hero */
+        .courses-stats-row {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 24px;
+        }
+        .courses-stat-pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 10px;
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--text-dim);
+        }
+        .courses-stat-pill strong {
+            color: var(--text-main);
+            font-weight: 800;
+        }
+
+        /* Level Filter Toolbar */
+        .level-filter-bar {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+        .filter-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: transparent;
+            border: 1px solid var(--border-subtle);
+            color: var(--text-dim);
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .filter-btn:hover {
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+            background: rgba(88, 166, 255, 0.06);
+        }
+        .filter-btn.active {
+            background: var(--accent-blue);
+            color: #fff;
+            border-color: var(--accent-blue);
+        }
+        .filter-btn.beginner.active { background: var(--accent-green); border-color: var(--accent-green); }
+        .filter-btn.intermediate.active { background: var(--accent-orange); border-color: var(--accent-orange); color: #1a1a2e; }
+        .filter-btn.advanced.active { background: var(--accent-purple); border-color: var(--accent-purple); }
+
+        /* Enhanced Course Card */
+        .enh-course-card {
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .enh-course-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+            border-color: rgba(88, 166, 255, 0.3);
+        }
+        .enh-course-card__header {
+            padding: 28px 28px 0;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .enh-course-card__icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+        .enh-course-card__icon.beginner { background: rgba(63, 185, 80, 0.12); color: var(--accent-green); border: 1px solid rgba(63, 185, 80, 0.2); }
+        .enh-course-card__icon.intermediate { background: rgba(210, 153, 34, 0.12); color: var(--accent-orange); border: 1px solid rgba(210, 153, 34, 0.2); }
+        .enh-course-card__icon.advanced { background: rgba(188, 140, 255, 0.12); color: var(--accent-purple); border: 1px solid rgba(188, 140, 255, 0.2); }
+
+        .enh-level-tag {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            flex-shrink: 0;
+        }
+        .enh-level-tag.beginner { background: rgba(63, 185, 80, 0.1); color: var(--accent-green); border: 1px solid rgba(63, 185, 80, 0.2); }
+        .enh-level-tag.intermediate { background: rgba(210, 153, 34, 0.1); color: var(--accent-orange); border: 1px solid rgba(210, 153, 34, 0.2); }
+        .enh-level-tag.advanced { background: rgba(188, 140, 255, 0.1); color: var(--accent-purple); border: 1px solid rgba(188, 140, 255, 0.2); }
+
+        .enh-course-card__body {
+            padding: 20px 28px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .enh-course-card__title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0 0 10px;
+            line-height: 1.4;
+        }
+        .enh-course-card__desc {
+            font-size: 0.88rem;
+            color: var(--text-dim);
+            line-height: 1.6;
+            margin: 0 0 20px;
+            flex: 1;
+        }
+        .enh-course-card__meta-row {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin-bottom: 4px;
+        }
+        .enh-course-card__meta-row i {
+            color: var(--accent-blue);
+            font-size: 0.85rem;
+        }
+        .enh-course-card__footer {
+            padding: 0 28px 28px;
+        }
+        .enh-course-card__cta {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+            border: 1px solid var(--border-subtle);
+            color: var(--text-main);
+            background: transparent;
+            transition: all 0.2s ease;
+        }
+        .enh-course-card__cta:hover {
+            background: var(--accent-blue);
+            color: #fff;
+            border-color: var(--accent-blue);
+        }
+        .enh-course-card__cta i {
+            transition: transform 0.2s ease;
+        }
+        .enh-course-card__cta:hover i {
+            transform: translateX(4px);
+        }
+
+        /* Module count decoration */
+        .enh-modules-count {
+            display: flex;
+            gap: 3px;
+            align-items: center;
+        }
+        .enh-modules-count span {
+            display: block;
+            width: 4px;
+            height: 12px;
+            border-radius: 2px;
+            background: rgba(88, 166, 255, 0.2);
+        }
+        .enh-modules-count span.filled {
+            background: var(--accent-blue);
+        }
+
+        /* CTA Banner */
+        .courses-cta-banner {
+            padding: clamp(2rem, 6vw, 4rem);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border-radius: 24px;
+        }
+        .courses-cta-banner::before {
+            content: '';
+            position: absolute;
+            top: -60px;
+            right: -60px;
+            width: 220px;
+            height: 220px;
+            background: radial-gradient(circle, rgba(88,166,255,0.08), transparent 70%);
+            pointer-events: none;
+        }
+        .courses-cta-banner::after {
+            content: '';
+            position: absolute;
+            bottom: -40px;
+            left: -40px;
+            width: 180px;
+            height: 180px;
+            background: radial-gradient(circle, rgba(188,140,255,0.07), transparent 70%);
+            pointer-events: none;
+        }
+
+        /* Hide/show animation */
+        .enh-course-card.card-hidden {
+            display: none;
+        }
+    </style>
 </head>
 <body>
-    <div layout:fragment="content">
+    <div layout:fragment="content" class="container py-l fade-in">
 
         <!-- ===== HERO ===== -->
-        <section class="hero-platform container">
-            <p class="hero-platform__eyebrow">All Courses</p>
-
-            <h1 class="hero-platform__heading">
-                Choose Your<br>
-                <span class="highlight">Learning Path</span>
-            </h1>
-
-            <p class="hero-platform__sub">
+        <section class="courses-hero container">
+            <p class="hero-platform__eyebrow">Academy Curriculum</p>
+            <h1>Choose Your<br><span class="highlight">Learning Path</span></h1>
+            <p>
                 Structured, production-grade courses for developers who want to go deep.
                 Pick a track that fits your level and start building expertise today.
             </p>
 
-            <div class="hero-platform__cta">
-                <a th:href="@{/about}" class="btn btn-outline btn-large">
-                    <i class="bi bi-info-circle"></i> How it works
-                </a>
-            </div>
-
-            <div class="hero-platform__stats">
-                <div>
-                    <div class="hero-stat__value">12+</div>
-                    <div class="hero-stat__label">Courses</div>
+            <div class="courses-stats-row">
+                <div class="courses-stat-pill">
+                    <i class="bi bi-journal-code" style="color: var(--accent-blue);"></i>
+                    <strong th:text="${#lists.size(courses)}">0</strong> Courses
                 </div>
-                <div>
-                    <div class="hero-stat__value">3</div>
-                    <div class="hero-stat__label">Skill levels</div>
+                <div class="courses-stat-pill">
+                    <i class="bi bi-bar-chart-steps" style="color: var(--accent-green);"></i>
+                    <strong>3</strong> Skill Levels
                 </div>
-                <div>
-                    <div class="hero-stat__value">Self</div>
-                    <div class="hero-stat__label">Paced</div>
+                <div class="courses-stat-pill">
+                    <i class="bi bi-clock-history" style="color: var(--accent-purple);"></i>
+                    Self <strong>Paced</strong>
                 </div>
             </div>
         </section>
 
-        <!-- ===== COURSES LIST ===== -->
-        <section class="container" style="padding-top: var(--space-2xl); padding-bottom: var(--space-3xl);">
+        <!-- ===== FILTER + GRID ===== -->
+        <section class="container" style="padding-bottom: var(--space-3xl);">
 
             <!-- Level filter -->
-            <div class="level-filter" id="levelFilter">
-                <button class="level-filter__btn active" data-filter="all">
+            <div class="level-filter-bar" id="levelFilter">
+                <button class="filter-btn active" data-filter="all">
                     <i class="bi bi-grid-3x3-gap"></i> All
                 </button>
-                <button class="level-filter__btn beginner" data-filter="Beginner">
+                <button class="filter-btn beginner" data-filter="Beginner">
                     <i class="bi bi-reception-1"></i> Beginner
                 </button>
-                <button class="level-filter__btn intermediate" data-filter="Intermediate">
+                <button class="filter-btn intermediate" data-filter="Intermediate">
                     <i class="bi bi-reception-3"></i> Intermediate
                 </button>
-                <button class="level-filter__btn advanced" data-filter="Advanced">
+                <button class="filter-btn advanced" data-filter="Advanced">
                     <i class="bi bi-reception-4"></i> Advanced
                 </button>
             </div>
 
             <!-- Course cards grid -->
             <div class="courses-grid" id="coursesGrid">
-
                 <div th:each="course : ${courses}"
-                     class="card-glass course-card"
+                     class="enh-course-card"
                      th:attr="data-level=${course.level}">
 
-                    <!-- Level badge (top-right) -->
-                    <span class="course-card__badge"
-                          th:classappend="${course.level == 'Beginner'} ? ' badge-beginner' : (${course.level == 'Advanced'} ? ' badge-advanced' : ' badge-intermediate')"
-                          th:text="${course.level}">Level</span>
-
-                    <!-- Icon -->
-                    <div class="course-card__icon"
-                         th:classappend="${course.level == 'Beginner'} ? 'level-beginner' : (${course.level == 'Advanced'} ? 'level-advanced' : 'level-intermediate')">
-                        <i th:class="${course.level == 'Beginner'} ? 'bi bi-database-check' : (${course.level == 'Advanced'} ? 'bi bi-layers-half' : 'bi bi-lightning-charge')"></i>
+                    <div class="enh-course-card__header">
+                        <div class="enh-course-card__icon"
+                             th:classappend="${course.level == 'Beginner'} ? 'beginner' : (${course.level == 'Advanced'} ? 'advanced' : 'intermediate')">
+                            <i th:class="${course.level == 'Beginner'} ? 'bi bi-code-slash' : (${course.level == 'Advanced'} ? 'bi bi-layers-half' : 'bi bi-lightning-charge')"></i>
+                        </div>
+                        <span class="enh-level-tag"
+                              th:classappend="${course.level == 'Beginner'} ? 'beginner' : (${course.level == 'Advanced'} ? 'advanced' : 'intermediate')"
+                              th:text="${course.level}">Level</span>
                     </div>
 
-                    <h3 class="course-card__title" th:text="${course.title}">Course Title</h3>
-                    <p class="course-card__description" th:text="${#strings.abbreviate(course.description, 130)}">
-                        Description goes here...
-                    </p>
-
-                    <div class="course-card__meta">
-                        <span><i class="bi bi-clock"></i> <span th:text="${course.duration}">12 Hours</span></span>
-                        <span><i class="bi bi-bar-chart"></i> <span th:text="${course.level}">Level</span></span>
+                    <div class="enh-course-card__body">
+                        <h3 class="enh-course-card__title" th:text="${course.title}">Course Title</h3>
+                        <p class="enh-course-card__desc" th:text="${#strings.abbreviate(course.description, 130)}">Description...</p>
+                        <div class="enh-course-card__meta-row">
+                            <span><i class="bi bi-clock"></i> <span th:text="${course.duration}">12h</span></span>
+                            <span><i class="bi bi-collection"></i> <span th:text="${#lists.size(course.modules)} + ' modules'">0 modules</span></span>
+                        </div>
                     </div>
 
-                    <a th:href="@{/course/{id}(id=${course.id})}" class="btn btn-outline w-full mt-m">
-                        Start Learning <i class="bi bi-arrow-right ms-2"></i>
-                    </a>
+                    <div class="enh-course-card__footer">
+                        <a th:href="@{/course/{id}(id=${course.id})}" class="enh-course-card__cta">
+                            Start Learning <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
                 </div>
 
                 <!-- Empty state -->
@@ -113,11 +364,7 @@
 
         <!-- ===== CTA BANNER ===== -->
         <section class="container" style="padding-bottom: var(--space-3xl);">
-            <div class="card-glass" style="padding: clamp(2rem, 6vw, 4rem); text-align: center; position: relative; overflow: hidden;">
-                <!-- Subtle background accent -->
-                <div style="position: absolute; top: -60px; right: -60px; width: 220px; height: 220px; background: radial-gradient(circle, rgba(88,166,255,0.08) 0%, transparent 70%); pointer-events: none;"></div>
-                <div style="position: absolute; bottom: -40px; left: -40px; width: 180px; height: 180px; background: radial-gradient(circle, rgba(188,140,255,0.07) 0%, transparent 70%); pointer-events: none;"></div>
-
+            <div class="card-glass courses-cta-banner">
                 <div style="position: relative;">
                     <span style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent-blue); letter-spacing: 0.1em; text-transform: uppercase;">Corporate &amp; Teams</span>
                     <h2 class="section-title justify-center mt-s mb-m" style="font-family: var(--font-sans); font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 700;">
@@ -151,21 +398,20 @@
                 if (!filter || !grid) return;
 
                 filter.addEventListener('click', function (e) {
-                    const btn = e.target.closest('.level-filter__btn');
+                    const btn = e.target.closest('.filter-btn');
                     if (!btn) return;
 
-                    // Update active button
-                    filter.querySelectorAll('.level-filter__btn').forEach(b => b.classList.remove('active'));
+                    filter.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
 
                     const value = btn.dataset.filter;
-                    const cards = grid.querySelectorAll('.course-card');
+                    const cards = grid.querySelectorAll('.enh-course-card');
                     let visible = 0;
 
                     cards.forEach(function (card) {
                         const level = card.dataset.level || '';
                         const show  = (value === 'all' || level === value);
-                        card.classList.toggle('course-card--hidden', !show);
+                        card.classList.toggle('card-hidden', !show);
                         if (show) visible++;
                     });
 

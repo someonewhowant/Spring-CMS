@@ -2,91 +2,488 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layouts/main}">
 <head>
-    <title>Leaderboard - CodeBlog</title>
+    <title>Leaderboard - CodeBlog Academy</title>
+    <style>
+        /* === Leaderboard Page Styles === */
+        .lb-hero {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+        .lb-hero h1 {
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin: 0 0 8px;
+        }
+        .lb-hero p {
+            color: var(--text-dim);
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+        }
+
+        /* --- Podium Section --- */
+        .lb-podium {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 48px;
+            padding: 0 20px;
+        }
+        .lb-podium-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            border-radius: 24px;
+            padding: 28px 20px 24px;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            flex: 1;
+            max-width: 240px;
+            overflow: hidden;
+        }
+        .lb-podium-card:hover {
+            transform: translateY(-8px);
+        }
+        .lb-podium-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 24px;
+            z-index: 0;
+        }
+        /* Gold — 1st place */
+        .lb-podium-card.gold {
+            background: linear-gradient(180deg, rgba(255, 215, 0, 0.12) 0%, rgba(255, 215, 0, 0.02) 100%);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            order: 2;
+            min-height: 280px;
+        }
+        .lb-podium-card.gold:hover {
+            box-shadow: 0 16px 60px rgba(255, 215, 0, 0.2);
+        }
+        /* Silver — 2nd */
+        .lb-podium-card.silver {
+            background: linear-gradient(180deg, rgba(192, 192, 192, 0.1) 0%, rgba(192, 192, 192, 0.02) 100%);
+            border: 1px solid rgba(192, 192, 192, 0.25);
+            order: 1;
+            min-height: 240px;
+        }
+        .lb-podium-card.silver:hover {
+            box-shadow: 0 16px 60px rgba(192, 192, 192, 0.15);
+        }
+        /* Bronze — 3rd */
+        .lb-podium-card.bronze {
+            background: linear-gradient(180deg, rgba(205, 127, 50, 0.1) 0%, rgba(205, 127, 50, 0.02) 100%);
+            border: 1px solid rgba(205, 127, 50, 0.25);
+            order: 3;
+            min-height: 220px;
+        }
+        .lb-podium-card.bronze:hover {
+            box-shadow: 0 16px 60px rgba(205, 127, 50, 0.15);
+        }
+        .lb-podium-rank {
+            font-family: var(--font-mono);
+            font-weight: 900;
+            font-size: 1.6rem;
+            position: relative;
+            z-index: 1;
+            margin-bottom: 12px;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        .gold .lb-podium-rank { background: linear-gradient(135deg, #ffd700, #d4a017); color: #1a1a2e; box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
+        .silver .lb-podium-rank { background: linear-gradient(135deg, #e8e8e8, #a0a0a0); color: #1a1a2e; box-shadow: 0 0 20px rgba(192, 192, 192, 0.4); }
+        .bronze .lb-podium-rank { background: linear-gradient(135deg, #cd7f32, #a0522d); color: #fff; box-shadow: 0 0 20px rgba(205, 127, 50, 0.4); }
+        .lb-podium-avatar {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            object-fit: cover;
+            position: relative;
+            z-index: 1;
+            margin-bottom: 12px;
+        }
+        .gold .lb-podium-avatar { border: 3px solid #ffd700; box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); width: 88px; height: 88px; }
+        .silver .lb-podium-avatar { border: 3px solid #c0c0c0; }
+        .bronze .lb-podium-avatar { border: 3px solid #cd7f32; }
+        .lb-podium-avatar-fallback {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-surface);
+            font-weight: 700;
+            color: var(--text-dim);
+            font-size: 1.4rem;
+        }
+        .lb-podium-name {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--text-main);
+            margin-bottom: 4px;
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+        .lb-podium-handle {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--accent-blue);
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 1;
+        }
+        .lb-podium-xp {
+            font-family: var(--font-mono);
+            font-weight: 800;
+            font-size: 1.1rem;
+            position: relative;
+            z-index: 1;
+        }
+        .gold .lb-podium-xp { color: #ffd700; }
+        .silver .lb-podium-xp { color: #c0c0c0; }
+        .bronze .lb-podium-xp { color: #cd7f32; }
+        .lb-podium-level {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: rgba(63, 185, 80, 0.1);
+            color: var(--accent-green);
+            margin-top: 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Crown icon for #1 */
+        .lb-crown {
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.6rem;
+            z-index: 2;
+            animation: crownFloat 3s ease-in-out infinite;
+        }
+        @keyframes crownFloat {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-5px); }
+        }
+
+        /* --- Table Section --- */
+        .lb-table-wrapper {
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border-subtle);
+        }
+        .lb-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .lb-table thead {
+            background: rgba(0, 0, 0, 0.2);
+        }
+        .light-theme .lb-table thead {
+            background: rgba(0, 0, 0, 0.03);
+        }
+        .lb-table thead th {
+            padding: 14px 24px;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .lb-table tbody tr {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            transition: background 0.2s ease;
+        }
+        .light-theme .lb-table tbody tr {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+        }
+        .lb-table tbody tr:hover {
+            background: rgba(88, 166, 255, 0.04);
+        }
+        .lb-table tbody tr.lb-current-user {
+            background: rgba(88, 166, 255, 0.06);
+            border-left: 3px solid var(--accent-blue);
+        }
+        .lb-table tbody td {
+            padding: 16px 24px;
+            vertical-align: middle;
+        }
+        .lb-rank-num {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--text-dim);
+            text-align: center;
+            width: 60px;
+        }
+        .lb-student-cell {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            text-decoration: none;
+            transition: transform 0.2s ease;
+        }
+        .lb-student-cell:hover {
+            transform: translateX(4px);
+        }
+        .lb-student-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(88, 166, 255, 0.3);
+            flex-shrink: 0;
+        }
+        .lb-student-name {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text-main);
+            margin-bottom: 2px;
+        }
+        .lb-student-handle {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--accent-blue);
+        }
+        .lb-status-pill {
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+        }
+        .lb-status-pill.master { background: rgba(188, 140, 255, 0.15); color: #bc8cff; border: 1px solid rgba(188, 140, 255, 0.3); }
+        .lb-status-pill.active { background: rgba(56, 139, 253, 0.15); color: #58a6ff; border: 1px solid rgba(56, 139, 253, 0.3); }
+        .lb-level {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--accent-green);
+            background: rgba(63, 185, 80, 0.1);
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(63, 185, 80, 0.2);
+        }
+        .lb-xp {
+            font-family: var(--font-mono);
+            font-weight: 800;
+            font-size: 1rem;
+            color: var(--accent-blue);
+            text-align: right;
+        }
+
+        /* --- Summary Stats Bar --- */
+        .lb-stats-bar {
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+        }
+        .lb-stats-bar .lb-stat {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 12px 20px;
+        }
+        .lb-stat-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+        .lb-stat-icon.blue { background: rgba(88, 166, 255, 0.1); color: var(--accent-blue); }
+        .lb-stat-icon.green { background: rgba(63, 185, 80, 0.1); color: var(--accent-green); }
+        .lb-stat-icon.purple { background: rgba(188, 140, 255, 0.1); color: var(--accent-purple); }
+        .lb-stat-value {
+            font-weight: 800;
+            font-size: 1.3rem;
+            color: var(--text-main);
+            line-height: 1;
+        }
+        .lb-stat-label {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        /* --- Mobile Responsive --- */
+        @media (max-width: 768px) {
+            .lb-podium { flex-direction: column; align-items: center; }
+            .lb-podium-card { order: unset !important; max-width: 100%; min-height: auto !important; width: 100%; }
+            .lb-podium-card.gold { order: -1 !important; }
+            .lb-table thead { display: none; }
+            .lb-table tbody tr { display: flex; flex-wrap: wrap; gap: 8px; padding: 16px; align-items: center; border-bottom: 1px solid var(--border-subtle); }
+            .lb-table tbody td { padding: 4px 8px; border: none; }
+            .lb-stats-bar { gap: 12px; }
+        }
+    </style>
 </head>
 <body>
 <div layout:fragment="content" class="container py-l fade-in">
-    <!-- Header -->
-    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 32px;">
-        <div>
-            <h1 style="font-size: 2.5rem; margin: 0 0 8px; font-weight: 800; letter-spacing: -0.02em;">Academy <span class="text-gradient-green">Leaderboard</span></h1>
-            <p class="font-mono text-dim" style="margin: 0; font-size: 0.95rem;">■ TOP_STUDENTS_BY_EXPERIENCE_POINTS</p>
+
+    <!-- Hero Header -->
+    <div class="lb-hero">
+        <h1>Academy <span class="text-gradient-green">Leaderboard</span></h1>
+        <p>■ RANKED_BY_EXPERIENCE // UPDATED_IN_REALTIME</p>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="lb-stats-bar">
+        <div class="lb-stat">
+            <div class="lb-stat-icon blue"><i class="bi bi-people-fill"></i></div>
+            <div>
+                <div class="lb-stat-value" th:text="${#lists.size(topStudents)}">0</div>
+                <div class="lb-stat-label">Students</div>
+            </div>
+        </div>
+        <div class="lb-stat" th:if="${!#lists.isEmpty(topStudents)}">
+            <div class="lb-stat-icon green"><i class="bi bi-trophy-fill"></i></div>
+            <div>
+                <div class="lb-stat-value" th:text="${topStudents[0].experiencePoints} + ' XP'">0 XP</div>
+                <div class="lb-stat-label">Top Score</div>
+            </div>
+        </div>
+        <div class="lb-stat" th:if="${!#lists.isEmpty(topStudents)}">
+            <div class="lb-stat-icon purple"><i class="bi bi-bar-chart-fill"></i></div>
+            <div>
+                <div class="lb-stat-value" th:text="'Lvl ' + ${topStudents[0].level}">Lvl 0</div>
+                <div class="lb-stat-label">Highest Level</div>
+            </div>
         </div>
     </div>
 
-    <div class="row justify-content-center">
-        <div class="col-lg-12">
-            <div class="card-glass" style="padding: 0; overflow: hidden; border: 1px solid rgba(88, 166, 255, 0.15);">
-                <div class="table-responsive">
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <thead class="font-mono text-dim" style="background: rgba(0,0,0,0.2); border-bottom: 1px solid var(--border-subtle);">
-                        <tr>
-                            <th style="padding: 16px 24px; text-align: center; width: 80px; font-weight: 500;">RANK</th>
-                            <th style="padding: 16px 24px; text-align: left; font-weight: 500;">STUDENT</th>
-                            <th style="padding: 16px 24px; text-align: center; font-weight: 500;">STATUS</th>
-                            <th style="padding: 16px 24px; text-align: center; font-weight: 500;">LEVEL</th>
-                            <th style="padding: 16px 24px; text-align: right; font-weight: 500;">XP</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:each="student, stat : ${topStudents}" style="border-bottom: 1px solid rgba(255,255,255,0.03); transition: background 0.2s ease;" onmouseover="this.style.background='rgba(88, 166, 255, 0.03)'" onmouseout="this.style.background='transparent'">
-                            <!-- Rank -->
-                            <td style="padding: 16px 24px; text-align: center;">
-                                <div th:if="${stat.index == 0}" style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #ffd700 0%, #d4af37 100%); display: flex; align-items: center; justify-content: center; margin: 0 auto; color: #000; font-weight: 700; box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);">
-                                    1
-                                </div>
-                                <div th:if="${stat.index == 1}" style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #e0e0e0 0%, #a0a0a0 100%); display: flex; align-items: center; justify-content: center; margin: 0 auto; color: #000; font-weight: 700; box-shadow: 0 0 15px rgba(192, 192, 192, 0.4);">
-                                    2
-                                </div>
-                                <div th:if="${stat.index == 2}" style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #cd7f32 0%, #a0522d 100%); display: flex; align-items: center; justify-content: center; margin: 0 auto; color: #fff; font-weight: 700; box-shadow: 0 0 15px rgba(205, 127, 50, 0.4);">
-                                    3
-                                </div>
-                                <div th:if="${stat.index > 2}" class="text-dim font-mono" style="font-weight: 600; font-size: 1.1rem;">
-                                    <span th:text="${stat.index + 1}">4</span>
-                                </div>
-                            </td>
-                            
-                            <!-- Student Profile Link -->
-                            <td style="padding: 16px 24px;">
-                                <a th:href="@{/profile/u/{username}(username=${student.username})}" style="text-decoration: none; display: flex; align-items: center; gap: 16px; transition: transform 0.2s ease;" onmouseover="this.style.transform='translateX(4px)'" onmouseout="this.style.transform='none'">
-                                    <img th:if="${student.avatarUrl != null}" th:src="${student.avatarUrl}" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(88, 166, 255, 0.5); background: var(--bg-body);">
-                                    <div th:if="${student.avatarUrl == null}" class="avatar-circle" style="width: 48px; height: 48px; border-radius: 50%; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; border: 2px solid rgba(88, 166, 255, 0.3); background: linear-gradient(135deg, rgba(88,166,255,0.1) 0%, rgba(188,140,255,0.1) 100%); color: var(--text-main); font-weight: 600;" th:text="${student.fullName != null and #strings.length(student.fullName) > 0 ? #strings.substring(student.fullName, 0, 1).toUpperCase() : #strings.substring(student.username, 0, 1).toUpperCase()}">U</div>
-                                    
-                                    <div>
-                                        <h6 style="margin: 0 0 2px; color: var(--text-main); font-size: 1.05rem; font-weight: 600;" th:text="${student.fullName != null and student.fullName != '' ? student.fullName : student.username}">John Doe</h6>
-                                        <small class="text-blue font-mono" th:text="'@' + ${student.username}">@johndoe</small>
-                                    </div>
-                                </a>
-                            </td>
+    <!-- Top 3 Podium -->
+    <div th:if="${#lists.size(topStudents) >= 3}" class="lb-podium">
+        <!-- 2nd Place (Silver) -->
+        <a th:href="@{/profile/u/{u}(u=${topStudents[1].username})}" class="lb-podium-card silver">
+            <div class="lb-podium-rank">2</div>
+            <img th:if="${topStudents[1].avatarUrl != null}" th:src="${topStudents[1].avatarUrl}" class="lb-podium-avatar">
+            <div th:if="${topStudents[1].avatarUrl == null}" class="lb-podium-avatar lb-podium-avatar-fallback"
+                 th:text="${topStudents[1].fullName != null and #strings.length(topStudents[1].fullName) > 0 ? #strings.substring(topStudents[1].fullName, 0, 1).toUpperCase() : #strings.substring(topStudents[1].username, 0, 1).toUpperCase()}">U</div>
+            <div class="lb-podium-name" th:text="${topStudents[1].fullName != null and topStudents[1].fullName != '' ? topStudents[1].fullName : topStudents[1].username}">Name</div>
+            <div class="lb-podium-handle" th:text="'@' + ${topStudents[1].username}">@user</div>
+            <div class="lb-podium-xp" th:text="${topStudents[1].experiencePoints} + ' XP'">0 XP</div>
+            <div class="lb-podium-level" th:text="'Level ' + ${topStudents[1].level}">Level 1</div>
+        </a>
 
-                            <!-- LMS Status -->
-                            <td style="padding: 16px 24px; text-align: center;">
-                                <span th:if="${student.lmsStatus != null}" class="badge" style="background: rgba(188, 140, 255, 0.15); color: #bc8cff; border: 1px solid rgba(188, 140, 255, 0.4); font-size: 0.7rem; font-weight: 600; padding: 4px 10px; border-radius: 12px; text-transform: uppercase;" th:text="${student.lmsStatus}">MASTER</span>
-                                <span th:if="${student.lmsStatus == null}" class="badge" style="background: rgba(56, 139, 253, 0.15); color: #58a6ff; border: 1px solid rgba(56, 139, 253, 0.4); font-size: 0.7rem; font-weight: 600; padding: 4px 10px; border-radius: 12px;">ACTIVE</span>
-                            </td>
+        <!-- 1st Place (Gold) -->
+        <a th:href="@{/profile/u/{u}(u=${topStudents[0].username})}" class="lb-podium-card gold">
+            <div class="lb-crown">👑</div>
+            <div class="lb-podium-rank">1</div>
+            <img th:if="${topStudents[0].avatarUrl != null}" th:src="${topStudents[0].avatarUrl}" class="lb-podium-avatar">
+            <div th:if="${topStudents[0].avatarUrl == null}" class="lb-podium-avatar lb-podium-avatar-fallback"
+                 style="width: 88px; height: 88px; font-size: 2rem;"
+                 th:text="${topStudents[0].fullName != null and #strings.length(topStudents[0].fullName) > 0 ? #strings.substring(topStudents[0].fullName, 0, 1).toUpperCase() : #strings.substring(topStudents[0].username, 0, 1).toUpperCase()}">U</div>
+            <div class="lb-podium-name" th:text="${topStudents[0].fullName != null and topStudents[0].fullName != '' ? topStudents[0].fullName : topStudents[0].username}">Name</div>
+            <div class="lb-podium-handle" th:text="'@' + ${topStudents[0].username}">@user</div>
+            <div class="lb-podium-xp" th:text="${topStudents[0].experiencePoints} + ' XP'">0 XP</div>
+            <div class="lb-podium-level" th:text="'Level ' + ${topStudents[0].level}">Level 1</div>
+        </a>
 
-                            <!-- Level -->
-                            <td style="padding: 16px 24px; text-align: center;">
-                                <div style="display: inline-flex; align-items: center; justify-content: center; background: rgba(63, 185, 80, 0.1); border: 1px solid rgba(63, 185, 80, 0.3); color: var(--accent-green); border-radius: 6px; padding: 4px 12px; font-family: var(--font-mono); font-size: 0.85rem; font-weight: 600;">
-                                    Lvl <span th:text="${student.level}" style="margin-left: 4px;">5</span>
-                                </div>
-                            </td>
+        <!-- 3rd Place (Bronze) -->
+        <a th:href="@{/profile/u/{u}(u=${topStudents[2].username})}" class="lb-podium-card bronze">
+            <div class="lb-podium-rank">3</div>
+            <img th:if="${topStudents[2].avatarUrl != null}" th:src="${topStudents[2].avatarUrl}" class="lb-podium-avatar">
+            <div th:if="${topStudents[2].avatarUrl == null}" class="lb-podium-avatar lb-podium-avatar-fallback"
+                 th:text="${topStudents[2].fullName != null and #strings.length(topStudents[2].fullName) > 0 ? #strings.substring(topStudents[2].fullName, 0, 1).toUpperCase() : #strings.substring(topStudents[2].username, 0, 1).toUpperCase()}">U</div>
+            <div class="lb-podium-name" th:text="${topStudents[2].fullName != null and topStudents[2].fullName != '' ? topStudents[2].fullName : topStudents[2].username}">Name</div>
+            <div class="lb-podium-handle" th:text="'@' + ${topStudents[2].username}">@user</div>
+            <div class="lb-podium-xp" th:text="${topStudents[2].experiencePoints} + ' XP'">0 XP</div>
+            <div class="lb-podium-level" th:text="'Level ' + ${topStudents[2].level}">Level 1</div>
+        </a>
+    </div>
 
-                            <!-- XP -->
-                            <td style="padding: 16px 24px; text-align: right;">
-                                <span class="text-accent-blue font-mono fw-bold" style="font-size: 1.05rem;" th:text="${student.experiencePoints} + ' XP'">1250 XP</span>
-                            </td>
-                        </tr>
-                        <tr th:if="${#lists.isEmpty(topStudents)}">
-                            <td colspan="5" style="text-align: center; padding: 48px; color: var(--text-dim); font-family: var(--font-mono);">
-                                [ NO_STUDENT_RECORDS_FOUND ]
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+    <!-- Full Rankings Table -->
+    <div class="lb-table-wrapper card-glass" style="padding: 0;">
+        <table class="lb-table">
+            <thead>
+            <tr>
+                <th style="text-align: center; width: 70px;">Rank</th>
+                <th style="text-align: left;">Student</th>
+                <th style="text-align: center;">Status</th>
+                <th style="text-align: center;">Level</th>
+                <th style="text-align: right;">Experience</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="student, stat : ${topStudents}"
+                th:classappend="${#authentication != null and #strings.equals(#authentication.getName(), student.username)} ? 'lb-current-user' : ''">
+                <!-- Rank -->
+                <td class="lb-rank-num">
+                    <div th:if="${stat.index == 0}" style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #ffd700, #d4a017); display: flex; align-items: center; justify-content: center; margin: 0 auto; color: #1a1a2e; font-weight: 800; font-size: 0.85rem; box-shadow: 0 0 12px rgba(255, 215, 0, 0.35);">1</div>
+                    <div th:if="${stat.index == 1}" style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #e0e0e0, #a0a0a0); display: flex; align-items: center; justify-content: center; margin: 0 auto; color: #1a1a2e; font-weight: 800; font-size: 0.85rem;">2</div>
+                    <div th:if="${stat.index == 2}" style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #cd7f32, #a0522d); display: flex; align-items: center; justify-content: center; margin: 0 auto; color: #fff; font-weight: 800; font-size: 0.85rem;">3</div>
+                    <span th:if="${stat.index > 2}" th:text="${stat.index + 1}">4</span>
+                </td>
+                <!-- Student -->
+                <td>
+                    <a th:href="@{/profile/u/{u}(u=${student.username})}" class="lb-student-cell">
+                        <img th:if="${student.avatarUrl != null}" th:src="${student.avatarUrl}" class="lb-student-avatar">
+                        <div th:if="${student.avatarUrl == null}" class="lb-student-avatar" style="display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, rgba(88,166,255,0.1), rgba(188,140,255,0.1)); font-weight: 700; color: var(--text-main); font-size: 1rem;"
+                             th:text="${student.fullName != null and #strings.length(student.fullName) > 0 ? #strings.substring(student.fullName, 0, 1).toUpperCase() : #strings.substring(student.username, 0, 1).toUpperCase()}">U</div>
+                        <div>
+                            <div class="lb-student-name" th:text="${student.fullName != null and student.fullName != '' ? student.fullName : student.username}">Name</div>
+                            <div class="lb-student-handle" th:text="'@' + ${student.username}">@user</div>
+                        </div>
+                    </a>
+                </td>
+                <!-- Status -->
+                <td style="text-align: center;">
+                    <span th:if="${student.lmsStatus != null}" class="lb-status-pill master" th:text="${student.lmsStatus}">MASTER</span>
+                    <span th:if="${student.lmsStatus == null}" class="lb-status-pill active">ACTIVE</span>
+                </td>
+                <!-- Level -->
+                <td style="text-align: center;">
+                    <span class="lb-level"><i class="bi bi-lightning-charge-fill"></i> <span th:text="${student.level}">1</span></span>
+                </td>
+                <!-- XP -->
+                <td>
+                    <div class="lb-xp" th:text="${student.experiencePoints} + ' XP'">0 XP</div>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(topStudents)}">
+                <td colspan="5" style="text-align: center; padding: 60px; color: var(--text-dim); font-family: var(--font-mono);">
+                    <i class="bi bi-inbox" style="font-size: 2.5rem; display: block; margin-bottom: 16px; opacity: 0.4;"></i>
+                    No students have joined the academy yet.
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- CTA -->
+    <div th:if="${#authentication != null and !#strings.equals(#authentication.getName(), 'anonymousUser')}" class="text-center" style="margin-top: 40px;">
+        <a th:href="@{/student/dashboard}" class="btn btn-outline" style="border-radius: 12px; padding: 12px 28px;">
+            <i class="bi bi-speedometer2 me-2"></i> My Dashboard
+        </a>
     </div>
 </div>
 </body>

@@ -9,7 +9,7 @@
     <div layout:fragment="content" class="container py-l fade-in">
         
         <!-- Breadcrumbs (Glassmorphism style) -->
-        <nav class="course-breadcrumbs" style="display: flex; align-items: center; gap: 12px; font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-dim); margin-bottom: 32px; background: rgba(255, 255, 255, 0.03); padding: 12px 20px; border-radius: var(--radius); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px);">
+        <nav class="course-breadcrumbs" style="display: flex; align-items: center; gap: 12px; font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-dim); margin-bottom: 32px; background: var(--bg-surface); padding: 12px 20px; border-radius: var(--radius); border: 1px solid var(--border-subtle); backdrop-filter: blur(10px);">
             <a th:href="@{/}" style="color: var(--accent-blue); text-decoration: none;"><i class="bi bi-house-door"></i> Home</a>
             <i class="bi bi-chevron-right" style="font-size: 0.7rem; opacity: 0.5;"></i>
             <a th:href="@{/courses}" style="color: var(--accent-blue); text-decoration: none;">Academy</a>
@@ -25,9 +25,21 @@
             <!-- Sidebar: Course Map -->
             <aside class="course-sidebar">
                 <div class="card-glass" style="padding: 24px;">
-                    <h3 class="font-mono text-dim" style="font-size: 0.85rem; text-transform: uppercase; margin: 0 0 20px; letter-spacing: 0.08em; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 12px;">
+                    <h3 class="font-mono text-dim" style="font-size: 0.85rem; text-transform: uppercase; margin: 0 0 20px; letter-spacing: 0.08em; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 12px;">
                         <i class="bi bi-map text-blue"></i> [ course_map ]
                     </h3>
+
+                    <!-- Course Progress Sidebar Tracker -->
+                    <div class="course-sidebar-progress" style="margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--border-subtle);">
+                        <div style="display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 0.75rem; margin-bottom: 8px;">
+                            <span class="text-dim">PROGRESS</span>
+                            <span class="text-green" th:text="${completedModuleIds != null ? #lists.size(completedModuleIds) : 0} + ' / ' + ${#lists.size(course.modules)}">0/0</span>
+                        </div>
+                        <div style="height: 6px; background: rgba(128,128,128,0.1); border-radius: 3px; overflow: hidden;">
+                            <div th:style="'width: ' + (${completedModuleIds != null and #lists.size(course.modules) > 0} ? (${#lists.size(completedModuleIds)} * 100 / ${#lists.size(course.modules)}) : 0) + '%; height: 100%; background: var(--accent-green); transition: width 0.3s ease;'"></div>
+                        </div>
+                    </div>
+
                     <ul class="course-map__list" style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px;">
                         <li class="course-map__item" th:classappend="${isOverview} ? 'active' : ''">
                             <a th:href="@{/course/{id}(id=${course.id})}" style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: var(--radius); text-decoration: none; transition: all 0.2s;" th:styleappend="${isOverview} ? 'background: rgba(88, 166, 255, 0.1); color: var(--accent-blue); font-weight: 600;' : 'color: var(--text-dim);'">
@@ -39,7 +51,7 @@
                             th:classappend="${!isOverview and m.id == module.id} ? 'active' : ''">
                             <a th:href="@{/course/{courseId}/module/{moduleId}(courseId=${course.id}, moduleId=${m.id})}" 
                                style="display: flex; flex-direction: column; padding: 12px 16px; border-radius: var(--radius); text-decoration: none; transition: all 0.2s;"
-                               th:styleappend="${!isOverview and m.id == module.id} ? 'background: rgba(188, 140, 255, 0.1); color: #bc8cff; font-weight: 600; border-left: 3px solid #bc8cff;' : 'color: var(--text-dim);'">
+                               th:styleappend="${!isOverview and m.id == module.id} ? 'background: rgba(188, 140, 255, 0.1); color: var(--accent-purple); font-weight: 600; border-left: 3px solid var(--accent-purple);' : 'color: var(--text-dim);'">
                                 <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
                                     <div style="display: flex; align-items: center; gap: 10px;">
                                         <!-- Completed check icon or default icon -->
@@ -72,7 +84,7 @@
                 <article class="post">
                     <!-- Page Header -->
                     <header style="margin-bottom: 40px;">
-                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
                             <span class="profile-role-badge" style="background: rgba(88, 166, 255, 0.1); color: var(--accent-blue); border-color: rgba(88, 166, 255, 0.3);" th:text="${isOverview ? course.level : 'MODULE ' + (module.orderIndex + 1)}">LEVEL / MODULE X</span>
                             <div th:if="${isOverview}" style="display: flex; gap: 12px; font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-dim); align-items: center;">
                                 <span><i class="bi bi-clock text-blue"></i> <span th:text="${course.duration}">12 Hours</span></span>
@@ -85,6 +97,11 @@
                                         <span th:text="${isBookmarked ? 'Saved' : 'Save'}">Save</span>
                                     </button>
                                 </form>
+                            </div>
+                            <div th:if="${not isOverview}" style="display: flex; gap: 12px; font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-dim); align-items: center;">
+                                <span id="readingTime" style="display: none; align-items: center; gap: 6px;">
+                                    <i class="bi bi-book text-purple"></i> <span id="readingTimeText">Calculating...</span>
+                                </span>
                             </div>
                         </div>
                         
@@ -197,6 +214,22 @@
     </div>
     
     <th:block layout:fragment="scripts">
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const contentEl = document.querySelector(".post-content");
+                if (contentEl) {
+                    const text = contentEl.textContent || contentEl.innerText || "";
+                    const wordCount = text.trim().split(/\s+/).filter(w => w.length > 0).length;
+                    const minutes = Math.max(1, Math.ceil(wordCount / 200));
+                    const rtText = document.getElementById("readingTimeText");
+                    const rtContainer = document.getElementById("readingTime");
+                    if (rtText && rtContainer) {
+                        rtText.textContent = minutes + " min read";
+                        rtContainer.style.display = "inline-flex";
+                    }
+                }
+            });
+        </script>
         <style>
             .course-map__item a:hover {
                 background: rgba(255, 255, 255, 0.05) !important;

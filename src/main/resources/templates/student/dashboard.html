@@ -7,39 +7,38 @@
     <style>
         .xp-bar-container {
             width: 100%;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(128, 128, 128, 0.1);
             height: 10px;
             border-radius: 5px;
             overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-subtle);
             margin-top: 8px;
         }
-
         .xp-bar-fill {
             height: 100%;
             background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
             box-shadow: 0 0 10px rgba(88, 166, 255, 0.3);
             transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border-radius: 5px;
         }
-
         .achievement-mini-card {
-            background: rgba(255, 255, 255, 0.03);
+            background: rgba(128, 128, 128, 0.04);
             border: 1px solid var(--border-subtle);
-            border-radius: 12px;
-            padding: 12px 16px;
+            border-radius: 14px;
+            padding: 14px 18px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
             flex: 1;
-            min-width: 220px;
-            transition: all 0.2s ease;
+            min-width: 230px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-
         .achievement-mini-card:hover {
-            background: rgba(255, 255, 255, 0.06);
+            background: rgba(88, 166, 255, 0.06);
             border-color: var(--accent-blue);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
         }
-
         .status-pill {
             display: inline-flex;
             align-items: center;
@@ -51,17 +50,55 @@
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
-
         .status-pill.active {
             background: rgba(63, 185, 80, 0.1);
             color: var(--accent-green);
             border: 1px solid rgba(63, 185, 80, 0.2);
         }
-
         .status-pill.master {
             background: rgba(188, 140, 255, 0.1);
             color: var(--accent-purple);
             border: 1px solid rgba(188, 140, 255, 0.2);
+        }
+        /* Completed course card */
+        .completed-course-card {
+            padding: 24px;
+            border-radius: 16px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(63, 185, 80, 0.2);
+            background: linear-gradient(135deg, rgba(63, 185, 80, 0.04) 0%, transparent 100%);
+        }
+        .completed-course-card::after {
+            content: '\F26E';
+            font-family: 'bootstrap-icons';
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            color: var(--accent-green);
+            font-size: 1.2rem;
+            opacity: 0.6;
+        }
+        .dash-section-title {
+            font-size: 1.3rem;
+            margin: 0 0 24px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        /* Active course card hover */
+        .active-course-card {
+            padding: 24px;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .active-course-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-blue);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
         }
     </style>
 </head>
@@ -69,14 +106,14 @@
 <body>
     <div layout:fragment="content" class="container py-l fade-in">
         <!-- Dashboard Header -->
-        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 32px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 32px; flex-wrap: wrap; gap: 16px;">
             <div>
-                <h1 style="font-size: 2.8rem; margin: 0 0 8px; font-weight: 800; letter-spacing: -0.02em;">Student <span
+                <h1 style="font-size: clamp(2rem, 5vw, 2.8rem); margin: 0 0 8px; font-weight: 800; letter-spacing: -0.02em;">Student <span
                         class="text-gradient-blue">Workspace</span></h1>
-                <p style="color: var(--text-dim); margin: 0; font-size: 1.1rem;">Manage your learning trajectory and
+                <p style="color: var(--text-dim); margin: 0; font-size: 1.05rem;">Manage your learning trajectory and
                     track achievement progress.</p>
             </div>
-            <div style="display: flex; gap: 12px; align-items: center;">
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                 <span class="profile-role-badge student" style="background: rgba(56, 139, 253, 0.15); color: var(--accent-blue); padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(56, 139, 253, 0.3); font-weight: 600; font-size: 0.8rem;">ACADEMY STUDENT</span>
                 <a th:href="@{/profile/settings}" class="btn btn-outline" style="border-radius: 20px;">
                     <i class="bi bi-person-gear"></i> Edit Profile
@@ -330,16 +367,13 @@
 
         <!-- Course Sections (Active, Available, Completed) - Using simplified cards -->
         <div th:if="${!#lists.isEmpty(activeCourses)}">
-            <h3
-                style="font-size: 1.4rem; margin: 0 0 24px; font-weight: 800; display: flex; align-items: center; gap: 12px;">
+            <h3 class="dash-section-title">
                 <i class="bi bi-terminal-fill text-blue"></i> ACTIVE_CURRICULUM
+                <span style="font-size: 0.7rem; color: var(--text-dim); font-weight: 500; margin-left: auto; font-family: var(--font-mono);" th:text="${#lists.size(activeCourses)} + ' active'">0 active</span>
             </h3>
             <div
                 style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; margin-bottom: 48px;">
-                <div th:each="progress : ${activeCourses}" class="card-glass"
-                    style="padding: 24px; border-radius: 16px; display: flex; flex-direction: column; transition: all 0.3s ease;"
-                    onmouseover="this.style.transform='translateY(-5px)'; this.style.borderColor='var(--accent-blue)';"
-                    onmouseout="this.style.transform='none'; this.style.borderColor='';">
+                <div th:each="progress : ${activeCourses}" class="card-glass active-course-card">
                     <div
                         style="display: flex; justify-content: space-between; margin-bottom: 16px; font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-dim);">
                         <span th:text="${progress.course.level}">Level</span>
@@ -355,7 +389,7 @@
                             <span class="text-blue" th:text="${progress.progressPercentage} + '%'">0%</span>
                         </div>
                         <div
-                            style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; margin-bottom: 20px;">
+                            style="height: 6px; background: rgba(128,128,128,0.1); border-radius: 3px; overflow: hidden; margin-bottom: 20px;">
                             <div
                                 th:style="'width: ' + ${progress.progressPercentage} + '%; height: 100%; background: var(--accent-blue);'">
                             </div>
@@ -368,10 +402,32 @@
         </div>
 
         <!-- Available Courses -->
+        <!-- Completed Courses -->
+        <div th:if="${!#lists.isEmpty(completedCourses)}" style="margin-bottom: 48px;">
+            <h3 class="dash-section-title">
+                <i class="bi bi-patch-check-fill text-green"></i> COMPLETED_COURSES
+                <span style="font-size: 0.7rem; color: var(--accent-green); font-weight: 500; margin-left: auto; font-family: var(--font-mono);" th:text="${#lists.size(completedCourses)} + ' done ✓'">0 done</span>
+            </h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px;">
+                <div th:each="progress : ${completedCourses}" class="card-glass completed-course-card">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-dim);">
+                        <span th:text="${progress.course.level}">Level</span>
+                        <span th:text="${progress.course.duration}">Duration</span>
+                    </div>
+                    <h4 style="font-size: 1.15rem; margin: 0 0 12px; font-weight: 700; color: var(--text-main);" th:text="${progress.course.title}">Title</h4>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-top: auto;">
+                        <div style="flex: 1; height: 6px; border-radius: 3px; background: var(--accent-green);"></div>
+                        <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent-green); font-weight: 700;">100%</span>
+                    </div>
+                    <a th:href="@{/course/{id}(id=${progress.course.id})}" class="btn btn-outline w-full" style="margin-top: 16px; border-radius: 10px; font-family: var(--font-mono); font-size: 0.85rem; border-color: rgba(63, 185, 80, 0.3); color: var(--accent-green);">REVIEW_COURSE</a>
+                </div>
+            </div>
+        </div>
+
         <div th:if="${!#lists.isEmpty(availableCourses)}">
-            <h3
-                style="font-size: 1.4rem; margin: 0 0 24px; font-weight: 800; display: flex; align-items: center; gap: 12px;">
+            <h3 class="dash-section-title">
                 <i class="bi bi-journal-code text-purple"></i> AVAILABLE_LIBRARIES
+                <span style="font-size: 0.7rem; color: var(--text-dim); font-weight: 500; margin-left: auto; font-family: var(--font-mono);" th:text="${#lists.size(availableCourses)} + ' available'">0 available</span>
             </h3>
             <div
                 style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; margin-bottom: 48px;">
@@ -395,8 +451,7 @@
 
         <!-- Academy Mentors -->
         <div th:if="${!#lists.isEmpty(teachers)}" style="margin-top: 24px; margin-bottom: 48px;">
-            <h3
-                style="font-size: 1.4rem; margin: 0 0 24px; font-weight: 800; display: flex; align-items: center; gap: 12px;">
+            <h3 class="dash-section-title">
                 <i class="bi bi-cpu text-blue"></i> ACADEMY_MENTORS
             </h3>
             <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px;">

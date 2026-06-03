@@ -4741,4 +4741,185 @@ code[class*="language-"] {
   }
 }
 
+/* ===================================================================
+   GLOBAL DESIGN IMPROVEMENTS — v2.0
+   Light theme fixes, improved transitions, and new component styles
+   =================================================================== */
 
+/* --- Light Theme Fixes for Inline Styles --- */
+.light-theme .card-glass {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+.light-theme .card-glass:hover {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+/* Fix table rows in light theme */
+.light-theme table tbody tr {
+  border-bottom-color: rgba(0, 0, 0, 0.05) !important;
+}
+.light-theme table tbody tr:hover {
+  background: rgba(59, 130, 246, 0.04) !important;
+}
+
+/* Fix stat cards in light theme */
+.light-theme .stat-card {
+  background: var(--bg-surface);
+}
+
+/* Fix metric pills and labels */
+.light-theme .metric-pill {
+  background: rgba(0, 0, 0, 0.03) !important;
+  border-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+/* --- Enhanced Page Entrance Animation --- */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in > * {
+  animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+.fade-in > *:nth-child(1) { animation-delay: 0s; }
+.fade-in > *:nth-child(2) { animation-delay: 0.06s; }
+.fade-in > *:nth-child(3) { animation-delay: 0.12s; }
+.fade-in > *:nth-child(4) { animation-delay: 0.18s; }
+.fade-in > *:nth-child(5) { animation-delay: 0.24s; }
+.fade-in > *:nth-child(6) { animation-delay: 0.3s; }
+.fade-in > *:nth-child(n+7) { animation-delay: 0.35s; }
+
+/* --- Text Gradient Helpers --- */
+.text-gradient-green {
+  background: linear-gradient(135deg, var(--accent-green), #69db7c);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.text-gradient-blue {
+  background: linear-gradient(135deg, var(--accent-blue), #7cc4ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.text-gradient-purple {
+  background: linear-gradient(135deg, var(--accent-purple), #d3aaff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* --- Better Scrollbar Styling --- */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(128, 128, 128, 0.25);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(128, 128, 128, 0.4);
+}
+
+/* --- Enhanced Course Card (used in courses page) --- */
+.courses-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 28px;
+}
+
+/* --- Improved Button Focus States for Accessibility --- */
+.btn:focus-visible,
+.filter-btn:focus-visible {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 2px;
+}
+
+/* --- Table Responsive Wrapper --- */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* --- Badge Styles Improvements --- */
+.badge.bg-green { background: rgba(63, 185, 80, 0.15) !important; }
+.badge.text-green { color: var(--accent-green) !important; }
+.badge.bg-orange { background: rgba(210, 153, 34, 0.15) !important; }
+.badge.text-orange { color: var(--accent-orange) !important; }
+.badge.bg-opacity-10 { }
+
+/* --- Empty State Improvements --- */
+.empty-state-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(128, 128, 128, 0.05);
+  margin: 0 auto 20px;
+}
+
+/* --- Light Theme Course Card Enhancement --- */
+.light-theme .enh-course-card {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(0, 0, 0, 0.06);
+}
+.light-theme .enh-course-card:hover {
+  border-color: rgba(59, 130, 246, 0.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+}
+
+/* --- Light Theme Leaderboard Podium --- */
+.light-theme .lb-podium-card.gold {
+  background: linear-gradient(180deg, rgba(255, 215, 0, 0.08) 0%, rgba(255, 215, 0, 0.02) 100%);
+}
+.light-theme .lb-podium-card.silver {
+  background: linear-gradient(180deg, rgba(128, 128, 128, 0.08) 0%, rgba(128, 128, 128, 0.02) 100%);
+}
+.light-theme .lb-podium-card.bronze {
+  background: linear-gradient(180deg, rgba(205, 127, 50, 0.08) 0%, rgba(205, 127, 50, 0.02) 100%);
+}
+
+/* --- Notification Bell Fix for Both Themes --- */
+.notif-bell-icon {
+  font-size: 1.15rem;
+  color: var(--text-dim);
+  transition: color 0.2s ease;
+}
+.lms-dropdown-trigger:hover .notif-bell-icon {
+  color: var(--text-main);
+}
+.notif-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  box-shadow: 0 0 0 2px var(--bg-dark);
+  line-height: 1;
+}
+.light-theme .notif-badge {
+  box-shadow: 0 0 0 2px var(--bg-surface);
+}
