@@ -1,14 +1,18 @@
 package com.example.blog.service.impl;
 
+import com.example.blog.entity.CodingSubmission;
+import com.example.blog.entity.CodingSubmission.SubmissionStatus;
+import com.example.blog.entity.CodingTask;
 import com.example.blog.entity.Quiz;
 import com.example.blog.entity.Role;
 import com.example.blog.entity.User;
 import com.example.blog.entity.UserQuizResult;
+import com.example.blog.repository.CodingSubmissionRepository;
+import com.example.blog.repository.CodingTaskRepository;
 import com.example.blog.repository.QuizRepository;
 import com.example.blog.repository.UserQuizResultRepository;
 import com.example.blog.repository.UserRepository;
 import com.example.blog.service.AnalyticsService;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -32,6 +36,8 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     private final UserQuizResultRepository userQuizResultRepository;
     private final UserRepository userRepository;
     private final QuizRepository quizRepository;
+    private final CodingSubmissionRepository codingSubmissionRepository;
+    private final CodingTaskRepository codingTaskRepository;
 
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd MMM");
     private static final DateTimeFormatter ISO_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -41,6 +47,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     public Map<String, Object> getXpProgressionData(Long userId, int days) {
         List<UserQuizResult> results =
                 userQuizResultRepository.findByUserIdOrderByCompletedAtAsc(userId);
+        List<CodingSubmission> submissions = codingSubmissionRepository.findByUserId(userId);
 
         LocalDate today = LocalDate.now();
         LocalDate startDate = today.minusDays(days - 1);
@@ -61,6 +68,25 @@ public class AnalyticsServiceImpl implements AnalyticsService {
             }
         }
 
+        // Add coding task XP (only earliest pass per task)
+        Map<Long, CodingSubmission> earliestPassByTask = new HashMap<>();
+        for (CodingSubmission s : submissions) {
+            if (s.getStatus() == SubmissionStatus.PASSED) {
+                earliestPassByTask.merge(s.getCodingTask().getId(), s, (existing, candidate) ->
+                    candidate.getSubmittedAt().isBefore(existing.getSubmittedAt()) ? candidate : existing
+                );
+            }
+        }
+
+        for (CodingSubmission s : earliestPassByTask.values()) {
+            LocalDate date = s.getSubmittedAt() != null
+                    ? s.getSubmittedAt().toLocalDate()
+                    : today;
+            if (!date.isBefore(startDate) && !date.isAfter(today)) {
+                dailyScores.merge(date, s.getCodingTask().getPointsReward(), Integer::sum);
+            }
+        }
+
         // Convert to cumulative XP
         List<String> labels = new ArrayList<>();
         List<Integer> data = new ArrayList<>();
@@ -77,11 +103,21 @@ public class AnalyticsServiceImpl implements AnalyticsService {
             }
         }
 
+        for (CodingSubmission s : earliestPassByTask.values()) {
+            LocalDate date = s.getSubmittedAt() != null
+                    ? s.getSubmittedAt().toLocalDate()
+                    : today;
+            if (date.isBefore(startDate)) {
+                cumulative += s.getCodingTask().getPointsReward();
+            }
+        }
+
         for (Map.Entry<LocalDate, Integer> entry : dailyScores.entrySet()) {
             cumulative += entry.getValue();
             labels.add(entry.getKey().format(DATE_FMT));
             data.add(cumulative);
         }
+
 
         Map<String, Object> result = new HashMap<>();
         result.put("labels", labels);
@@ -125,12 +161,25 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     public List<Map<String, Object>> getActivityHeatmapData(Long userId) {
         List<UserQuizResult> results =
                 userQuizResultRepository.findByUserIdOrderByCompletedAtAsc(userId);
+        
+        List<CodingSubmission> submissions =
+                codingSubmissionRepository.findByUserId(userId);
 
         Map<String, Integer> dailyCounts = new LinkedHashMap<>();
+        
         for (UserQuizResult r : results) {
             LocalDate date =
                     r.getCompletedAt() != null
                             ? r.getCompletedAt().atZone(ZONE).toLocalDate()
+                            : LocalDate.now();
+            String key = date.format(ISO_FMT);
+            dailyCounts.merge(key, 1, Integer::sum);
+        }
+
+        for (CodingSubmission s : submissions) {
+            LocalDate date =
+                    s.getSubmittedAt() != null
+                            ? s.getSubmittedAt().toLocalDate()
                             : LocalDate.now();
             String key = date.format(ISO_FMT);
             dailyCounts.merge(key, 1, Integer::sum);
@@ -145,6 +194,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         }
         return heatmap;
     }
+
 
     @Override
     public Map<String, Object> getPassFailSummary(Long userId) {
@@ -236,5 +286,76 @@ public class AnalyticsServiceImpl implements AnalyticsService {
                                 (double) a.get("passRate"), (double) b.get("passRate")));
 
         return quizStats.stream().limit(limit).collect(Collectors.toList());
+    }
+
+    @Override
+    public Map<String, Object> getCodingTaskStats(Long userId) {
+        List<CodingSubmission> submissions = codingSubmissionRepository.findByUserId(userId);
+
+        // Deduplicate: keep only the best (PASSED beats FAILED) submission per task
+        Map<Long, CodingSubmission> bestByTask = new LinkedHashMap<>();
+        for (CodingSubmission s : submissions) {
+            Long taskId = s.getCodingTask().getId();
+            bestByTask.merge(taskId, s, (existing, candidate) -> {
+                if (candidate.getStatus() == SubmissionStatus.PASSED) return candidate;
+                return existing;
+            });
+        }
+
+        int totalAttempted = bestByTask.size();
+        long totalPassed = bestByTask.values().stream()
+                .filter(s -> s.getStatus() == SubmissionStatus.PASSED)
+                .count();
+
+        // XP earned from coding tasks
+        int xpFromCode = bestByTask.values().stream()
+                .filter(s -> s.getStatus() == SubmissionStatus.PASSED)
+                .mapToInt(s -> s.getCodingTask().getPointsReward())
+                .sum();
+
+        // Per-task breakdown for the table
+        List<Map<String, Object>> tasks = new ArrayList<>();
+        for (CodingSubmission s : bestByTask.values()) {
+            Map<String, Object> row = new HashMap<>();
+            row.put("title", s.getCodingTask().getTitle());
+            row.put("language", s.getCodingTask().getLanguage());
+            row.put("status", s.getStatus().name());
+            row.put("xp", s.getCodingTask().getPointsReward());
+            tasks.add(row);
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("totalAttempted", totalAttempted);
+        result.put("totalPassed", totalPassed);
+        result.put("xpFromCode", xpFromCode);
+        result.put("tasks", tasks);
+        return result;
+    }
+
+    @Override
+    public Map<String, Object> getCodingTaskPlatformStats() {
+        List<CodingTask> allTasks = codingTaskRepository.findAll();
+
+        List<String> labels = new ArrayList<>();
+        List<Double> passRates = new ArrayList<>();
+        List<Integer> totalSubmissions = new ArrayList<>();
+
+        for (CodingTask task : allTasks) {
+            List<CodingSubmission> subs = codingSubmissionRepository.findByCodingTaskId(task.getId());
+            if (subs.isEmpty()) continue;
+
+            long passed = subs.stream().filter(s -> s.getStatus() == SubmissionStatus.PASSED).count();
+            double passRate = (passed * 100.0) / subs.size();
+
+            labels.add(task.getTitle());
+            passRates.add(Math.round(passRate * 10.0) / 10.0);
+            totalSubmissions.add(subs.size());
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("labels", labels);
+        result.put("passRates", passRates);
+        result.put("totalSubmissions", totalSubmissions);
+        return result;
     }
 }

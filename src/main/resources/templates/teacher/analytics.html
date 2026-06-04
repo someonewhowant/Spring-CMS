@@ -152,6 +152,22 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Coding Challenges Platform Stats (full-width) -->
+            <div class="card-glass chart-card" style="grid-column: 1 / -1; display: none;" id="codingChallengesStatsCard">
+                <div class="chart-header">
+                    <div class="chart-icon" style="background: rgba(56, 139, 253, 0.1); color: var(--accent-blue);">
+                        <i class="bi bi-terminal"></i>
+                    </div>
+                    <div>
+                        <h3 class="chart-title">Coding Task Performance</h3>
+                        <p class="chart-subtitle">PLATFORM_WIDE_CODING_CHALLENGES_STATS</p>
+                    </div>
+                </div>
+                <div class="chart-container" style="height: 320px;">
+                    <canvas id="codingTasksChart"></canvas>
+                </div>
+            </div>
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
@@ -303,8 +319,74 @@
                 container.innerHTML = html;
             }
 
+            // --- Coding Tasks Chart ---
+            async function loadCodingTasks() {
+                const res = await fetch('/teacher/api/analytics/coding-tasks');
+                const data = await res.json();
+
+                if (!data.labels || data.labels.length === 0) {
+                    document.getElementById('codingChallengesStatsCard').style.display = 'none';
+                    return;
+                }
+
+                document.getElementById('codingChallengesStatsCard').style.display = 'block';
+
+                const ctx = document.getElementById('codingTasksChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            data: data.passRates,
+                            backgroundColor: data.passRates.map(v => {
+                                if (v >= 70) return 'rgba(63, 185, 80, 0.7)';
+                                if (v >= 40) return 'rgba(255, 166, 87, 0.7)';
+                                return 'rgba(248, 81, 73, 0.7)';
+                            }),
+                            borderRadius: 8,
+                            borderSkipped: false,
+                            barPercentage: 0.6,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'x',
+                        scales: {
+                            x: { grid: { display: false } },
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: {
+                                    callback: function(value) {
+                                        return value + "%";
+                                    }
+                                },
+                                grid: { color: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.05)' }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                backgroundColor: isDark ? 'rgba(30,30,30,0.95)' : 'rgba(255,255,255,0.95)',
+                                borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+                                borderWidth: 1, padding: 12, cornerRadius: 10,
+                                callbacks: {
+                                    label: ctx => {
+                                        const submissionsCount = data.totalSubmissions[ctx.dataIndex];
+                                        return [
+                                            `Pass Rate: ${ctx.parsed.y}%`,
+                                            `Total Submissions: ${submissionsCount}`
+                                        ];
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
             // --- Init ---
-            Promise.all([loadLevelDist(), loadAvgScores(), loadHardestQuizzes()])
+            Promise.all([loadLevelDist(), loadAvgScores(), loadHardestQuizzes(), loadCodingTasks()])
                 .catch(err => console.error('Teacher analytics error:', err));
         </script>
     </div>

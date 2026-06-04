@@ -135,4 +135,24 @@ public class AnalyticsController {
         }
         return ResponseEntity.ok(analyticsService.getHardestQuizzes(limit));
     }
+
+    @GetMapping("/student/api/analytics/coding-tasks")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getStudentCodingStats(Principal principal) {
+        User user = userRepository.findByUsername(principal.getName()).orElse(null);
+        if (user == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(analyticsService.getCodingTaskStats(user.getId()));
+    }
+
+    @GetMapping("/teacher/api/analytics/coding-tasks")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getTeacherCodingStats(Principal principal) {
+        User user = userRepository.findByUsername(principal.getName()).orElse(null);
+        if (user == null || user.getRole() != Role.TEACHER) {
+            return ResponseEntity.status(403).build();
+        }
+        return ResponseEntity.ok(analyticsService.getCodingTaskPlatformStats());
+    }
 }

@@ -126,6 +126,25 @@ public class SandboxController {
         return "redirect:/teacher/courses/" + moduleRepository.findById(moduleId).get().getCourse().getId() + "/modules";
     }
 
+    @PostMapping("/teacher/modules/{moduleId}/coding-tasks/import")
+    public String importCodingTask(
+            @PathVariable Long moduleId,
+            @RequestParam("file") org.springframework.web.multipart.MultipartFile file,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            if (file != null && !file.isEmpty()) {
+                String content = new String(file.getBytes(), java.nio.charset.StandardCharsets.UTF_8);
+                codingTaskService.importTaskFromMarkdown(moduleId, content);
+                redirectAttributes.addFlashAttribute("message", "Coding task imported successfully!");
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to import coding task: " + e.getMessage());
+        }
+
+        return "redirect:/teacher/courses/" + moduleRepository.findById(moduleId).get().getCourse().getId() + "/modules";
+    }
+
     @GetMapping("/teacher/coding-tasks/{taskId}/delete")
     public String deleteCodingTask(@PathVariable Long taskId, RedirectAttributes redirectAttributes) {
         CodingTask task = codingTaskService.getTask(taskId);

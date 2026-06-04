@@ -27,4 +27,6 @@ public interface CodingTaskService {
     CodingSubmission submitCode(Long taskId, Long userId, String code, String language);
 
     boolean hasUserPassedTask(Long taskId, Long userId);
+
+    CodingTask importTaskFromMarkdown(Long moduleId, String content);
 }

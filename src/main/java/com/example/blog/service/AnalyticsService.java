@@ -65,4 +65,25 @@ public interface AnalyticsService {
      * @return list of maps with quiz title and pass rate
      */
     List<Map<String, Object>> getHardestQuizzes(int limit);
+
+    // --- Coding Task analytics (student) ---
+
+    /**
+     * Returns coding task submission stats for a student.
+     * Includes total tasks attempted, passed count, and per-task breakdown.
+     *
+     * @param userId the student's user ID
+     * @return map with "totalAttempted", "totalPassed", "xpFromCode", "tasks" list
+     */
+    Map<String, Object> getCodingTaskStats(Long userId);
+
+    // --- Coding Task analytics (teacher) ---
+
+    /**
+     * Returns platform-wide coding task stats for the teacher dashboard.
+     * Includes pass rates per task and total submission counts.
+     *
+     * @return map with "labels" (task titles), "passRates", "totalSubmissions" lists
+     */
+    Map<String, Object> getCodingTaskPlatformStats();
 }

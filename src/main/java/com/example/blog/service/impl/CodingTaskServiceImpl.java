@@ -137,6 +137,8 @@ public class CodingTaskServiceImpl implements CodingTaskService {
             resultJson = "{}";
         }
 
+        boolean alreadyPassed = hasUserPassedTask(taskId, userId);
+
         CodingSubmission submission = CodingSubmission.builder()
                 .user(user)
                 .codingTask(task)
@@ -148,7 +150,7 @@ public class CodingTaskServiceImpl implements CodingTaskService {
         CodingSubmission saved = submissionRepository.save(submission);
 
         // Award XP on first successful pass
-        if (allPassed && !hasUserPassedTask(taskId, userId)) {
+        if (allPassed && !alreadyPassed) {
             gamificationService.awardXp(userId, task.getPointsReward(), "Coding task passed: " + task.getTitle());
             log.info("Awarded {} XP to user {} for passing coding task: {}", task.getPointsReward(), userId, task.getTitle());
         }
@@ -170,5 +172,82 @@ public class CodingTaskServiceImpl implements CodingTaskService {
             log.error("Failed to parse test cases JSON: {}", e.getMessage());
             return List.of();
         }
+    }
+
+    @Override
+    @Transactional
+    public CodingTask importTaskFromMarkdown(Long moduleId, String content) {
+        CodingTask task = new CodingTask();
+        task.setPointsReward(50); // Default reward
+        task.setLanguage("javascript"); // Default language
+
+        String[] lines = content.split("\n");
+        StringBuilder descriptionBuilder = new StringBuilder();
+        StringBuilder starterCodeBuilder = new StringBuilder();
+        List<Map<String, String>> testCases = new ArrayList<>();
+        
+        boolean inStarterCode = false;
+        boolean inTestsSection = false;
+
+        for (String line : lines) {
+            String trimmedLine = line.trim();
+
+            if (trimmedLine.startsWith("# ") && task.getTitle() == null) {
+                task.setTitle(trimmedLine.substring(2).trim());
+            } else if (trimmedLine.toLowerCase().startsWith("language:")) {
+                task.setLanguage(trimmedLine.substring(9).trim());
+            } else if (trimmedLine.toLowerCase().startsWith("reward:")) {
+                try {
+                    task.setPointsReward(Integer.parseInt(trimmedLine.substring(7).trim()));
+                } catch (NumberFormatException ignored) {}
+            } else if (trimmedLine.startsWith("## Starter Code")) {
+                inStarterCode = true;
+            } else if (trimmedLine.startsWith("## Tests")) {
+                inStarterCode = false;
+                inTestsSection = true;
+            } else if (inStarterCode) {
+                if (!trimmedLine.startsWith("```")) {
+                    starterCodeBuilder.append(line).append("\n");
+                }
+            } else if (inTestsSection) {
+                if (trimmedLine.startsWith("- ")) {
+                    // Parse line: - Input: `5` | Expected: `25` | Label: `Test 1`
+                    Map<String, String> testCase = new HashMap<>();
+                    String[] parts = trimmedLine.substring(2).split("\\|");
+                    for (String part : parts) {
+                        String[] kv = part.split(":", 2);
+                        if (kv.length == 2) {
+                            String key = kv[0].trim().toLowerCase();
+                            String value = kv[1].trim().replace("`", ""); // Remove backticks
+                            if (key.equals("input")) testCase.put("input", value);
+                            if (key.equals("expected")) testCase.put("expectedOutput", value);
+                            if (key.equals("label")) testCase.put("label", value);
+                        }
+                    }
+                    if (!testCase.isEmpty()) {
+                        testCases.add(testCase);
+                    }
+                }
+            } else {
+                if (task.getTitle() != null && !trimmedLine.startsWith("# ") && !trimmedLine.toLowerCase().startsWith("language:") && !trimmedLine.toLowerCase().startsWith("reward:")) {
+                    descriptionBuilder.append(line).append("\n");
+                }
+            }
+        }
+
+        if (task.getTitle() == null) {
+            task.setTitle("Imported Coding Task");
+        }
+        
+        task.setDescription(descriptionBuilder.toString().trim());
+        task.setStarterCode(starterCodeBuilder.toString().trim());
+        
+        try {
+            task.setTestCasesJson(objectMapper.writeValueAsString(testCases));
+        } catch (Exception e) {
+            task.setTestCasesJson("[]");
+        }
+
+        return createTask(moduleId, task);
     }
 }

@@ -14,6 +14,8 @@ public interface CodingSubmissionRepository extends JpaRepository<CodingSubmissi
 
     List<CodingSubmission> findByUserId(Long userId);
 
+    List<CodingSubmission> findByCodingTaskId(Long codingTaskId);
+
     long countByCodingTaskIdAndUserIdAndStatus(
             Long codingTaskId, Long userId, CodingSubmission.SubmissionStatus status);
 }

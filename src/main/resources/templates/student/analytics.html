@@ -230,6 +230,33 @@
                     </div>
                 </div>
             </div>
+            <!-- Coding Tasks Card (full-width) -->
+            <div class="card-glass chart-card" id="codingTasksCard" style="grid-column: 1 / -1; display: none;">
+                <div class="chart-header">
+                    <div class="chart-icon" style="background: rgba(63, 185, 80, 0.1); color: var(--accent-green);">
+                        <i class="bi bi-terminal-fill"></i>
+                    </div>
+                    <div style="flex: 1;">
+                        <h3 class="chart-title">Coding Challenges</h3>
+                        <p class="chart-subtitle">SANDBOX_SUBMISSIONS_BREAKDOWN</p>
+                    </div>
+                    <div style="display: flex; gap: 20px; font-family: var(--font-mono); font-size: 0.8rem;">
+                        <div style="text-align: center;">
+                            <div id="codeAttempted" style="font-size: 1.4rem; font-weight: 800; color: var(--accent-blue);">0</div>
+                            <div style="color: var(--text-dim);">attempted</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div id="codePassed" style="font-size: 1.4rem; font-weight: 800; color: var(--accent-green);">0</div>
+                            <div style="color: var(--text-dim);">passed</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div id="codeXp" style="font-size: 1.4rem; font-weight: 800; color: var(--accent-orange);">0</div>
+                            <div style="color: var(--text-dim);">XP earned</div>
+                        </div>
+                    </div>
+                </div>
+                <div id="codingTasksList" style="display: flex; flex-direction: column; gap: 10px; margin-top: 8px;"></div>
+            </div>
         </div>
 
         <!-- Empty State -->
@@ -466,24 +493,93 @@
                 }
             }
 
+            // --- Coding Tasks ---
+            async function loadCodingTasks() {
+                const res = await fetch('/student/api/analytics/coding-tasks');
+                const data = await res.json();
+
+                if (!data.tasks || data.tasks.length === 0) {
+                    document.getElementById('codingTasksCard').style.display = 'none';
+                    return;
+                }
+
+                document.getElementById('codingTasksCard').style.display = 'block';
+                document.getElementById('codeAttempted').innerText = data.totalAttempted;
+                document.getElementById('codePassed').innerText = data.totalPassed;
+                document.getElementById('codeXp').innerText = data.xpFromCode;
+
+                const list = document.getElementById('codingTasksList');
+                list.innerHTML = '';
+
+                data.tasks.forEach(task => {
+                    const statusClass = task.status === 'PASSED' ? 'text-green' : 'text-orange';
+                    const iconClass = task.status === 'PASSED' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill';
+                    const item = document.createElement('div');
+                    item.className = 'card-glass';
+                    item.style.padding = '12px 18px';
+                    item.style.display = 'flex';
+                    item.style.justifyContent = 'space-between';
+                    item.style.alignItems = 'center';
+                    item.style.borderRadius = '12px';
+                    item.style.border = '1px solid var(--border-subtle)';
+                    
+                    item.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <i class="bi ${iconClass} ${statusClass}" style="font-size: 1.1rem;"></i>
+                            <div>
+                                <div style="font-weight: 600; font-size: 0.9rem;">${task.title}</div>
+                                <div style="font-size: 0.75rem; color: var(--text-dim); font-family: var(--font-mono);">${task.language}</div>
+                            </div>
+                        </div>
+                        <div style="font-family: var(--font-mono); font-weight: 700; font-size: 0.85rem;" class="${statusClass}">
+                            ${task.status === 'PASSED' ? '+' + task.xp + ' XP' : 'FAILED'}
+                        </div>
+                    `;
+                    list.appendChild(item);
+                });
+            }
+
             // --- Check data availability & init ---
             async function initAnalytics() {
                 try {
                     const pfRes = await fetch('/student/api/analytics/pass-fail');
                     const pfData = await pfRes.json();
+                    
+                    const codeRes = await fetch('/student/api/analytics/coding-tasks');
+                    const codeData = await codeRes.json();
 
-                    if (pfData.passed === 0 && pfData.failed === 0) {
+                    const hasQuizzes = pfData.passed > 0 || pfData.failed > 0;
+                    const hasCode = codeData.totalAttempted > 0;
+
+                    if (!hasQuizzes && !hasCode) {
                         document.querySelector('.analytics-grid').style.display = 'none';
                         document.getElementById('emptyState').style.display = 'block';
                         return;
                     }
 
-                    await Promise.all([
-                        loadXpChart(30),
-                        loadCourseRadar(),
-                        loadPassFail(),
-                        loadHeatmap()
-                    ]);
+                    const promises = [];
+                    if (hasQuizzes) {
+                        promises.push(loadXpChart(30));
+                        promises.push(loadCourseRadar());
+                        promises.push(loadPassFail());
+                        promises.push(loadHeatmap());
+                    } else {
+                        // Hide charts that depend on quizzes
+                        document.getElementById('courseRadarChart').parentElement.parentElement.style.display = 'none';
+                        document.getElementById('passFailChart').parentElement.parentElement.style.display = 'none';
+                    }
+
+                    // Always load XP chart since it now includes coding task XP
+                    if (hasCode || hasQuizzes) {
+                        promises.push(loadXpChart(30));
+                        promises.push(loadHeatmap());
+                    }
+
+                    if (hasCode) {
+                        promises.push(loadCodingTasks());
+                    }
+
+                    await Promise.all(promises);
                 } catch (err) {
                     console.error('Analytics init error:', err);
                 }
