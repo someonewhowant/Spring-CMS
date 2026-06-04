@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title th:text="${title}">Coding Sandbox</title>
+    <style>
+        .sandbox-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            min-height: 70vh;
+        }
+        @media (max-width: 1024px) {
+            .sandbox-layout { grid-template-columns: 1fr; }
+        }
+
+        .sandbox-editor-panel {
+            display: flex;
+            flex-direction: column;
+            border-radius: var(--radius);
+            overflow: hidden;
+            border: 1px solid var(--border-subtle);
+            background: #1e1e1e;
+        }
+
+        .sandbox-panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: rgba(22, 27, 34, 0.95);
+            border-bottom: 1px solid var(--border-subtle);
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+        }
+
+        .sandbox-panel-header .lang-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            background: rgba(63, 185, 80, 0.15);
+            color: var(--accent-green);
+            border: 1px solid rgba(63, 185, 80, 0.3);
+        }
+
+        #editor-container {
+            flex: 1;
+            min-height: 400px;
+        }
+
+        .sandbox-actions {
+            display: flex;
+            gap: 12px;
+            padding: 12px 16px;
+            background: rgba(22, 27, 34, 0.95);
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .sandbox-right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .sandbox-description {
+            padding: 24px;
+            border-radius: var(--radius);
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            backdrop-filter: blur(10px);
+        }
+        .sandbox-description h3 {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--accent-green);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin: 0 0 16px;
+        }
+        .sandbox-description .task-desc {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: var(--text-main);
+        }
+
+        /* Console output */
+        .sandbox-console {
+            flex: 1;
+            border-radius: var(--radius);
+            background: #0d1117;
+            border: 1px solid var(--border-subtle);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 200px;
+        }
+        .sandbox-console .console-header {
+            padding: 10px 16px;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(22, 27, 34, 0.6);
+        }
+        .sandbox-console .console-body {
+            padding: 16px;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: #c9d1d9;
+            overflow-y: auto;
+            flex: 1;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        /* Test case indicators */
+        .test-result {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+        .test-result.passed {
+            background: rgba(63, 185, 80, 0.08);
+            border: 1px solid rgba(63, 185, 80, 0.2);
+            color: var(--accent-green);
+        }
+        .test-result.failed {
+            background: rgba(248, 81, 73, 0.08);
+            border: 1px solid rgba(248, 81, 73, 0.2);
+            color: #f85149;
+        }
+        .test-result .test-icon {
+            font-size: 1rem;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        .test-result .test-details {
+            flex: 1;
+        }
+        .test-result .test-label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .test-result .test-meta {
+            font-size: 0.72rem;
+            opacity: 0.7;
+        }
+
+        /* Success overlay */
+        .sandbox-success-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            animation: fadeIn 0.3s ease;
+        }
+        .sandbox-success-card {
+            text-align: center;
+            padding: 48px 64px;
+            border-radius: 24px;
+            background: linear-gradient(135deg, rgba(63, 185, 80, 0.15) 0%, rgba(22, 27, 34, 0.95) 100%);
+            border: 2px solid rgba(63, 185, 80, 0.4);
+            box-shadow: 0 24px 80px rgba(63, 185, 80, 0.15);
+            animation: scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @keyframes scaleIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Spinner */
+        .sandbox-spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-top-color: var(--accent-green);
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .already-passed-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            background: rgba(63, 185, 80, 0.1);
+            border: 1px solid rgba(63, 185, 80, 0.3);
+            color: var(--accent-green);
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="content" class="container py-l fade-in">
+
+        <!-- Breadcrumbs -->
+        <nav style="display: flex; align-items: center; gap: 12px; font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-dim); margin-bottom: 32px; background: var(--bg-surface); padding: 12px 20px; border-radius: var(--radius); border: 1px solid var(--border-subtle); backdrop-filter: blur(10px);">
+            <a th:href="@{/}" style="color: var(--accent-blue); text-decoration: none;"><i class="bi bi-house-door"></i> Home</a>
+            <i class="bi bi-chevron-right" style="font-size: 0.7rem; opacity: 0.5;"></i>
+            <a th:href="@{/courses}" style="color: var(--accent-blue); text-decoration: none;">Academy</a>
+            <i class="bi bi-chevron-right" style="font-size: 0.7rem; opacity: 0.5;"></i>
+            <span class="text-green"><i class="bi bi-terminal"></i> Sandbox</span>
+        </nav>
+
+        <!-- Task Header -->
+        <div style="margin-bottom: 32px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+            <div>
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px; flex-wrap: wrap;">
+                    <span class="lang-badge" th:text="${task.language}" style="display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; background: rgba(63, 185, 80, 0.15); color: var(--accent-green); border: 1px solid rgba(63, 185, 80, 0.3); font-family: var(--font-mono);">JS</span>
+                    <span style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent-orange);"><i class="bi bi-trophy"></i> <span th:text="${task.pointsReward}">50</span> XP</span>
+                    <span th:if="${alreadyPassed}" class="already-passed-badge"><i class="bi bi-check-circle-fill"></i> ALREADY_PASSED</span>
+                </div>
+                <h1 style="font-size: clamp(1.5rem, 4vw, 2.2rem); font-weight: 800; margin: 0; letter-spacing: -0.02em;">
+                    <span class="text-gradient-green" th:text="${task.title}">Task Title</span>
+                </h1>
+            </div>
+        </div>
+
+        <!-- Sandbox Layout -->
+        <div class="sandbox-layout">
+
+            <!-- Left: Code Editor -->
+            <div class="sandbox-editor-panel">
+                <div class="sandbox-panel-header">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="display: flex; gap: 6px;">
+                            <span style="width: 12px; height: 12px; border-radius: 50%; background: #f85149;"></span>
+                            <span style="width: 12px; height: 12px; border-radius: 50%; background: #d29922;"></span>
+                            <span style="width: 12px; height: 12px; border-radius: 50%; background: #3fb950;"></span>
+                        </span>
+                        <span class="text-dim">solution.<span th:text="${task.language == 'python' ? 'py' : (task.language == 'java' ? 'java' : (task.language == 'javascript' ? 'js' : task.language))}">js</span></span>
+                    </div>
+                    <div class="lang-badge" th:text="${task.language}">javascript</div>
+                </div>
+
+                <div id="editor-container"></div>
+
+                <div class="sandbox-actions">
+                    <button id="btn-run" class="btn btn-outline btn-green font-mono" style="flex: 1;" onclick="runCode()">
+                        <i class="bi bi-play-fill"></i> RUN_TESTS()
+                    </button>
+                    <button id="btn-submit" class="btn btn-primary font-mono" style="flex: 1;" onclick="submitCode()">
+                        <i class="bi bi-check2-circle"></i> SUBMIT()
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right: Description + Console -->
+            <div class="sandbox-right-panel">
+                <div class="sandbox-description">
+                    <h3><i class="bi bi-file-earmark-text"></i> TASK_DESCRIPTION</h3>
+                    <div class="task-desc" th:utext="${task.description}"></div>
+                </div>
+
+                <div class="sandbox-console">
+                    <div class="console-header">
+                        <span><i class="bi bi-terminal"></i> // OUTPUT_CONSOLE</span>
+                        <span id="test-summary" class="text-dim">Waiting for execution...</span>
+                    </div>
+                    <div class="console-body" id="console-output">
+                        <span class="text-dim">// Click RUN_TESTS() to execute your code against test cases.
+// Click SUBMIT() to submit your solution for grading and XP.
+
+<span style="color: var(--accent-blue);">Tip:</span> Your program reads from stdin and prints to stdout.
+      Test cases compare your stdout output against expected output.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="scripts">
+        <!-- Monaco Editor from CDN -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+            const TASK_ID = [[${task.id}]];
+            const LANGUAGE = [[${task.language}]];
+            const STARTER_CODE = [[${task.starterCode != null ? task.starterCode : ''}]];
+            const ALREADY_PASSED = [[${alreadyPassed}]];
+
+            let editor;
+
+            // Map language names to Monaco language IDs
+            function getMonacoLanguage(lang) {
+                const map = {
+                    'javascript': 'javascript',
+                    'python': 'python',
+                    'java': 'java',
+                    'c': 'c',
+                    'cpp': 'cpp'
+                };
+                return map[lang] || 'plaintext';
+            }
+
+            // Initialize Monaco Editor
+            require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
+            require(['vs/editor/editor.main'], function() {
+                monaco.editor.defineTheme('nova-dark', {
+                    base: 'vs-dark',
+                    inherit: true,
+                    rules: [
+                        { token: 'comment', foreground: '6e7681', fontStyle: 'italic' },
+                        { token: 'keyword', foreground: 'ff7b72' },
+                        { token: 'string', foreground: 'a5d6ff' },
+                        { token: 'number', foreground: '79c0ff' },
+                        { token: 'type', foreground: 'ffa657' },
+                    ],
+                    colors: {
+                        'editor.background': '#0d1117',
+                        'editor.foreground': '#c9d1d9',
+                        'editor.lineHighlightBackground': '#161b2233',
+                        'editorCursor.foreground': '#58a6ff',
+                        'editor.selectionBackground': '#264f7844',
+                        'editorLineNumber.foreground': '#484f58',
+                        'editorLineNumber.activeForeground': '#c9d1d9',
+                        'editorIndentGuide.background': '#21262d',
+                        'editorIndentGuide.activeBackground': '#30363d',
+                    }
+                });
+
+                editor = monaco.editor.create(document.getElementById('editor-container'), {
+                    value: STARTER_CODE || getDefaultCode(LANGUAGE),
+                    language: getMonacoLanguage(LANGUAGE),
+                    theme: 'nova-dark',
+                    fontSize: 14,
+                    fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace",
+                    minimap: { enabled: false },
+                    padding: { top: 16, bottom: 16 },
+                    scrollBeyondLastLine: false,
+                    lineNumbers: 'on',
+                    roundedSelection: true,
+                    renderLineHighlight: 'all',
+                    automaticLayout: true,
+                    tabSize: 4,
+                    wordWrap: 'on',
+                    bracketPairColorization: { enabled: true },
+                    suggestOnTriggerCharacters: true,
+                    scrollbar: {
+                        verticalSliderSize: 6,
+                        horizontalSliderSize: 6,
+                    }
+                });
+            });
+
+            function getDefaultCode(lang) {
+                const defaults = {
+                    'javascript': '// Read input from stdin\nconst input = require("readline").createInterface({ input: process.stdin });\nlet lines = [];\ninput.on("line", (line) => lines.push(line));\ninput.on("close", () => {\n    const n = parseInt(lines[0]);\n    console.log(n);\n});',
+                    'python': '# Read input from stdin\nimport sys\n\ndef solve():\n    n = int(input())\n    print(n)\n\nsolve()',
+                    'java': 'import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        System.out.println(n);\n    }\n}',
+                    'c': '#include <stdio.h>\n\nint main() {\n    int n;\n    scanf("%d", &n);\n    printf("%d\\n", n);\n    return 0;\n}',
+                    'cpp': '#include <iostream>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    cout << n << endl;\n    return 0;\n}'
+                };
+                return defaults[lang] || '// Write your solution here';
+            }
+
+            function setLoading(isLoading) {
+                const btnRun = document.getElementById('btn-run');
+                const btnSubmit = document.getElementById('btn-submit');
+                if (isLoading) {
+                    btnRun.disabled = true;
+                    btnSubmit.disabled = true;
+                    btnRun.innerHTML = '<span class="sandbox-spinner"></span> EXECUTING...';
+                } else {
+                    btnRun.disabled = false;
+                    btnSubmit.disabled = false;
+                    btnRun.innerHTML = '<i class="bi bi-play-fill"></i> RUN_TESTS()';
+                }
+            }
+
+            function renderResults(data) {
+                const consoleEl = document.getElementById('console-output');
+                const summaryEl = document.getElementById('test-summary');
+
+                let html = '';
+
+                if (data.results && data.results.length > 0) {
+                    data.results.forEach((test, idx) => {
+                        const statusClass = test.passed ? 'passed' : 'failed';
+                        const icon = test.passed ? 'bi-check-circle-fill' : 'bi-x-circle-fill';
+                        html += `<div class="test-result ${statusClass}">
+                            <i class="bi ${icon} test-icon"></i>
+                            <div class="test-details">
+                                <span class="test-label">${test.label || ('Test #' + (idx + 1))}</span>`;
+                        if (!test.passed) {
+                            html += `<div class="test-meta">Expected: <strong>${escapeHtml(test.expected)}</strong> | Got: <strong>${escapeHtml(test.actual)}</strong></div>`;
+                        }
+                        if (test.stderr) {
+                            html += `<div class="test-meta" style="color: #f85149;">stderr: ${escapeHtml(test.stderr)}</div>`;
+                        }
+                        html += `</div></div>`;
+                    });
+                }
+
+                const passed = data.passedTests || 0;
+                const total = data.totalTests || 0;
+                const allPassed = data.passed;
+
+                summaryEl.innerHTML = allPassed
+                    ? `<span style="color: var(--accent-green);"><i class="bi bi-check-circle-fill"></i> ALL PASSED (${passed}/${total})</span>`
+                    : `<span style="color: #f85149;"><i class="bi bi-x-circle"></i> ${passed}/${total} PASSED</span>`;
+
+                consoleEl.innerHTML = html;
+            }
+
+            async function runCode() {
+                const code = editor.getValue();
+                setLoading(true);
+
+                try {
+                    const resp = await fetch('/api/sandbox/run', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ taskId: TASK_ID, code: code, language: LANGUAGE })
+                    });
+                    const data = await resp.json();
+                    renderResults(data);
+                } catch (err) {
+                    document.getElementById('console-output').innerHTML =
+                        `<div style="color: #f85149;">[ERROR] ${err.message}</div>`;
+                } finally {
+                    setLoading(false);
+                }
+            }
+
+            async function submitCode() {
+                const code = editor.getValue();
+                setLoading(true);
+
+                try {
+                    // First run tests
+                    const runResp = await fetch('/api/sandbox/run', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ taskId: TASK_ID, code: code, language: LANGUAGE })
+                    });
+                    const runData = await runResp.json();
+                    renderResults(runData);
+
+                    // Then submit
+                    const submitResp = await fetch('/api/sandbox/submit', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ taskId: TASK_ID, code: code, language: LANGUAGE })
+                    });
+                    const submitData = await submitResp.json();
+
+                    if (submitData.passed) {
+                        showSuccessOverlay(submitData.xpAwarded || 0);
+                    } else {
+                        const summaryEl = document.getElementById('test-summary');
+                        summaryEl.innerHTML = `<span style="color: #f85149;"><i class="bi bi-x-circle"></i> SUBMISSION FAILED — Fix failing tests and try again</span>`;
+                    }
+                } catch (err) {
+                    document.getElementById('console-output').innerHTML =
+                        `<div style="color: #f85149;">[ERROR] ${err.message}</div>`;
+                } finally {
+                    setLoading(false);
+                }
+            }
+
+            function showSuccessOverlay(xp) {
+                const overlay = document.createElement('div');
+                overlay.className = 'sandbox-success-overlay';
+                overlay.innerHTML = `
+                    <div class="sandbox-success-card">
+                        <div style="font-size: 4rem; margin-bottom: 16px;">🎉</div>
+                        <h2 class="font-mono text-green" style="font-size: 1.5rem; margin: 0 0 12px;">// ALL_TESTS_PASSED</h2>
+                        <p style="color: var(--text-dim); margin: 0 0 24px; font-size: 1rem;">Your solution has been accepted!</p>
+                        <div style="font-family: var(--font-mono); font-size: 1.8rem; color: var(--accent-orange); margin-bottom: 32px; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                            <i class="bi bi-trophy-fill"></i> +${xp} XP
+                        </div>
+                        <button class="btn btn-outline btn-green font-mono" onclick="this.closest('.sandbox-success-overlay').remove()" style="padding: 12px 32px;">
+                            CONTINUE() <i class="bi bi-arrow-right"></i>
+                        </button>
+                    </div>
+                `;
+                document.body.appendChild(overlay);
+
+                // Confetti effect
+                createConfetti();
+            }
+
+            function createConfetti() {
+                const colors = ['#3fb950', '#58a6ff', '#d29922', '#bc8cff', '#f85149', '#ffa657'];
+                for (let i = 0; i < 60; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.style.cssText = `
+                        position: fixed;
+                        width: ${Math.random() * 10 + 5}px;
+                        height: ${Math.random() * 10 + 5}px;
+                        background: ${colors[Math.floor(Math.random() * colors.length)]};
+                        left: ${Math.random() * 100}%;
+                        top: -10px;
+                        z-index: 10000;
+                        border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+                        pointer-events: none;
+                        animation: confettiFall ${Math.random() * 2 + 2}s ease-out forwards;
+                        animation-delay: ${Math.random() * 0.5}s;
+                    `;
+                    document.body.appendChild(confetti);
+                    setTimeout(() => confetti.remove(), 4000);
+                }
+            }
+
+            // Add confetti animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes confettiFall {
+                    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+                    100% { transform: translateY(100vh) rotate(${360 + Math.random() * 360}deg); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+            /*]]>*/
+        </script>
+    </th:block>
+</body>
+</html>

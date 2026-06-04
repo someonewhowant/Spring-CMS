@@ -31,6 +31,7 @@ public class MainController {
     private final UserRepository userRepository;
     private final BookmarkService bookmarkService;
     private final com.example.blog.service.AssignmentService assignmentService;
+    private final com.example.blog.service.CodingTaskService codingTaskService;
 
     /** Главная страница блога с пагинацией. */
     @GetMapping("")
@@ -393,6 +394,9 @@ public class MainController {
         
         List<com.example.blog.entity.Assignment> assignments = assignmentService.getAssignmentsByModule(moduleId);
         model.addAttribute("assignments", assignments);
+
+        List<com.example.blog.entity.CodingTask> codingTasks = codingTaskService.getTasksByModule(moduleId);
+        model.addAttribute("codingTasks", codingTasks);
 
         String htmlContent = markdownService.convertToHtml(module.getContent());
 

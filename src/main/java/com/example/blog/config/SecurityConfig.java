@@ -50,6 +50,8 @@ public class SecurityConfig {
                                         .hasRole("STUDENT")
                                         .requestMatchers("/teacher/**")
                                         .hasRole("TEACHER")
+                                        .requestMatchers("/api/sandbox/**")
+                                        .authenticated()
                                         .anyRequest()
                                         .authenticated())
                 .formLogin(
