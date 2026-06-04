@@ -62,32 +62,107 @@
 
                 <div class="form-group">
                     <label for="starterCode" class="form-label" style="color: var(--accent-green);">// CODE: starter_code (pre-filled in editor)</label>
-                    <textarea id="starterCode" name="starterCode" rows="8" class="form-control" style="font-family: var(--font-mono); font-size: 0.85rem; background: var(--bg-dark);" placeholder="// Write your starter code here...
-function solve(input) {
-  // Your code here
-}"></textarea>
+                    <textarea id="starterCode" name="starterCode" rows="8" class="form-control" style="font-family: var(--font-mono); font-size: 0.85rem; background: var(--bg-dark);" placeholder="// Write your solution here"></textarea>
                 </div>
 
                 <div class="form-group">
-                    <label for="testCasesJson" class="form-label" style="color: var(--accent-orange);">// JSON: test_cases</label>
-                    <textarea id="testCasesJson" name="testCasesJson" rows="10" class="form-control" style="font-family: var(--font-mono); font-size: 0.85rem; background: var(--bg-dark);" required placeholder='[
-  {"input": "5", "expectedOutput": "25", "label": "Square of 5"},
-  {"input": "0", "expectedOutput": "0", "label": "Square of 0"},
-  {"input": "-3", "expectedOutput": "9", "label": "Negative number"}
-]'></textarea>
-                    <p class="text-dim" style="font-size: 0.75rem; margin-top: 6px; font-family: var(--font-mono);">
-                        Format: JSON array of objects with "input", "expectedOutput", "label" fields.
-                        The student's program stdout is compared against expectedOutput (trimmed).
-                    </p>
+                    <label class="form-label" style="color: var(--accent-orange);">// TEST_CASES_BUILDER</label>
+                    <div id="testCasesContainer" style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 16px;">
+                        <!-- Test cases will be added here dynamically -->
+                    </div>
+                    <button type="button" class="btn btn-outline btn-sm btn-green" onclick="addTestCase()">
+                        <i class="bi bi-plus-circle"></i> ADD_TEST_CASE()
+                    </button>
+                    <!-- Hidden field for actual submission -->
+                    <textarea id="testCasesJson" name="testCasesJson" style="display: none;" required></textarea>
                 </div>
 
                 <div style="margin-top: 32px;">
-                    <button type="submit" class="btn btn-primary btn-large" style="width: 100%;">
+                    <button type="button" class="btn btn-primary btn-large" style="width: 100%;" onclick="submitForm()">
                         <i class="bi bi-terminal"></i> deploy_coding_task()
                     </button>
                 </div>
             </form>
         </div>
     </div>
+    
+    <th:block layout:fragment="scripts">
+        <script>
+            const defaultCodes = {
+                'javascript': '// Read input from stdin\nconst input = require("readline").createInterface({ input: process.stdin });\nlet lines = [];\ninput.on("line", (line) => lines.push(line));\ninput.on("close", () => {\n    const n = parseInt(lines[0]);\n    console.log(n);\n});',
+                'python': '# Read input from stdin\nimport sys\n\ndef solve():\n    n = int(input())\n    print(n)\n\nsolve()',
+                'java': 'import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        System.out.println(n);\n    }\n}',
+                'c': '#include <stdio.h>\n\nint main() {\n    int n;\n    scanf("%d", &n);\n    printf("%d\\n", n);\n    return 0;\n}',
+                'cpp': '#include <iostream>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    cout << n << endl;\n    return 0;\n}'
+            };
+
+            const langSelect = document.getElementById('language');
+            const starterCodeArea = document.getElementById('starterCode');
+            const testCasesContainer = document.getElementById('testCasesContainer');
+            const testCasesJsonInput = document.getElementById('testCasesJson');
+
+            langSelect.addEventListener('change', () => {
+                starterCodeArea.value = defaultCodes[langSelect.value];
+            });
+
+            // Initialize with first language
+            starterCodeArea.value = defaultCodes[langSelect.value];
+
+            function addTestCase() {
+                const index = testCasesContainer.children.length;
+                const testCaseDiv = document.createElement('div');
+                testCaseDiv.className = 'card-glass test-case-item';
+                testCaseDiv.style.padding = '16px';
+                testCaseDiv.style.position = 'relative';
+                
+                testCaseDiv.innerHTML = `
+                    <button type="button" class="btn btn-outline btn-xs btn-orange" style="position: absolute; top: 16px; right: 16px; border: none;" onclick="this.parentElement.remove()">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label" style="font-size: 0.75rem;">// STRING: label</label>
+                            <input type="text" class="form-control tc-label" placeholder="Test Case ${index + 1}" value="Test Case ${index + 1}" required>
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label" style="font-size: 0.75rem;">// TEXT: stdin_input</label>
+                            <textarea class="form-control tc-input" rows="2" placeholder="5" required></textarea>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label" style="font-size: 0.75rem;">// TEXT: expected_stdout</label>
+                            <textarea class="form-control tc-output" rows="2" placeholder="25" required></textarea>
+                        </div>
+                    </div>
+                `;
+                testCasesContainer.appendChild(testCaseDiv);
+            }
+
+            function submitForm() {
+                const testCases = [];
+                const items = document.querySelectorAll('.test-case-item');
+                
+                items.forEach(item => {
+                    testCases.push({
+                        label: item.querySelector('.tc-label').value,
+                        input: item.querySelector('.tc-input').value,
+                        expectedOutput: item.querySelector('.tc-output').value
+                    });
+                });
+
+                if (testCases.length === 0) {
+                    alert("Please add at least one test case.");
+                    return;
+                }
+
+                testCasesJsonInput.value = JSON.stringify(testCases);
+                document.querySelector('form').submit();
+            }
+
+            // Add one default test case on load
+            addTestCase();
+        </script>
+    </th:block>
 </body>
 </html>
