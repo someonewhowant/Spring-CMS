@@ -30,6 +30,7 @@ public class MainController {
     private final MarkdownService markdownService;
     private final UserRepository userRepository;
     private final BookmarkService bookmarkService;
+    private final com.example.blog.service.AssignmentService assignmentService;
 
     /** Главная страница блога с пагинацией. */
     @GetMapping("")
@@ -389,6 +390,9 @@ public class MainController {
                 isNextLocked = true;
             }
         }
+        
+        List<com.example.blog.entity.Assignment> assignments = assignmentService.getAssignmentsByModule(moduleId);
+        model.addAttribute("assignments", assignments);
 
         String htmlContent = markdownService.convertToHtml(module.getContent());
 

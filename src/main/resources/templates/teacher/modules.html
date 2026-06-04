@@ -45,6 +45,10 @@
                                 <button type="submit" class="btn btn-outline btn-xs btn-blue">
                                     UPDATE
                                 </button>
+                                <a th:href="@{/teacher/modules/{moduleId}/assignments/new(moduleId=${module.id})}"
+                                   class="btn btn-outline btn-xs btn-green" title="Add Practical Task">
+                                    <i class="bi bi-journal-plus"></i> ADD TASK
+                                </a>
                                 <a th:href="@{/teacher/courses/{courseId}/modules/{moduleId}/edit(courseId=${course.id}, moduleId=${module.id})}" 
                                    class="btn btn-outline btn-xs btn-orange">
                                     EDIT

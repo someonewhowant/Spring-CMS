@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/main}">
+
+<head>
+    <title>Peer Review Queue - CodeBlog</title>
+</head>
+
+<body>
+    <div layout:fragment="content" class="container py-l fade-in">
+        <div style="max-width: 900px; margin: 0 auto;">
+            
+            <!-- Page Header -->
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 36px; flex-wrap: wrap; gap: 16px;">
+                <div>
+                    <a th:href="@{/student/dashboard}" class="btn btn-outline btn-sm" style="border-radius: 8px; margin-bottom: 12px; font-size: 0.8rem;">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
+                    </a>
+                    <h1 style="font-size: clamp(2rem, 5vw, 2.6rem); margin: 0 0 8px; font-weight: 800; letter-spacing: -0.02em;">
+                        Peer <span class="text-gradient-purple">Review</span> Queue
+                    </h1>
+                    <p style="color: var(--text-dim); margin: 0; font-size: 1rem;">
+                        Help your peers improve and earn XP by reviewing their practical tasks.
+                    </p>
+                </div>
+                
+                <div class="card-glass" style="padding: 12px 20px; border-radius: 12px; display: flex; align-items: center; gap: 12px;">
+                    <div style="font-size: 2rem; color: var(--accent-orange);"><i class="bi bi-inboxes-fill"></i></div>
+                    <div>
+                        <div class="font-mono text-dim" style="font-size: 0.75rem;">AVAILABLE TASKS</div>
+                        <div class="font-mono" style="font-size: 1.4rem; font-weight: 700; color: var(--text-main);" th:text="${submissions.size()}">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Success Message -->
+            <div th:if="${message}" class="alert" style="background: rgba(63, 185, 80, 0.15); border: 1px solid rgba(63, 185, 80, 0.3); color: var(--accent-green); padding: 16px; border-radius: 12px; margin-bottom: 32px; font-family: var(--font-mono); display: flex; align-items: center; gap: 12px;">
+                <i class="bi bi-check-circle" style="font-size: 1.5rem;"></i>
+                <div>
+                    <strong style="display: block;">Success!</strong>
+                    <span th:text="${message}"></span>
+                </div>
+            </div>
+
+            <!-- Error Message -->
+            <div th:if="${error}" class="alert" style="background: rgba(248, 81, 73, 0.15); border: 1px solid rgba(248, 81, 73, 0.3); color: var(--accent-red, #f85149); padding: 16px; border-radius: 12px; margin-bottom: 32px; font-family: var(--font-mono); display: flex; align-items: center; gap: 12px;">
+                <i class="bi bi-exclamation-triangle" style="font-size: 1.5rem;"></i>
+                <span th:text="${error}"></span>
+            </div>
+
+            <!-- Queue List -->
+            <div th:if="${submissions.isEmpty()}" style="text-align: center; padding: 60px 20px;">
+                <i class="bi bi-cup-hot" style="font-size: 4rem; color: var(--text-dim); opacity: 0.3;"></i>
+                <h3 style="margin: 20px 0 8px; color: var(--text-dim); font-weight: 600;">Queue is empty</h3>
+                <p style="color: var(--text-dim); font-size: 0.9rem;">You have reviewed all available submissions. Great job!</p>
+            </div>
+
+            <div th:if="${!submissions.isEmpty()}" style="display: grid; gap: 20px;">
+                <div th:each="submission : ${submissions}" class="card-glass hover-scale" style="padding: 24px; transition: transform 0.2s; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; border-left: 4px solid var(--accent-purple);">
+                    <div style="flex: 1; min-width: 250px;">
+                        <div class="font-mono text-purple" style="font-size: 0.8rem; margin-bottom: 6px;" th:text="${submission.assignment.module.course.title} + ' &raquo; ' + ${submission.assignment.module.title}">Course -> Module</div>
+                        <h3 style="margin: 0 0 8px; font-size: 1.2rem; font-weight: 600; color: var(--text-main);" th:text="${submission.assignment.title}">Assignment Title</h3>
+                        <div style="display: flex; gap: 16px; align-items: center;">
+                            <div class="font-mono text-dim" style="font-size: 0.75rem;">
+                                <i class="bi bi-clock"></i> Submitted: <span th:text="${#temporals.format(submission.submittedAt, 'MMM dd, HH:mm')}">Date</span>
+                            </div>
+                            <div class="badge" style="background: rgba(88, 166, 255, 0.15); color: var(--accent-blue); font-size: 0.7rem; padding: 4px 8px; border-radius: 8px;">
+                                MAX <span th:text="${submission.assignment.maxScore}"></span> PTS
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <a th:href="@{/student/peer-reviews/{id}(id=${submission.id})}" class="btn btn-purple" style="border-radius: 8px; font-family: var(--font-mono); font-weight: 600; padding: 10px 20px; flex-shrink: 0;">
+                        START_REVIEW <i class="bi bi-arrow-right-short ms-1" style="font-size: 1.2rem;"></i>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>

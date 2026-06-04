@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/main}">
+
+<head>
+    <title>Create Assignment - CodeBlog</title>
+</head>
+
+<body>
+    <div layout:fragment="content" class="container py-l fade-in">
+        <div style="max-width: 800px; margin: 0 auto;">
+            <!-- Header -->
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px;">
+                <div>
+                    <a th:href="@{/teacher/courses/{id}(id=${module.course.id})}" class="btn btn-outline btn-sm" style="border-radius: 8px; margin-bottom: 12px; font-size: 0.8rem;">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Course
+                    </a>
+                    <h1 style="font-size: 2.2rem; margin: 0 0 8px; font-weight: 800; letter-spacing: -0.02em;">
+                        New <span class="text-gradient-purple">Assignment</span>
+                    </h1>
+                    <p style="color: var(--text-dim); margin: 0; font-size: 1rem;">
+                        Create a practical task for module: <strong class="text-main" th:text="${module.title}">Module Title</strong>
+                    </p>
+                </div>
+            </div>
+
+            <div class="card-glass" style="padding: 32px;">
+                <form th:action="@{/teacher/modules/{id}/assignments/new(id=${module.id})}" th:object="${assignment}" method="post">
+                    
+                    <div class="form-group" style="margin-bottom: 24px;">
+                        <label for="title" class="form-label" style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-dim);">TITLE</label>
+                        <input type="text" id="title" th:field="*{title}" class="form-control" required style="background: rgba(0,0,0,0.2); border: 1px solid var(--border-subtle); color: var(--text-main); font-size: 1.1rem; padding: 12px 16px;">
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 24px;">
+                        <label for="description" class="form-label" style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-dim);">DESCRIPTION & REQUIREMENTS</label>
+                        <textarea id="description" th:field="*{description}" class="form-control" rows="8" required style="background: rgba(0,0,0,0.2); border: 1px solid var(--border-subtle); color: var(--text-main); font-family: var(--font-mono); font-size: 0.95rem; line-height: 1.6; padding: 16px;"></textarea>
+                    </div>
+
+                    <div style="display: flex; gap: 24px; margin-bottom: 32px;">
+                        <div class="form-group" style="flex: 1;">
+                            <label for="maxScore" class="form-label" style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-dim);">MAXIMUM SCORE</label>
+                            <input type="number" id="maxScore" th:field="*{maxScore}" class="form-control" value="100" required style="background: rgba(0,0,0,0.2); border: 1px solid var(--border-subtle); color: var(--text-main); font-size: 1.1rem; padding: 12px 16px;">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label for="deadline" class="form-label" style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-dim);">DEADLINE (Optional)</label>
+                            <input type="datetime-local" id="deadline" name="deadline" class="form-control" style="background: rgba(0,0,0,0.2); border: 1px solid var(--border-subtle); color: var(--text-dim); font-size: 1.1rem; padding: 12px 16px; font-family: var(--font-mono);">
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: flex-end; gap: 16px;">
+                        <a th:href="@{/teacher/courses/{id}(id=${module.course.id})}" class="btn btn-outline" style="border-radius: 8px;">Cancel</a>
+                        <button type="submit" class="btn btn-purple" style="border-radius: 8px; font-weight: 600;">
+                            <i class="bi bi-save me-1"></i> Create Assignment
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

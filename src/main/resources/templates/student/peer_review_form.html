@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/main}">
+
+<head>
+    <title>Evaluate Submission - CodeBlog</title>
+</head>
+
+<body>
+    <div layout:fragment="content" class="container py-l fade-in">
+        <div style="max-width: 900px; margin: 0 auto;">
+            
+            <!-- Breadcrumb / Header -->
+            <div style="margin-bottom: 32px;">
+                <a th:href="@{/student/peer-reviews}" class="btn btn-outline btn-sm" style="border-radius: 8px; margin-bottom: 16px; font-size: 0.8rem;">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Queue
+                </a>
+                
+                <div>
+                    <div class="font-mono text-purple" style="font-size: 0.85rem; letter-spacing: 0.05em; margin-bottom: 8px;">PEER REVIEW PROCESS</div>
+                    <h1 style="font-size: 2.2rem; margin: 0 0 12px; font-weight: 800; letter-spacing: -0.02em;" th:text="${submission.assignment.title}">Assignment Title</h1>
+                </div>
+            </div>
+
+            <!-- Task Context -->
+            <div class="card-glass" style="padding: 24px; margin-bottom: 32px; border-left: 4px solid var(--text-dim); opacity: 0.9;">
+                <h3 class="font-mono text-dim" style="font-size: 0.85rem; letter-spacing: 0.05em; margin-bottom: 12px; display: flex; justify-content: space-between;">
+                    <span><i class="bi bi-info-circle"></i> ORIGINAL_REQUIREMENTS</span>
+                    <span>MAX SCORE: <strong class="text-blue" th:text="${submission.assignment.maxScore}">100</strong></span>
+                </h3>
+                <div class="prose prose-invert max-w-none" style="font-size: 0.9rem; color: var(--text-dim);" th:utext="${#strings.replace(#htmlEscape.escape(submission.assignment.description), '&#10;', '<br/>')}">
+                    Description goes here...
+                </div>
+            </div>
+
+            <!-- Student's Submission -->
+            <div class="card-glass" style="padding: 32px; margin-bottom: 32px; border: 1px solid rgba(188, 140, 255, 0.3);">
+                <h3 class="font-mono text-purple" style="font-size: 1.1rem; letter-spacing: 0.05em; margin-bottom: 20px;"><i class="bi bi-file-code"></i> STUDENT'S_SOLUTION</h3>
+                
+                <div th:if="${submission.fileUrl != null and submission.fileUrl != ''}" style="margin-bottom: 24px; padding: 16px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between;">
+                    <div>
+                        <div class="font-mono text-dim" style="font-size: 0.75rem; margin-bottom: 4px;">REPOSITORY LINK</div>
+                        <a th:href="${submission.fileUrl}" target="_blank" rel="noopener noreferrer" style="color: var(--accent-blue); text-decoration: none; font-weight: 600;">
+                            <i class="bi bi-github"></i> <span th:text="${submission.fileUrl}"></span>
+                        </a>
+                    </div>
+                    <a th:href="${submission.fileUrl}" target="_blank" class="btn btn-outline btn-sm" style="border-radius: 6px;">Open <i class="bi bi-box-arrow-up-right ms-1"></i></a>
+                </div>
+
+                <div style="margin-bottom: 12px;">
+                    <div class="font-mono text-dim" style="font-size: 0.75rem; margin-bottom: 8px;">COMMENTS / TEXT</div>
+                    <div style="background: rgba(0,0,0,0.2); padding: 16px; border-radius: 8px; border: 1px solid var(--border-subtle); font-family: var(--font-mono); font-size: 0.95rem; line-height: 1.6; white-space: pre-wrap;" th:text="${submission.submissionText}">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Evaluation Form -->
+            <div class="card-glass" style="padding: 32px; border-left: 4px solid var(--accent-orange);">
+                <h3 class="font-mono text-orange" style="font-size: 1.1rem; letter-spacing: 0.05em; margin-bottom: 20px;"><i class="bi bi-check2-square"></i> YOUR_EVALUATION</h3>
+                
+                <form th:action="@{/student/peer-reviews/{id}(id=${submission.id})}" method="post">
+                    
+                    <div class="form-group" style="margin-bottom: 24px; max-width: 200px;">
+                        <label for="score" class="form-label" style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-dim);">GIVEN SCORE (0 - <span th:text="${submission.assignment.maxScore}"></span>)</label>
+                        <input type="number" id="score" name="score" class="form-control" min="0" th:max="${submission.assignment.maxScore}" required style="background: rgba(0,0,0,0.2); border: 1px solid var(--border-subtle); color: var(--text-main); font-size: 1.2rem; font-weight: bold; padding: 12px 16px; text-align: center;">
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 24px;">
+                        <label for="feedbackComment" class="form-label" style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-dim);">CONSTRUCTIVE FEEDBACK</label>
+                        <textarea id="feedbackComment" name="feedbackComment" class="form-control" rows="6" required placeholder="Explain what was good, what could be improved, and justify your score." style="background: rgba(0,0,0,0.2); border: 1px solid var(--border-subtle); color: var(--text-main); font-size: 0.95rem; line-height: 1.6; padding: 16px;"></textarea>
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-end; gap: 16px; align-items: center;">
+                        <span style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-dim);">Review is anonymous</span>
+                        <button type="submit" class="btn btn-orange" style="border-radius: 8px; font-weight: 600; font-family: var(--font-mono);">
+                            <i class="bi bi-shield-check me-1"></i> SUBMIT_REVIEW
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>

@@ -248,8 +248,8 @@
             const rootStyles = getComputedStyle(document.documentElement);
             const isDark = !document.documentElement.classList.contains('light-theme');
 
-            Chart.defaults.color = isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)';
-            Chart.defaults.borderColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)';
+            Chart.defaults.color = isDark ? 'rgba(255,255,255,0.85)' : 'rgba(0,0,0,0.75)';
+            Chart.defaults.borderColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.15)';
             Chart.defaults.font.family = "'Inter', sans-serif";
             Chart.defaults.font.size = 11;
             Chart.defaults.plugins.legend.display = false;
@@ -361,7 +361,7 @@
                                 grid: { color: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' },
                                 pointLabels: {
                                     font: { size: 11, family: "'Inter', sans-serif" },
-                                    color: isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)',
+                                    color: isDark ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.85)',
                                 }
                             }
                         },

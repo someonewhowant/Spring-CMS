@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/main}">
+
+<head>
+    <title th:text="${assignment.title} + ' - CodeBlog'">Assignment Detail</title>
+</head>
+
+<body>
+    <div layout:fragment="content" class="container py-l fade-in">
+        <div style="max-width: 900px; margin: 0 auto;">
+            
+            <!-- Breadcrumb / Header -->
+            <div style="margin-bottom: 32px;">
+                <a th:href="@{/courses/{id}(id=${assignment.module.course.id})}" class="btn btn-outline btn-sm" style="border-radius: 8px; margin-bottom: 16px; font-size: 0.8rem;">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Course
+                </a>
+                
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; flex-wrap: wrap;">
+                    <div>
+                        <div class="font-mono text-purple" style="font-size: 0.85rem; letter-spacing: 0.05em; margin-bottom: 8px;" th:text="${assignment.module.title}">Module Title</div>
+                        <h1 style="font-size: 2.2rem; margin: 0 0 12px; font-weight: 800; letter-spacing: -0.02em;" th:text="${assignment.title}">Assignment Title</h1>
+                    </div>
+                    
+                    <div style="display: flex; gap: 16px; align-items: center;">
+                        <div class="card-glass" style="padding: 10px 16px; border-radius: 12px; text-align: center; min-width: 100px;">
+                            <div class="font-mono text-dim" style="font-size: 0.7rem; margin-bottom: 4px;">MAX SCORE</div>
+                            <div class="font-mono text-blue" style="font-size: 1.2rem; font-weight: 700;" th:text="${assignment.maxScore}">100</div>
+                        </div>
+                        <div class="card-glass" style="padding: 10px 16px; border-radius: 12px; text-align: center; min-width: 120px;" th:if="${mySubmission != null}">
+                            <div class="font-mono text-dim" style="font-size: 0.7rem; margin-bottom: 4px;">MY STATUS</div>
+                            <div th:if="${mySubmission.status.name() == 'PENDING'}" class="font-mono text-orange" style="font-size: 1rem; font-weight: 700;">PENDING</div>
+                            <div th:if="${mySubmission.status.name() == 'IN_REVIEW'}" class="font-mono text-blue" style="font-size: 1rem; font-weight: 700;">IN REVIEW</div>
+                            <div th:if="${mySubmission.status.name() == 'GRADED'}" class="font-mono text-green" style="font-size: 1.2rem; font-weight: 700;" th:text="${mySubmission.score} + ' / ' + ${assignment.maxScore}">100 / 100</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Task Description -->
+            <div class="card-glass" style="padding: 32px; margin-bottom: 32px; border-left: 4px solid var(--accent-purple);">
+                <h3 class="font-mono text-dim" style="font-size: 0.85rem; letter-spacing: 0.05em; margin-bottom: 16px;"><i class="bi bi-file-text"></i> TASK_DESCRIPTION</h3>
+                <div class="prose prose-invert max-w-none" th:utext="${#strings.replace(#htmlEscape.escape(assignment.description), '&#10;', '<br/>')}">
+                    Description goes here...
+                </div>
+                
+                <div th:if="${assignment.deadline != null}" style="margin-top: 24px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 0.85rem;" th:classappend="${assignment.deadline.isBefore(#temporals.createNow())} ? 'text-red' : 'text-dim'">
+                    <i class="bi bi-clock"></i> 
+                    Deadline: <span th:text="${#temporals.format(assignment.deadline, 'dd MMM yyyy HH:mm')}">Date</span>
+                    <span th:if="${assignment.deadline.isBefore(#temporals.createNow())}" class="badge bg-red" style="margin-left: 8px;">OVERDUE</span>
+                </div>
+            </div>
+
+            <!-- Submission Area -->
+            <div class="card-glass" style="padding: 32px; margin-bottom: 32px; border: 1px solid rgba(88, 166, 255, 0.3);">
+                <h3 class="font-mono text-blue" style="font-size: 1.1rem; letter-spacing: 0.05em; margin-bottom: 20px;"><i class="bi bi-cloud-arrow-up"></i> YOUR_SUBMISSION</h3>
+                
+                <!-- Success Message -->
+                <div th:if="${message}" class="alert" style="background: rgba(63, 185, 80, 0.15); border: 1px solid rgba(63, 185, 80, 0.3); color: var(--accent-green); padding: 12px 16px; border-radius: 8px; margin-bottom: 24px; font-family: var(--font-mono); font-size: 0.9rem;">
+                    <i class="bi bi-check-circle me-2"></i> <span th:text="${message}"></span>
+                </div>
+
+                <form th:action="@{/student/assignments/{id}/submit(id=${assignment.id})}" method="post">
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label for="fileUrl" class="form-label" style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-dim);">GIT REPOSITORY URL</label>
+                        <div class="input-group">
+                            <span class="input-group-text" style="background: rgba(0,0,0,0.3); border: 1px solid var(--border-subtle); border-right: none; color: var(--text-dim);"><i class="bi bi-github"></i></span>
+                            <input type="url" id="fileUrl" name="fileUrl" class="form-control" placeholder="https://github.com/username/project" th:value="${mySubmission != null ? mySubmission.fileUrl : ''}" style="background: rgba(0,0,0,0.2); border: 1px solid var(--border-subtle); color: var(--text-main); font-family: var(--font-mono);">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 24px;">
+                        <label for="submissionText" class="form-label" style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-dim);">COMMENTS / SOLUTION TEXT</label>
+                        <textarea id="submissionText" name="submissionText" class="form-control" rows="5" required placeholder="Describe your solution, how to run it, etc." style="background: rgba(0,0,0,0.2); border: 1px solid var(--border-subtle); color: var(--text-main); font-family: var(--font-mono); font-size: 0.95rem; line-height: 1.6; padding: 16px;" th:text="${mySubmission != null ? mySubmission.submissionText : ''}"></textarea>
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-end;">
+                        <button type="submit" class="btn btn-blue" style="border-radius: 8px; font-weight: 600; font-family: var(--font-mono);" th:text="${mySubmission != null ? 'UPDATE_SUBMISSION' : 'SUBMIT_WORK'}">
+                            <i class="bi bi-send me-1"></i> SUBMIT
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Peer Reviews Section -->
+            <div th:if="${reviews != null and !reviews.isEmpty()}" style="margin-top: 48px;">
+                <h3 class="font-mono text-dim" style="font-size: 1.2rem; letter-spacing: 0.05em; margin-bottom: 24px; display: flex; align-items: center; gap: 8px;">
+                    <i class="bi bi-chat-square-quote"></i> PEER_REVIEWS 
+                    <span class="badge" style="background: rgba(188, 140, 255, 0.2); color: var(--accent-purple); font-size: 0.8rem; border-radius: 20px;" th:text="${reviews.size()}">2</span>
+                </h3>
+                
+                <div style="display: grid; gap: 20px;">
+                    <div th:each="review : ${reviews}" class="card-glass" style="padding: 24px; position: relative;">
+                        <div style="position: absolute; top: -12px; right: 24px; background: var(--bg-body); padding: 4px 12px; border: 1px solid var(--border-subtle); border-radius: 20px; font-family: var(--font-mono); font-size: 0.85rem; font-weight: bold;" th:classappend="${review.score >= assignment.maxScore * 0.8 ? 'text-green' : (review.score >= assignment.maxScore * 0.5 ? 'text-orange' : 'text-red')}">
+                            SCORE: <span th:text="${review.score}"></span>/<span th:text="${assignment.maxScore}"></span>
+                        </div>
+                        
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                            <img th:if="${review.reviewer.avatarUrl != null}" th:src="${review.reviewer.avatarUrl}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
+                            <div th:if="${review.reviewer.avatarUrl == null}" class="avatar-circle" style="width: 32px; height: 32px; border-radius: 50%; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; background: rgba(88,166,255,0.1); border: 1px solid rgba(88,166,255,0.3);" th:text="${#strings.substring(review.reviewer.username, 0, 1).toUpperCase()}">U</div>
+                            <div>
+                                <div style="font-weight: 600; font-size: 0.9rem; color: var(--text-main);" th:text="${review.reviewer.fullName != null and review.reviewer.fullName != '' ? review.reviewer.fullName : review.reviewer.username}">Reviewer</div>
+                                <div class="font-mono text-dim" style="font-size: 0.7rem;" th:text="${#temporals.format(review.reviewedAt, 'dd MMM yyyy, HH:mm')}">Date</div>
+                            </div>
+                        </div>
+                        
+                        <div class="prose prose-invert max-w-none" style="font-size: 0.95rem; line-height: 1.6; color: var(--text-main);" th:utext="${#strings.replace(#htmlEscape.escape(review.feedbackComment), '&#10;', '<br/>')}">
+                            Feedback text...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>
