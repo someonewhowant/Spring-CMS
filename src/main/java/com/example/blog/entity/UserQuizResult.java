@@ -1,9 +1,13 @@
 package com.example.blog.entity;
 
 import jakarta.persistence.*;
+import java.time.Instant;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 @Table(
         name = "user_quiz_results",
         uniqueConstraints = {@UniqueConstraint(columnNames = {"user_id", "quiz_id"})})
@@ -28,4 +32,8 @@ public class UserQuizResult {
 
     @Column(nullable = false)
     private int score;
+
+    @CreatedDate
+    @Column(name = "completed_at")
+    private Instant completedAt;
 }

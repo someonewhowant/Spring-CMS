@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/main}">
+
+<head>
+    <title>Academy Analytics - CodeBlog</title>
+    <style>
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 28px;
+            margin-bottom: 48px;
+        }
+        @media (max-width: 600px) {
+            .analytics-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .chart-card {
+            padding: 28px;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        .chart-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 3px;
+            background: linear-gradient(90deg, var(--accent-purple), var(--accent-blue));
+            opacity: 0.6;
+        }
+        .chart-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+        .chart-icon {
+            width: 44px; height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+        }
+        .chart-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin: 0;
+        }
+        .chart-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin: 0;
+            font-family: var(--font-mono);
+        }
+        .chart-container {
+            position: relative;
+            height: 280px;
+        }
+        .hardest-quiz-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(128,128,128,0.08);
+        }
+        .hardest-quiz-row:last-child { border-bottom: none; }
+        .pass-rate-bar {
+            flex: 1;
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(128,128,128,0.08);
+            overflow: hidden;
+        }
+        .pass-rate-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 1s ease;
+        }
+    </style>
+</head>
+
+<body>
+    <div layout:fragment="content" class="container py-l fade-in">
+        <!-- Page Header -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 36px; flex-wrap: wrap; gap: 16px;">
+            <div>
+                <a th:href="@{/teacher/dashboard}" class="btn btn-outline btn-sm" style="border-radius: 8px; margin-bottom: 12px; font-size: 0.8rem;">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
+                </a>
+                <h1 style="font-size: clamp(2rem, 5vw, 2.6rem); margin: 0 0 8px; font-weight: 800; letter-spacing: -0.02em;">
+                    Academy <span class="text-gradient-blue">Analytics</span>
+                </h1>
+                <p style="color: var(--text-dim); margin: 0; font-size: 1rem;">
+                    Comprehensive insights into student performance and curriculum effectiveness.
+                </p>
+            </div>
+        </div>
+
+        <!-- Charts Grid -->
+        <div class="analytics-grid">
+
+            <!-- Student Level Distribution (Doughnut) -->
+            <div class="card-glass chart-card">
+                <div class="chart-header">
+                    <div class="chart-icon" style="background: rgba(188, 140, 255, 0.1); color: var(--accent-purple);">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <div>
+                        <h3 class="chart-title">Student Level Distribution</h3>
+                        <p class="chart-subtitle">ENROLLED_STUDENTS_BY_LEVEL</p>
+                    </div>
+                </div>
+                <div class="chart-container" style="display: flex; align-items: center; justify-content: center;">
+                    <canvas id="levelDistChart" style="max-width: 300px; max-height: 300px;"></canvas>
+                </div>
+            </div>
+
+            <!-- Average Scores by Quiz (Bar) -->
+            <div class="card-glass chart-card">
+                <div class="chart-header">
+                    <div class="chart-icon" style="background: rgba(88, 166, 255, 0.1); color: var(--accent-blue);">
+                        <i class="bi bi-bar-chart-fill"></i>
+                    </div>
+                    <div>
+                        <h3 class="chart-title">Average Scores by Quiz</h3>
+                        <p class="chart-subtitle">MEAN_STUDENT_PERFORMANCE_PER_ASSESSMENT</p>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="avgScoresChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Hardest Quizzes Table (full-width) -->
+            <div class="card-glass chart-card" style="grid-column: 1 / -1;">
+                <div class="chart-header">
+                    <div class="chart-icon" style="background: rgba(248, 81, 73, 0.1); color: var(--accent-red, #f85149);">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                    </div>
+                    <div>
+                        <h3 class="chart-title">Hardest Assessments</h3>
+                        <p class="chart-subtitle">LOWEST_PASS_RATE_QUIZZES</p>
+                    </div>
+                </div>
+                <div id="hardestQuizzesContainer">
+                    <div style="text-align: center; padding: 40px; color: var(--text-dim);">
+                        <i class="bi bi-hourglass-split" style="font-size: 1.5rem; opacity: 0.4;"></i>
+                        <p style="margin: 10px 0 0; font-size: 0.9rem;">Loading analytics data...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+        <script>
+            const isDark = !document.documentElement.classList.contains('light-theme');
+
+            Chart.defaults.color = isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)';
+            Chart.defaults.borderColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)';
+            Chart.defaults.font.family = "'Inter', sans-serif";
+            Chart.defaults.font.size = 11;
+            Chart.defaults.plugins.legend.display = false;
+
+            const PALETTE = [
+                '#58a6ff', '#bc8cff', '#3fb950', '#ffa657', '#f85149',
+                '#79c0ff', '#d2a8ff', '#56d364', '#e3b341', '#ff7b72'
+            ];
+
+            // --- Level Distribution Doughnut ---
+            async function loadLevelDist() {
+                const res = await fetch('/teacher/api/analytics/level-distribution');
+                const data = await res.json();
+
+                if (!data.labels || data.labels.length === 0) return;
+
+                const ctx = document.getElementById('levelDistChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            data: data.data,
+                            backgroundColor: PALETTE.slice(0, data.labels.length),
+                            borderWidth: 0,
+                            spacing: 4,
+                            borderRadius: 6,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        cutout: '60%',
+                        plugins: {
+                            legend: {
+                                display: true, position: 'right',
+                                labels: {
+                                    padding: 16, usePointStyle: true, pointStyleWidth: 10,
+                                    font: { size: 12, family: "'JetBrains Mono', monospace" }
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: isDark ? 'rgba(30,30,30,0.95)' : 'rgba(255,255,255,0.95)',
+                                borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+                                borderWidth: 1, padding: 12, cornerRadius: 10,
+                                callbacks: {
+                                    label: ctx => `${ctx.label}: ${ctx.parsed} students`
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // --- Avg Scores Bar Chart ---
+            async function loadAvgScores() {
+                const res = await fetch('/teacher/api/analytics/avg-scores');
+                const data = await res.json();
+
+                if (!data.labels || data.labels.length === 0) return;
+
+                const ctx = document.getElementById('avgScoresChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            data: data.data,
+                            backgroundColor: data.data.map((v, i) => {
+                                if (v >= 4) return 'rgba(63, 185, 80, 0.7)';
+                                if (v >= 3) return 'rgba(88, 166, 255, 0.7)';
+                                if (v >= 2) return 'rgba(255, 166, 87, 0.7)';
+                                return 'rgba(248, 81, 73, 0.7)';
+                            }),
+                            borderRadius: 8,
+                            borderSkipped: false,
+                            barPercentage: 0.6,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: data.labels.length > 6 ? 'y' : 'x',
+                        scales: {
+                            x: { grid: { display: false }, ticks: { maxTicksLimit: 8 } },
+                            y: {
+                                beginAtZero: true,
+                                max: 5,
+                                grid: { color: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.05)' }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                backgroundColor: isDark ? 'rgba(30,30,30,0.95)' : 'rgba(255,255,255,0.95)',
+                                borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+                                borderWidth: 1, padding: 12, cornerRadius: 10,
+                                callbacks: {
+                                    label: ctx => `Avg Score: ${ctx.parsed.y || ctx.parsed.x} / 5`
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // --- Hardest Quizzes Table ---
+            async function loadHardestQuizzes() {
+                const res = await fetch('/teacher/api/analytics/hardest-quizzes?limit=8');
+                const data = await res.json();
+
+                const container = document.getElementById('hardestQuizzesContainer');
+
+                if (!data || data.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: var(--text-dim);">
+                            <i class="bi bi-check-circle" style="font-size: 2rem; color: var(--accent-green); opacity: 0.6;"></i>
+                            <p style="margin: 10px 0 0;">No quiz data available yet.</p>
+                        </div>`;
+                    return;
+                }
+
+                let html = '';
+                data.forEach((q, idx) => {
+                    const color = q.passRate >= 70 ? '#3fb950' : q.passRate >= 40 ? '#ffa657' : '#f85149';
+                    html += `
+                        <div class="hardest-quiz-row">
+                            <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-dim); min-width: 24px;">#${idx + 1}</span>
+                            <div style="flex: 1; min-width: 0;">
+                                <div style="font-weight: 600; font-size: 0.9rem; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${q.title}</div>
+                                <div style="font-size: 0.75rem; color: var(--text-dim); font-family: var(--font-mono);">${q.courseName} · ${q.totalAttempts} attempts</div>
+                            </div>
+                            <div style="width: 140px;">
+                                <div class="pass-rate-bar">
+                                    <div class="pass-rate-fill" style="width: ${q.passRate}%; background: ${color};"></div>
+                                </div>
+                            </div>
+                            <span style="font-family: var(--font-mono); font-weight: 700; font-size: 0.85rem; color: ${color}; min-width: 50px; text-align: right;">${q.passRate}%</span>
+                        </div>`;
+                });
+
+                container.innerHTML = html;
+            }
+
+            // --- Init ---
+            Promise.all([loadLevelDist(), loadAvgScores(), loadHardestQuizzes()])
+                .catch(err => console.error('Teacher analytics error:', err));
+        </script>
+    </div>
+</body>
+
+</html>

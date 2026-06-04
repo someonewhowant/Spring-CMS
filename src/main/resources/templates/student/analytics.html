@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/main}">
+
+<head>
+    <title>Performance Analytics - CodeBlog</title>
+    <style>
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 28px;
+            margin-bottom: 48px;
+        }
+        @media (max-width: 600px) {
+            .analytics-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .chart-card {
+            padding: 28px;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        .chart-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 3px;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+            opacity: 0.6;
+        }
+        .chart-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+        .chart-icon {
+            width: 44px; height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+        }
+        .chart-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin: 0;
+        }
+        .chart-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin: 0;
+            font-family: var(--font-mono);
+        }
+        .chart-container {
+            position: relative;
+            height: 280px;
+        }
+        .time-filter {
+            display: flex;
+            gap: 6px;
+        }
+        .time-filter button {
+            background: rgba(128, 128, 128, 0.08);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-dim);
+            padding: 4px 14px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-family: var(--font-mono);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .time-filter button.active,
+        .time-filter button:hover {
+            background: rgba(88, 166, 255, 0.12);
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+        }
+        /* Activity heatmap */
+        .heatmap-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3px;
+        }
+        .heatmap-cell {
+            width: 14px; height: 14px;
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+        .heatmap-cell:hover {
+            transform: scale(1.5);
+            box-shadow: 0 0 8px rgba(88, 166, 255, 0.4);
+        }
+        .stat-mini {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 12px;
+            background: rgba(128, 128, 128, 0.04);
+            border: 1px solid var(--border-subtle);
+        }
+        .stat-mini-value {
+            font-size: 1.4rem;
+            font-weight: 800;
+        }
+        .stat-mini-label {
+            font-size: 0.72rem;
+            color: var(--text-dim);
+            font-family: var(--font-mono);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+    </style>
+</head>
+
+<body>
+    <div layout:fragment="content" class="container py-l fade-in">
+        <!-- Page Header -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 36px; flex-wrap: wrap; gap: 16px;">
+            <div>
+                <a th:href="@{/student/dashboard}" class="btn btn-outline btn-sm" style="border-radius: 8px; margin-bottom: 12px; font-size: 0.8rem;">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
+                </a>
+                <h1 style="font-size: clamp(2rem, 5vw, 2.6rem); margin: 0 0 8px; font-weight: 800; letter-spacing: -0.02em;">
+                    Performance <span class="text-gradient-blue">Analytics</span>
+                </h1>
+                <p style="color: var(--text-dim); margin: 0; font-size: 1rem;">
+                    Track your learning trajectory with data-driven insights.
+                </p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="stat-mini">
+                    <i class="bi bi-lightning-charge-fill" style="color: var(--accent-blue); font-size: 1.2rem;"></i>
+                    <div>
+                        <div class="stat-mini-value text-blue" th:text="${user.experiencePoints != null ? user.experiencePoints : 0}">0</div>
+                        <div class="stat-mini-label">Total XP</div>
+                    </div>
+                </div>
+                <div class="stat-mini">
+                    <i class="bi bi-trophy-fill" style="color: var(--accent-purple); font-size: 1.2rem;"></i>
+                    <div>
+                        <div class="stat-mini-value text-purple" th:text="'LVL ' + ${user.level != null ? user.level : 1}">LVL 1</div>
+                        <div class="stat-mini-label">Current Level</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Grid -->
+        <div class="analytics-grid">
+
+            <!-- XP Progression Chart -->
+            <div class="card-glass chart-card">
+                <div class="chart-header">
+                    <div class="chart-icon" style="background: rgba(88, 166, 255, 0.1); color: var(--accent-blue);">
+                        <i class="bi bi-graph-up-arrow"></i>
+                    </div>
+                    <div style="flex: 1;">
+                        <h3 class="chart-title">XP Progression</h3>
+                        <p class="chart-subtitle">CUMULATIVE_EXPERIENCE_POINTS</p>
+                    </div>
+                    <div class="time-filter">
+                        <button onclick="loadXpChart(7)" id="xp-7d">7D</button>
+                        <button onclick="loadXpChart(30)" id="xp-30d" class="active">30D</button>
+                        <button onclick="loadXpChart(90)" id="xp-90d">90D</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="xpChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Scores by Course (Radar) -->
+            <div class="card-glass chart-card">
+                <div class="chart-header">
+                    <div class="chart-icon" style="background: rgba(188, 140, 255, 0.1); color: var(--accent-purple);">
+                        <i class="bi bi-radar"></i>
+                    </div>
+                    <div>
+                        <h3 class="chart-title">Course Mastery</h3>
+                        <p class="chart-subtitle">AVERAGE_ACCURACY_BY_COURSE (%)</p>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="courseRadarChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Pass/Fail Doughnut -->
+            <div class="card-glass chart-card">
+                <div class="chart-header">
+                    <div class="chart-icon" style="background: rgba(63, 185, 80, 0.1); color: var(--accent-green);">
+                        <i class="bi bi-pie-chart-fill"></i>
+                    </div>
+                    <div>
+                        <h3 class="chart-title">Quiz Outcome Ratio</h3>
+                        <p class="chart-subtitle">PASS_vs_FAIL_DISTRIBUTION</p>
+                    </div>
+                </div>
+                <div class="chart-container" style="display: flex; align-items: center; justify-content: center;">
+                    <canvas id="passFailChart" style="max-width: 260px; max-height: 260px;"></canvas>
+                </div>
+            </div>
+
+            <!-- Activity Heatmap -->
+            <div class="card-glass chart-card">
+                <div class="chart-header">
+                    <div class="chart-icon" style="background: rgba(255, 166, 87, 0.1); color: var(--accent-orange);">
+                        <i class="bi bi-calendar3"></i>
+                    </div>
+                    <div>
+                        <h3 class="chart-title">Activity Heatmap</h3>
+                        <p class="chart-subtitle">DAILY_QUIZ_COMPLETIONS</p>
+                    </div>
+                </div>
+                <div id="heatmapContainer" style="min-height: 120px; display: flex; flex-direction: column; gap: 12px;">
+                    <div class="heatmap-grid" id="heatmapGrid"></div>
+                    <div style="display: flex; align-items: center; gap: 6px; font-size: 0.7rem; color: var(--text-dim); font-family: var(--font-mono);">
+                        <span>Less</span>
+                        <div style="width: 14px; height: 14px; border-radius: 3px; background: rgba(88, 166, 255, 0.05); border: 1px solid rgba(88, 166, 255, 0.1);"></div>
+                        <div style="width: 14px; height: 14px; border-radius: 3px; background: rgba(88, 166, 255, 0.2);"></div>
+                        <div style="width: 14px; height: 14px; border-radius: 3px; background: rgba(88, 166, 255, 0.5);"></div>
+                        <div style="width: 14px; height: 14px; border-radius: 3px; background: var(--accent-blue);"></div>
+                        <span>More</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" style="display: none; text-align: center; padding: 60px 20px;">
+            <i class="bi bi-bar-chart-line" style="font-size: 4rem; color: var(--text-dim); opacity: 0.3;"></i>
+            <h3 style="margin: 20px 0 8px; color: var(--text-dim); font-weight: 600;">No analytics data yet</h3>
+            <p style="color: var(--text-dim); font-size: 0.9rem;">Complete some quizzes to see your performance analytics here.</p>
+            <a th:href="@{/student/dashboard}" class="btn btn-blue" style="border-radius: 12px; margin-top: 20px;">
+                Go to Courses <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+        <script>
+            // Chart.js global defaults adapted to our dark theme
+            const rootStyles = getComputedStyle(document.documentElement);
+            const isDark = !document.documentElement.classList.contains('light-theme');
+
+            Chart.defaults.color = isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)';
+            Chart.defaults.borderColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)';
+            Chart.defaults.font.family = "'Inter', sans-serif";
+            Chart.defaults.font.size = 11;
+            Chart.defaults.plugins.legend.display = false;
+
+            const COLORS = {
+                blue: '#58a6ff',
+                purple: '#bc8cff',
+                green: '#3fb950',
+                orange: '#ffa657',
+                red: '#f85149',
+            };
+
+            let xpChartInstance = null;
+            let courseRadarInstance = null;
+            let passFailInstance = null;
+
+            // --- XP Progression Line Chart ---
+            async function loadXpChart(days = 30) {
+                document.querySelectorAll('.time-filter button').forEach(b => b.classList.remove('active'));
+                document.getElementById('xp-' + days + 'd')?.classList.add('active');
+
+                const res = await fetch(`/student/api/analytics/xp-progression?days=${days}`);
+                const data = await res.json();
+
+                if (xpChartInstance) xpChartInstance.destroy();
+
+                const ctx = document.getElementById('xpChart').getContext('2d');
+                const gradient = ctx.createLinearGradient(0, 0, 0, 280);
+                gradient.addColorStop(0, 'rgba(88, 166, 255, 0.25)');
+                gradient.addColorStop(1, 'rgba(88, 166, 255, 0.0)');
+
+                xpChartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            data: data.data,
+                            borderColor: COLORS.blue,
+                            backgroundColor: gradient,
+                            borderWidth: 2.5,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 0,
+                            pointHoverRadius: 6,
+                            pointHoverBackgroundColor: COLORS.blue,
+                            pointHoverBorderColor: '#fff',
+                            pointHoverBorderWidth: 2,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { intersect: false, mode: 'index' },
+                        scales: {
+                            x: { grid: { display: false }, ticks: { maxTicksLimit: 8 } },
+                            y: { beginAtZero: true, grid: { color: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.05)' } }
+                        },
+                        plugins: {
+                            tooltip: {
+                                backgroundColor: isDark ? 'rgba(30,30,30,0.95)' : 'rgba(255,255,255,0.95)',
+                                titleColor: isDark ? '#fff' : '#000',
+                                bodyColor: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)',
+                                borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+                                borderWidth: 1,
+                                padding: 12,
+                                cornerRadius: 10,
+                                displayColors: false,
+                                callbacks: {
+                                    label: ctx => `${ctx.parsed.y} XP`
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // --- Scores by Course Radar ---
+            async function loadCourseRadar() {
+                const res = await fetch('/student/api/analytics/scores-by-course');
+                const data = await res.json();
+
+                if (!data.labels || data.labels.length === 0) return;
+
+                if (courseRadarInstance) courseRadarInstance.destroy();
+
+                const ctx = document.getElementById('courseRadarChart').getContext('2d');
+                courseRadarInstance = new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            data: data.data,
+                            backgroundColor: 'rgba(188, 140, 255, 0.15)',
+                            borderColor: COLORS.purple,
+                            borderWidth: 2,
+                            pointBackgroundColor: COLORS.purple,
+                            pointRadius: 4,
+                            pointHoverRadius: 7,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: { stepSize: 20, display: false },
+                                grid: { color: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' },
+                                pointLabels: {
+                                    font: { size: 11, family: "'Inter', sans-serif" },
+                                    color: isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)',
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                backgroundColor: isDark ? 'rgba(30,30,30,0.95)' : 'rgba(255,255,255,0.95)',
+                                borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+                                borderWidth: 1,
+                                padding: 12,
+                                cornerRadius: 10,
+                                callbacks: {
+                                    label: ctx => `Accuracy: ${ctx.parsed.r}%`
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // --- Pass/Fail Doughnut ---
+            async function loadPassFail() {
+                const res = await fetch('/student/api/analytics/pass-fail');
+                const data = await res.json();
+
+                if (data.passed === 0 && data.failed === 0) return;
+
+                if (passFailInstance) passFailInstance.destroy();
+
+                const ctx = document.getElementById('passFailChart').getContext('2d');
+                passFailInstance = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Passed', 'Failed'],
+                        datasets: [{
+                            data: [data.passed, data.failed],
+                            backgroundColor: [COLORS.green, COLORS.red],
+                            borderWidth: 0,
+                            spacing: 4,
+                            borderRadius: 6,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        cutout: '65%',
+                        plugins: {
+                            legend: { display: true, position: 'bottom',
+                                labels: {
+                                    padding: 20,
+                                    usePointStyle: true,
+                                    pointStyleWidth: 10,
+                                    font: { size: 12, family: "'JetBrains Mono', monospace" }
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: isDark ? 'rgba(30,30,30,0.95)' : 'rgba(255,255,255,0.95)',
+                                borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+                                borderWidth: 1, padding: 12, cornerRadius: 10,
+                            }
+                        }
+                    }
+                });
+            }
+
+            // --- Activity Heatmap ---
+            async function loadHeatmap() {
+                const res = await fetch('/student/api/analytics/activity');
+                const data = await res.json();
+
+                const grid = document.getElementById('heatmapGrid');
+                grid.innerHTML = '';
+
+                // Build 90-day heatmap
+                const today = new Date();
+                const activityMap = {};
+                data.forEach(d => { activityMap[d.date] = d.count; });
+
+                let maxCount = 0;
+                data.forEach(d => { if (d.count > maxCount) maxCount = d.count; });
+                if (maxCount === 0) maxCount = 1;
+
+                for (let i = 89; i >= 0; i--) {
+                    const d = new Date(today);
+                    d.setDate(d.getDate() - i);
+                    const key = d.toISOString().split('T')[0];
+                    const count = activityMap[key] || 0;
+                    const intensity = count / maxCount;
+
+                    const cell = document.createElement('div');
+                    cell.className = 'heatmap-cell';
+                    cell.title = `${key}: ${count} quiz${count !== 1 ? 'zes' : ''}`;
+
+                    if (count === 0) {
+                        cell.style.background = isDark ? 'rgba(88, 166, 255, 0.04)' : 'rgba(88, 166, 255, 0.06)';
+                        cell.style.border = `1px solid ${isDark ? 'rgba(88, 166, 255, 0.08)' : 'rgba(88, 166, 255, 0.12)'}`;
+                    } else {
+                        const alpha = 0.2 + (intensity * 0.8);
+                        cell.style.background = `rgba(88, 166, 255, ${alpha})`;
+                    }
+
+                    grid.appendChild(cell);
+                }
+            }
+
+            // --- Check data availability & init ---
+            async function initAnalytics() {
+                try {
+                    const pfRes = await fetch('/student/api/analytics/pass-fail');
+                    const pfData = await pfRes.json();
+
+                    if (pfData.passed === 0 && pfData.failed === 0) {
+                        document.querySelector('.analytics-grid').style.display = 'none';
+                        document.getElementById('emptyState').style.display = 'block';
+                        return;
+                    }
+
+                    await Promise.all([
+                        loadXpChart(30),
+                        loadCourseRadar(),
+                        loadPassFail(),
+                        loadHeatmap()
+                    ]);
+                } catch (err) {
+                    console.error('Analytics init error:', err);
+                }
+            }
+
+            initAnalytics();
+        </script>
+    </div>
+</body>
+
+</html>
