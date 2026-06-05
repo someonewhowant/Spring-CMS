@@ -69,6 +69,16 @@ public class CodingTaskServiceImpl implements CodingTaskService {
         List<Map<String, String>> testCases = parseTestCases(task.getTestCasesJson());
 
         List<Map<String, Object>> testResults = new ArrayList<>();
+        if (testCases.isEmpty()) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("passed", false);
+            response.put("results", testResults);
+            response.put("output", "Error: No test cases configured for this task. Please contact the instructor.");
+            response.put("totalTests", 0);
+            response.put("passedTests", 0);
+            return response;
+        }
+
         boolean allPassed = true;
         StringBuilder fullOutput = new StringBuilder();
 
@@ -201,9 +211,10 @@ public class CodingTaskServiceImpl implements CodingTaskService {
                 try {
                     task.setPointsReward(Integer.parseInt(trimmedLine.substring(7).trim()));
                 } catch (NumberFormatException ignored) {}
-            } else if (trimmedLine.startsWith("## Starter Code")) {
+            } else if (trimmedLine.toLowerCase().startsWith("## starter code") || trimmedLine.toLowerCase().startsWith("## шаблон кода") || trimmedLine.toLowerCase().startsWith("## начальный код")) {
                 inStarterCode = true;
-            } else if (trimmedLine.startsWith("## Tests")) {
+                inTestsSection = false;
+            } else if (trimmedLine.toLowerCase().startsWith("## tests") || trimmedLine.toLowerCase().startsWith("## тесты") || trimmedLine.toLowerCase().startsWith("## test cases") || trimmedLine.toLowerCase().startsWith("## testcases")) {
                 inStarterCode = false;
                 inTestsSection = true;
             } else if (inStarterCode) {
@@ -211,18 +222,26 @@ public class CodingTaskServiceImpl implements CodingTaskService {
                     starterCodeBuilder.append(line).append("\n");
                 }
             } else if (inTestsSection) {
-                if (trimmedLine.startsWith("- ")) {
-                    // Parse line: - Input: `5` | Expected: `25` | Label: `Test 1`
+                boolean isBullet = trimmedLine.startsWith("- ") || trimmedLine.startsWith("* ") || trimmedLine.startsWith("+ ") || trimmedLine.matches("^\\d+\\.\\s+.*");
+                if (isBullet) {
+                    String testLine = trimmedLine.replaceFirst("^([\\-*+]|\\d+\\.)\\s+", "");
                     Map<String, String> testCase = new HashMap<>();
-                    String[] parts = trimmedLine.substring(2).split("\\|");
+                    String[] parts = testLine.split("\\|");
                     for (String part : parts) {
                         String[] kv = part.split(":", 2);
                         if (kv.length == 2) {
-                            String key = kv[0].trim().toLowerCase();
+                            String key = kv[0].trim().toLowerCase().replace(" ", "").replace("_", "").replace("-", "");
                             String value = kv[1].trim().replace("`", ""); // Remove backticks
-                            if (key.equals("input")) testCase.put("input", value);
-                            if (key.equals("expected")) testCase.put("expectedOutput", value);
-                            if (key.equals("label")) testCase.put("label", value);
+                            if ((value.startsWith("\"") && value.endsWith("\"")) || (value.startsWith("'") && value.endsWith("'"))) {
+                                value = value.substring(1, value.length() - 1);
+                            }
+                            if (key.equals("input") || key.equals("stdin") || key.equals("testinput") || key.equals("вход") || key.equals("входныеданные")) {
+                                testCase.put("input", value);
+                            } else if (key.equals("expected") || key.equals("expectedoutput") || key.equals("output") || key.equals("expected_output") || key.equals("результат") || key.equals("выход") || key.equals("выходныеданные")) {
+                                testCase.put("expectedOutput", value);
+                            } else if (key.equals("label") || key.equals("name") || key.equals("testname") || key.equals("название") || key.equals("метка")) {
+                                testCase.put("label", value);
+                            }
                         }
                     }
                     if (!testCase.isEmpty()) {

@@ -9,6 +9,7 @@ import com.example.blog.entity.Quiz;
 import com.example.blog.entity.Role;
 import com.example.blog.entity.User;
 import com.example.blog.entity.UserQuizResult;
+import com.example.blog.repository.CourseModuleRepository;
 import com.example.blog.repository.CourseRepository;
 import com.example.blog.repository.QuestionRepository;
 import com.example.blog.repository.QuizRepository;
@@ -29,6 +30,7 @@ class QuizServiceTest {
     @Mock private QuizRepository quizRepository;
     @Mock private QuestionRepository questionRepository;
     @Mock private CourseRepository courseRepository;
+    @Mock private CourseModuleRepository moduleRepository;
     @Mock private UserRepository userRepository;
     @Mock private UserQuizResultRepository userQuizResultRepository;
     @Mock private NotificationService notificationService;
@@ -42,6 +44,7 @@ class QuizServiceTest {
                         quizRepository,
                         questionRepository,
                         courseRepository,
+                        moduleRepository,
                         userRepository,
                         userQuizResultRepository,
                         notificationService,

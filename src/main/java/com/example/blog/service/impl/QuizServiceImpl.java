@@ -1,6 +1,7 @@
 package com.example.blog.service.impl;
 
 import com.example.blog.entity.Course;
+import com.example.blog.entity.CourseModule;
 import com.example.blog.entity.Question;
 import com.example.blog.entity.QuestionOption;
 import com.example.blog.entity.Quiz;
@@ -8,6 +9,7 @@ import com.example.blog.entity.Role;
 import com.example.blog.entity.User;
 import com.example.blog.entity.UserQuizResult;
 import com.example.blog.repository.CourseRepository;
+import com.example.blog.repository.CourseModuleRepository;
 import com.example.blog.repository.QuestionRepository;
 import com.example.blog.repository.QuizRepository;
 import com.example.blog.repository.UserQuizResultRepository;
@@ -28,6 +30,7 @@ public class QuizServiceImpl implements QuizService {
     private final QuizRepository quizRepository;
     private final QuestionRepository questionRepository;
     private final CourseRepository courseRepository;
+    private final CourseModuleRepository moduleRepository;
     private final UserRepository userRepository;
     private final UserQuizResultRepository userQuizResultRepository;
     private final NotificationService notificationService;
@@ -39,10 +42,19 @@ public class QuizServiceImpl implements QuizService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Quiz getQuizById(Long id) {
-        return quizRepository
+        Quiz quiz = quizRepository
                 .findById(id)
                 .orElseThrow(() -> new RuntimeException("Quiz not found with id: " + id));
+        if (quiz.getQuestions() != null) {
+            quiz.getQuestions().forEach(q -> {
+                if (q.getOptions() != null) {
+                    q.getOptions().size();
+                }
+            });
+        }
+        return quiz;
     }
 
     @Override
@@ -67,6 +79,15 @@ public class QuizServiceImpl implements QuizService {
     @Override
     @Transactional
     public void deleteQuiz(Long id) {
+        List<CourseModule> modules = moduleRepository.findByQuizId(id);
+        for (CourseModule m : modules) {
+            m.setQuiz(null);
+            moduleRepository.save(m);
+        }
+
+        List<UserQuizResult> results = userQuizResultRepository.findByQuizId(id);
+        userQuizResultRepository.deleteAll(results);
+
         quizRepository.deleteById(id);
     }
 

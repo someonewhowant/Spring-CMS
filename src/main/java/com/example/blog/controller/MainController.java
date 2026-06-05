@@ -312,7 +312,7 @@ public class MainController {
 
     @GetMapping("/course/{id}")
     public String courseDetail(@PathVariable Long id, Principal principal, Model model) {
-        Course course = courseService.getCourseById(id);
+        Course course = courseService.getCourseWithDetails(id);
         String htmlContent = markdownService.convertToHtml(course.getContent());
         User user = null;
         boolean isBookmarked = false;
@@ -339,14 +339,13 @@ public class MainController {
         return "course-detail";
     }
 
-    /** Страница конкретного модуля курса. */
     @GetMapping("/course/{courseId}/module/{moduleId}")
     public String moduleDetail(
             @PathVariable Long courseId,
             @PathVariable Long moduleId,
             Principal principal,
             Model model) {
-        Course course = courseService.getCourseById(courseId);
+        Course course = courseService.getCourseWithDetails(courseId);
         CourseModule module = courseService.getModuleById(moduleId);
 
         List<CourseModule> modules = course.getModules();

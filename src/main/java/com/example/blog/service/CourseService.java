@@ -10,6 +10,8 @@ public interface CourseService {
 
     Course getCourseById(Long id);
 
+    Course getCourseWithDetails(Long id);
+
     Course createCourse(Course course, User teacher);
 
     Course updateCourse(Long id, Course course);

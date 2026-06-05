@@ -78,7 +78,7 @@ class CodingTaskServiceTest {
         assertEquals(100, task.getPointsReward());
         assertTrue(task.getDescription().contains("Write a function that returns Fizz"));
         assertTrue(task.getStarterCode().contains("function fizzBuzz(n)"));
-        assertTrue(task.getTestCasesJson().contains("expectedOutput\":\"\\\"Fizz\\\"\""));
+        assertTrue(task.getTestCasesJson().contains("expectedOutput\":\"Fizz\""));
         assertTrue(task.getTestCasesJson().contains("label\":\"Divisible by 3"));
     }
 
@@ -95,16 +95,17 @@ class CodingTaskServiceTest {
                 .id(1L)
                 .title("FizzBuzz")
                 .pointsReward(100)
+                .testCasesJson("[{\"input\":\"3\",\"expectedOutput\":\"Fizz\",\"label\":\"Test 1\"}]")
                 .build();
 
         when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
-        // Mock sandbox runCode to return passed
+        // Mock sandbox execution to return successful output matching expected
         Map<String, Object> runResult = new HashMap<>();
-        runResult.put("passed", true);
-        runResult.put("results", Map.of());
-        runResult.put("output", "Success");
+        runResult.put("stdout", "Fizz");
+        runResult.put("stderr", "");
+        runResult.put("exitCode", 0);
         when(sandboxExecutionService.executeCode(any(), any(), any())).thenReturn(runResult);
 
         // First pass: count passed submissions is 0
@@ -132,16 +133,17 @@ class CodingTaskServiceTest {
                 .id(1L)
                 .title("FizzBuzz")
                 .pointsReward(100)
+                .testCasesJson("[{\"input\":\"3\",\"expectedOutput\":\"Fizz\",\"label\":\"Test 1\"}]")
                 .build();
 
         when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
-        // Mock sandbox runCode to return passed
+        // Mock sandbox execution to return successful output matching expected
         Map<String, Object> runResult = new HashMap<>();
-        runResult.put("passed", true);
-        runResult.put("results", Map.of());
-        runResult.put("output", "Success");
+        runResult.put("stdout", "Fizz");
+        runResult.put("stderr", "");
+        runResult.put("exitCode", 0);
         when(sandboxExecutionService.executeCode(any(), any(), any())).thenReturn(runResult);
 
         // Already passed once: count passed submissions is 1
