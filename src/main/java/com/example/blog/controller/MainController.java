@@ -281,8 +281,14 @@ public class MainController {
 
                 boolean isCompleted = false;
                 if (!lockedModuleIds.contains(m.getId())) {
-                    if (m.getQuiz() != null) {
-                        isCompleted = quizService.isQuizPassed(user.getId(), m.getQuiz().getId());
+                    boolean hasQuiz = m.getQuiz() != null;
+                    List<com.example.blog.entity.CodingTask> mTasks = codingTaskService.getTasksByModule(m.getId());
+                    boolean hasCodingTask = !mTasks.isEmpty();
+
+                    if (hasQuiz || hasCodingTask) {
+                        boolean quizPassed = !hasQuiz || quizService.isQuizPassed(user.getId(), m.getQuiz().getId());
+                        boolean codingTasksPassed = !hasCodingTask || mTasks.stream().allMatch(t -> codingTaskService.hasUserPassedTask(t.getId(), user.getId()));
+                        isCompleted = quizPassed && codingTasksPassed;
                     } else {
                         if ((currentModuleId != null && m.getId().equals(currentModuleId))
                                 || (lastOpenedOrder >= m.getOrderIndex())) {
@@ -296,8 +302,7 @@ public class MainController {
                 }
 
                 previousCompleted =
-                        !lockedModuleIds.contains(m.getId())
-                                && (m.getQuiz() == null || isCompleted);
+                        !lockedModuleIds.contains(m.getId()) && isCompleted;
             }
         }
 
@@ -360,13 +365,19 @@ public class MainController {
             if (modules.get(i).getId().equals(moduleId)) {
                 if (i > 0) {
                     prevModule = modules.get(i - 1);
-                    // Check if previous module had a quiz and if it was passed
-                    if (prevModule.getQuiz() != null && user != null) {
-                        if (!quizService.isQuizPassed(user.getId(), prevModule.getQuiz().getId())) {
+                    // Check if previous module had a quiz or coding task and if it was passed
+                    boolean prevHasQuiz = prevModule.getQuiz() != null;
+                    List<com.example.blog.entity.CodingTask> prevTasks = codingTaskService.getTasksByModule(prevModule.getId());
+                    boolean prevHasCodingTask = !prevTasks.isEmpty();
+
+                    if ((prevHasQuiz || prevHasCodingTask) && user != null) {
+                        final Long finalUserId = user.getId();
+                        boolean prevQuizPassed = !prevHasQuiz || quizService.isQuizPassed(finalUserId, prevModule.getQuiz().getId());
+                        boolean prevCodingTasksPassed = !prevHasCodingTask || prevTasks.stream().allMatch(t -> codingTaskService.hasUserPassedTask(t.getId(), finalUserId));
+                        
+                        if (!prevQuizPassed || !prevCodingTasksPassed) {
                             isLocked = true;
-                            lockReason =
-                                    "You must score at least 3 points in the quiz for module: "
-                                            + prevModule.getTitle();
+                            lockReason = "You must pass the quiz and/or coding tasks for module: " + prevModule.getTitle();
                         }
                     }
                 }
@@ -383,19 +394,29 @@ public class MainController {
 
         populateModuleStatuses(course, user, model, moduleId);
 
+        List<com.example.blog.entity.CodingTask> codingTasks = codingTaskService.getTasksByModule(moduleId);
+
         boolean isNextLocked = false;
         boolean isCurrentQuizPassed = false;
-        if (module.getQuiz() != null && user != null) {
-            isCurrentQuizPassed = quizService.isQuizPassed(user.getId(), module.getQuiz().getId());
-            if (!isCurrentQuizPassed) {
+        boolean hasQuiz = module.getQuiz() != null;
+        boolean hasCodingTask = !codingTasks.isEmpty();
+
+        if ((hasQuiz || hasCodingTask) && user != null) {
+            final Long finalUserId = user.getId();
+            boolean quizPassed = !hasQuiz || quizService.isQuizPassed(finalUserId, module.getQuiz().getId());
+            boolean codingTasksPassed = !hasCodingTask || codingTasks.stream().allMatch(t -> codingTaskService.hasUserPassedTask(t.getId(), finalUserId));
+            
+            if (!quizPassed || !codingTasksPassed) {
                 isNextLocked = true;
+            }
+            if (hasQuiz) {
+                isCurrentQuizPassed = quizPassed;
             }
         }
         
         List<com.example.blog.entity.Assignment> assignments = assignmentService.getAssignmentsByModule(moduleId);
         model.addAttribute("assignments", assignments);
 
-        List<com.example.blog.entity.CodingTask> codingTasks = codingTaskService.getTasksByModule(moduleId);
         model.addAttribute("codingTasks", codingTasks);
 
         String htmlContent = markdownService.convertToHtml(module.getContent());

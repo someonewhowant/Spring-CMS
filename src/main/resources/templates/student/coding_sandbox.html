@@ -309,6 +309,8 @@
             const LANGUAGE = [[${task.language}]];
             const STARTER_CODE = [[${task.starterCode != null ? task.starterCode : ''}]];
             const ALREADY_PASSED = [[${alreadyPassed}]];
+            const COURSE_ID = [[${courseId}]];
+            const MODULE_ID = [[${moduleId}]];
 
             let editor;
 
@@ -414,13 +416,19 @@
                             <div class="test-details">
                                 <span class="test-label">${test.label || ('Test #' + (idx + 1))}</span>`;
                         if (!test.passed) {
-                            html += `<div class="test-meta">Expected: <strong>${escapeHtml(test.expected)}</strong> | Got: <strong>${escapeHtml(test.actual)}</strong></div>`;
+                            html += `<div class="test-meta">Expected: <strong>${escapeHtml(test.expected || 'nothing')}</strong> | Got: <strong>${escapeHtml(test.actual || 'nothing')}</strong></div>`;
                         }
                         if (test.stderr) {
                             html += `<div class="test-meta" style="color: #f85149;">stderr: ${escapeHtml(test.stderr)}</div>`;
                         }
                         html += `</div></div>`;
                     });
+
+                    if (data.results[0].stderr && data.results[0].stderr.includes("Compilation error")) {
+                       html = `<div style="color: #f85149; font-family: var(--font-mono); white-space: pre-wrap; margin-bottom: 15px;"><strong>Compilation Error:</strong>\n${escapeHtml(data.results[0].stderr)}</div>` + html;
+                    }
+                } else if (data.output || data.error) {
+                    html = `<div style="color: #c9d1d9; font-family: var(--font-mono); white-space: pre-wrap; padding: 10px;">${escapeHtml(data.output || data.error)}</div>`;
                 }
 
                 const passed = data.passedTests || 0;
@@ -501,7 +509,7 @@
                         <div style="font-family: var(--font-mono); font-size: 1.8rem; color: var(--accent-orange); margin-bottom: 32px; display: flex; align-items: center; justify-content: center; gap: 10px;">
                             <i class="bi bi-trophy-fill"></i> +${xp} XP
                         </div>
-                        <button class="btn btn-outline btn-green font-mono" onclick="this.closest('.sandbox-success-overlay').remove()" style="padding: 12px 32px;">
+                        <button class="btn btn-outline btn-green font-mono" onclick="window.location.href='/course/' + COURSE_ID + '/module/' + MODULE_ID" style="padding: 12px 32px;">
                             CONTINUE() <i class="bi bi-arrow-right"></i>
                         </button>
                     </div>

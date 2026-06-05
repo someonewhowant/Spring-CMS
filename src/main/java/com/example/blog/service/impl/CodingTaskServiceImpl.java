@@ -82,7 +82,8 @@ public class CodingTaskServiceImpl implements CodingTaskService {
 
             String actualOutput = ((String) execResult.getOrDefault("stdout", "")).trim();
             String stderr = (String) execResult.getOrDefault("stderr", "");
-            boolean passed = actualOutput.equals(expectedOutput);
+            int exitCode = (int) execResult.getOrDefault("exitCode", -1);
+            boolean passed = exitCode == 0 && actualOutput.equals(expectedOutput);
 
             if (!passed) {
                 allPassed = false;

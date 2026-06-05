@@ -88,6 +88,8 @@ public class SandboxController {
         boolean alreadyPassed = codingTaskService.hasUserPassedTask(taskId, user.getId());
 
         model.addAttribute("task", task);
+        model.addAttribute("courseId", task.getModule().getCourse().getId());
+        model.addAttribute("moduleId", task.getModule().getId());
         model.addAttribute("alreadyPassed", alreadyPassed);
         model.addAttribute("currentUser", user.getUsername());
         model.addAttribute("currentUserRole", "ROLE_" + user.getRole().name());
