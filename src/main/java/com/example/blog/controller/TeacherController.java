@@ -85,6 +85,7 @@ public class TeacherController {
             topStudents = topStudents.subList(0, 5);
         }
         model.addAttribute("topStudents", topStudents);
+        model.addAttribute("courses", courses);
 
         model.addAttribute("message", "Добро пожаловать в командный центр преподавателя!");
         model.addAttribute("title", "Teacher Cabinet");
@@ -543,6 +544,25 @@ public class TeacherController {
                 "success", "Вся статистика студентов академии успешно сброшена!");
         return "redirect:/teacher/dashboard";
     }
+
+    @PostMapping("/broadcast")
+    public String broadcastNotification(
+            @RequestParam("message") String message,
+            Principal principal,
+            RedirectAttributes redirectAttributes) {
+        if (principal == null) {
+            return "redirect:/admin/login";
+        }
+        if (message == null || message.trim().isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "Сообщение объявления не может быть пустым!");
+            return "redirect:/teacher/dashboard";
+        }
+        List<User> students = userRepository.findByRole(Role.STUDENT);
+        students.forEach(student -> notificationService.createNotification(student, "[ОБЪЯВЛЕНИЕ] " + message.trim(), "/student/dashboard"));
+        redirectAttributes.addFlashAttribute("success", "Объявление успешно отправлено всем студентам!");
+        return "redirect:/teacher/dashboard";
+    }
+
 
     @PostMapping("/students/{id}/reset-stats")
     public String resetSingleStudentStats(

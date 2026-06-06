@@ -3,65 +3,89 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layouts/main}">
 <head>
-    <title>Dashboard</title>
+    <title>Admin Dashboard</title>
 </head>
 <body>
     <div layout:fragment="content" class="container py-l">
-        <div class="admin-header">
-            <h1>root@admin:~/posts$</h1>
-            <div class="admin-actions">
-                <a th:href="@{/admin/categories}" class="btn btn-outline btn-green">
-                    <i class="bi bi-folder2"></i> manage_categories()
+        <div class="admin-workspace">
+            <!-- Sidebar Navigation -->
+            <div class="admin-sidebar">
+                <div class="admin-sidebar-header">
+                    <i class="bi bi-shield-lock"></i> admin@academy:~$
+                </div>
+                
+                <a th:href="@{/admin/dashboard}" class="admin-sidebar-menu-item active">
+                    <i class="bi bi-terminal"></i> posts_manager()
                 </a>
-                <a th:href="@{/admin/courses}" class="btn btn-outline btn-blue">
-                    <i class="bi bi-book"></i> manage_courses()
+                <a th:href="@{/admin/categories}" class="admin-sidebar-menu-item">
+                    <i class="bi bi-folder2"></i> categories_manager()
                 </a>
-                <a th:href="@{/admin/add-post}" class="btn btn-primary">
-                    <i class="bi bi-plus-lg"></i> new_post()
+                <a th:href="@{/admin/courses}" class="admin-sidebar-menu-item">
+                    <i class="bi bi-book"></i> courses_manager()
                 </a>
-                <form th:action="@{/logout}" method="POST" class="m-0">
-                    <button type="submit" class="btn btn-outline btn-orange">
-                        <i class="bi bi-power"></i> exit()
-                    </button>
-                </form>
+                
+                <div style="margin-top: auto; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.08); margin-top: 40px;">
+                    <form th:action="@{/logout}" method="POST" class="m-0">
+                        <button type="submit" class="admin-sidebar-menu-item" style="background: none; border: none; width: 100%; text-align: left; cursor: pointer; padding: 8px 12px;">
+                            <i class="bi bi-power" style="color: var(--accent-orange);"></i> exit()
+                        </button>
+                    </form>
+                </div>
             </div>
-        </div>
-        
-        <div class="admin-table-wrapper">
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th>ENTRY_TITLE</th>
-                        <th>CATEGORY</th>
-                        <th>CREATED_AT</th>
-                        <th style="text-align: right;">ACTIONS</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="post : ${data}">
-                        <td th:text="${post.title}">Title</td>
-                        <td>
-                            <span th:if="${post.category}" 
-                                  th:text="${post.category.name}" 
-                                  class="badge badge-success">Category</span>
-                            <span th:unless="${post.category}" class="text-dim" style="font-family: var(--font-mono); font-size: 0.75rem;">none</span>
-                        </td>
-                        <td th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}">Date</td>
-                        <td>
-                            <div class="admin-actions" style="justify-content: flex-end;">
-                                <a th:href="@{/admin/edit-post/{id}(id=${post.id})}" class="btn btn-outline btn-xs">
-                                    <i class="bi bi-pencil"></i> EDIT
-                                </a>
-                                <a th:href="@{/admin/delete-post/{id}(id=${post.id})}" 
-                                   class="btn btn-outline btn-delete btn-xs" 
-                                   onclick="return confirm('rm -rf this_post?')">
-                                    <i class="bi bi-trash3"></i> DELETE
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+
+            <!-- Main Workspace -->
+            <div class="admin-main" style="flex-grow: 1;">
+                <div class="admin-header" style="margin-bottom: 24px;">
+                    <h1>root@admin:~/posts$</h1>
+                    <div class="admin-actions">
+                        <a th:href="@{/admin/add-post}" class="btn btn-primary">
+                            <i class="bi bi-plus-lg"></i> new_post()
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="admin-table-wrapper card-glass" style="padding: 12px; border-radius: 12px;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ENTRY_TITLE</th>
+                                <th>CATEGORY</th>
+                                <th>CREATED_AT</th>
+                                <th style="text-align: right;">ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="post : ${data}">
+                                <td th:text="${post.title}" style="font-weight: 500;">Title</td>
+                                <td>
+                                    <span th:if="${post.category}" 
+                                          th:text="${post.category.name}" 
+                                          class="badge badge-success">Category</span>
+                                    <span th:unless="${post.category}" class="text-dim" style="font-family: var(--font-mono); font-size: 0.75rem;">none</span>
+                                </td>
+                                <td th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}" style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-dim);">Date</td>
+                                <td>
+                                    <div class="admin-actions" style="justify-content: flex-end; gap: 8px;">
+                                        <a th:href="@{/admin/edit-post/{id}(id=${post.id})}" class="btn btn-outline btn-xs">
+                                            <i class="bi bi-pencil"></i> EDIT
+                                        </a>
+                                        <a th:href="@{/admin/delete-post/{id}(id=${post.id})}" 
+                                           class="btn btn-outline btn-delete btn-xs" 
+                                           onclick="return confirm('rm -rf this_post?')">
+                                            <i class="bi bi-trash3"></i> DELETE
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(data)}">
+                                <td colspan="4" class="text-center py-2xl text-dim">
+                                    No posts found. Run <span class="text-blue">new_post()</span> to create one.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </body>

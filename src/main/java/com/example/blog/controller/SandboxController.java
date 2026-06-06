@@ -123,28 +123,41 @@ public class SandboxController {
             @ModelAttribute CodingTask codingTask,
             RedirectAttributes redirectAttributes) {
 
+        CourseModule module = moduleRepository.findById(moduleId).orElse(null);
+        if (module == null) {
+            redirectAttributes.addFlashAttribute("error", "Failed to create coding task: Module not found.");
+            return "redirect:/teacher/dashboard";
+        }
         codingTaskService.createTask(moduleId, codingTask);
         redirectAttributes.addFlashAttribute("message", "Coding task created successfully!");
-        return "redirect:/teacher/courses/" + moduleRepository.findById(moduleId).get().getCourse().getId() + "/modules";
+        return "redirect:/teacher/courses/" + module.getCourse().getId() + "/modules";
     }
 
     @PostMapping("/teacher/modules/{moduleId}/coding-tasks/import")
     public String importCodingTask(
             @PathVariable Long moduleId,
-            @RequestParam("file") org.springframework.web.multipart.MultipartFile file,
+            @RequestParam(value = "file", required = false) org.springframework.web.multipart.MultipartFile file,
             RedirectAttributes redirectAttributes) {
+
+        CourseModule module = moduleRepository.findById(moduleId).orElse(null);
+        if (module == null) {
+            redirectAttributes.addFlashAttribute("error", "Failed to import coding task: Module not found.");
+            return "redirect:/teacher/dashboard";
+        }
 
         try {
             if (file != null && !file.isEmpty()) {
                 String content = new String(file.getBytes(), java.nio.charset.StandardCharsets.UTF_8);
                 codingTaskService.importTaskFromMarkdown(moduleId, content);
                 redirectAttributes.addFlashAttribute("message", "Coding task imported successfully!");
+            } else {
+                redirectAttributes.addFlashAttribute("error", "Failed to import coding task: No file was provided.");
             }
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Failed to import coding task: " + e.getMessage());
         }
 
-        return "redirect:/teacher/courses/" + moduleRepository.findById(moduleId).get().getCourse().getId() + "/modules";
+        return "redirect:/teacher/courses/" + module.getCourse().getId() + "/modules";
     }
 
     @GetMapping("/teacher/coding-tasks/{taskId}/delete")

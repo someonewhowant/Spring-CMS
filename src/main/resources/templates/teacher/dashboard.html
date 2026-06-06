@@ -8,6 +8,14 @@
 
 <body>
     <div layout:fragment="content" class="container py-l fade-in">
+        <!-- Success/Error Messages -->
+        <div th:if="${success}" style="border-left:3px solid var(--accent-green);background:rgba(63,185,80,0.07);padding:14px 18px;border-radius:8px;font-family:var(--font-mono);font-size:0.85rem;color:var(--accent-green);margin-bottom:24px;">
+            <i class="bi bi-check-circle-fill"></i> <span th:text="${success}">Success</span>
+        </div>
+        <div th:if="${error}" style="border-left:3px solid #ff6e32;background:rgba(255,110,50,0.07);padding:14px 18px;border-radius:8px;font-family:var(--font-mono);font-size:0.85rem;color:#ff6e32;margin-bottom:24px;">
+            <i class="bi bi-exclamation-triangle-fill"></i> <span th:text="${error}">Error</span>
+        </div>
+
         <!-- Dashboard Header -->
         <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px;">
             <div>
@@ -199,6 +207,64 @@
                         </a>
                     </div>
                 </div>
+
+                <!-- Quick Actions Grid -->
+                <h3 class="font-mono text-dim"
+                    style="font-size: 0.85rem; text-transform: uppercase; margin-top: 12px; margin-bottom: 0; letter-spacing: 0.08em;">
+                    <i class="bi bi-lightning-charge-fill text-yellow" style="color: #ffd166;"></i> quick_actions()
+                </h3>
+                <div class="card-glass" style="padding: 24px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+                        <!-- Action 1: Add Course -->
+                        <a th:href="@{/teacher/add-course}" class="quick-action-btn">
+                            <i class="bi bi-journal-plus text-orange" style="color: var(--accent-orange);"></i>
+                            <div>
+                                <span class="quick-action-title">Создать курс</span>
+                                <span class="quick-action-desc">Добавить новый учебный курс</span>
+                            </div>
+                        </a>
+                        <!-- Action 2: Add Article -->
+                        <a th:href="@{/admin/add-post}" class="quick-action-btn">
+                            <i class="bi bi-file-earmark-plus text-purple" style="color: #bc8cff;"></i>
+                            <div>
+                                <span class="quick-action-title">Написать статью</span>
+                                <span class="quick-action-desc">Опубликовать новый пост</span>
+                            </div>
+                        </a>
+                        <!-- Action 3: Add Category -->
+                        <a th:href="@{/admin/categories}" class="quick-action-btn">
+                            <i class="bi bi-tags text-blue" style="color: var(--accent-blue);"></i>
+                            <div>
+                                <span class="quick-action-title">Категории</span>
+                                <span class="quick-action-desc">Управление категориями</span>
+                            </div>
+                        </a>
+                        <!-- Action 4: Broadcast Announcement -->
+                        <button type="button" class="quick-action-btn" onclick="openBroadcastModal()" style="background: none; border: 1px solid rgba(255, 255, 255, 0.05); text-align: left; cursor: pointer; width: 100%;">
+                            <i class="bi bi-megaphone text-green" style="color: #3fb950;"></i>
+                            <div>
+                                <span class="quick-action-title">Объявление</span>
+                                <span class="quick-action-desc">Отправить сообщение всем</span>
+                            </div>
+                        </button>
+                        <!-- Action 5: Add Quiz -->
+                        <button type="button" class="quick-action-btn" onclick="openAddQuizModal()" style="background: none; border: 1px solid rgba(255, 255, 255, 0.05); text-align: left; cursor: pointer; width: 100%;">
+                            <i class="bi bi-patch-question-fill" style="color: #ff758f;"></i>
+                            <div>
+                                <span class="quick-action-title">Добавить тест</span>
+                                <span class="quick-action-desc">Создать квиз для курса</span>
+                            </div>
+                        </button>
+                        <!-- Action 6: Add Coding Task -->
+                        <button type="button" class="quick-action-btn" onclick="openAddCodingTaskModal()" style="background: none; border: 1px solid rgba(255, 255, 255, 0.05); text-align: left; cursor: pointer; width: 100%;">
+                            <i class="bi bi-code-square" style="color: #ffd166;"></i>
+                            <div>
+                                <span class="quick-action-title">Добавить задачу</span>
+                                <span class="quick-action-desc">Создать/импортировать код-задачу</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <!-- Top Students Widget -->
@@ -275,16 +341,214 @@
                         th:text="${user != null and user.email != null and user.email != ''} ? ${user.email} : 'OFFLINE'">OFFLINE</span>
                 </div>
                 <div>
-                    <strong style="color: var(--text-main); display: block; margin-bottom: 4px;">Allocated
-                        Resources</strong>
-                    <span th:text="${coursesCount} + ' courses, ' + ${quizzesCount} + ' quizzes'">0 courses, 0
-                        quizzes</span> loaded in context
+                    <strong style="color: var(--text-main); display: block; margin-bottom: 4px;">Allocated Resources</strong>
                 </div>
-                <div>
-                    <strong style="color: var(--text-main); display: block; margin-bottom: 4px;">System
-                        Architecture</strong>
-                    <span>Spring Security Secured Router</span>
+            </div>
+        </div>
+
+        <!-- Reset Stats Confirmation Modal -->
+        <div id="resetModal" class="modal-backdrop" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); z-index: 1050; align-items: center; justify-content: center;">
+            <div class="card-glass" style="width: 100%; max-width: 480px; padding: 32px; border-radius: 12px; border: 1px solid rgba(255, 110, 50, 0.3); background: rgba(20, 20, 20, 0.85); box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; transform: scale(0.9); transition: transform 0.3s ease;">
+                <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(255, 110, 50, 0.1); border: 2px solid rgba(255, 110, 50, 0.3); color: #ff6e32; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 20px;">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
                 </div>
+                <h3 class="font-mono" style="margin: 0 0 12px; font-size: 1.5rem; color: #ff6e32; font-weight: 700;">RESET ALL STUDENT STATS?</h3>
+                <p style="color: var(--text-dim); font-size: 0.95rem; line-height: 1.6; margin-bottom: 28px;">
+                    Warning: This action will permanently erase all quiz results, experience points (XP), levels, and academic achievements for ALL students in the academy. This cannot be undone.
+                </p>
+                <div style="display: flex; gap: 16px; justify-content: center;">
+                    <button type="button" class="btn btn-outline" style="border-radius: 20px; flex: 1; padding: 10px;" onclick="closeResetModal()">
+                        Cancel
+                    </button>
+                    <form th:action="@{/teacher/reset-stats}" method="POST" style="margin: 0; flex: 1;">
+                        <button type="submit" class="btn" style="background: #ff6e32; color: white; border-radius: 20px; width: 100%; padding: 10px; font-weight: 600; border: none; transition: background 0.2s;" onmouseover="this.style.background='#ff8c5a'" onmouseout="this.style.background='#ff6e32'">
+                            Confirm Reset All
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Broadcast Announcement Modal -->
+        <div id="broadcastModal" class="drawer-backdrop">
+            <div class="card-glass drawer-content" style="border-left: 3px solid rgba(63, 185, 80, 0.5) !important;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 16px;">
+                    <h3 class="font-mono" style="margin: 0; font-size: 1.3rem; color: #3fb950; font-weight: 700; display: flex; align-items: center; gap: 10px;">
+                        <i class="bi bi-megaphone-fill"></i> broadcast_info()
+                    </h3>
+                    <button type="button" onclick="closeBroadcastModal()" style="background: none; border: none; color: var(--text-dim); font-size: 1.25rem; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'; this.style.color='var(--text-main)'" onmouseout="this.style.background='none'; this.style.color='var(--text-dim)'">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+                
+                <p style="color: var(--text-dim); font-size: 0.9rem; line-height: 1.6; margin-bottom: 24px;">
+                    Отправить объявление всем студентам академии. Сообщение мгновенно отобразится в их личном кабинете.
+                </p>
+                
+                <form th:action="@{/teacher/broadcast}" method="POST" style="margin: 0; display: flex; flex-direction: column; flex-grow: 1;">
+                    <div style="margin-bottom: 24px; flex-grow: 1;">
+                        <label class="font-mono" style="font-size: 0.8rem; color: var(--text-dim); display: block; margin-bottom: 8px;">Текст объявления</label>
+                        <textarea name="message" rows="8" placeholder="Введите текст объявления..." required 
+                            style="width: 100%; padding: 12px 16px; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-main); font-family: inherit; font-size: 0.95rem; resize: none; outline: none; transition: border-color 0.2s;"
+                            onfocus="this.style.borderColor='#3fb950'"
+                            onblur="this.style.borderColor='var(--border-subtle)'"></textarea>
+                    </div>
+                    <div style="display: flex; gap: 16px; margin-top: auto; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 20px;">
+                        <button type="button" class="btn btn-outline" style="border-radius: 20px; flex: 1; padding: 10px;" onclick="closeBroadcastModal()">
+                            Отмена
+                        </button>
+                        <button type="submit" class="btn" style="background: #3fb950; color: white; border-radius: 20px; flex: 1; padding: 10px; font-weight: 600; border: none; transition: background 0.2s;" onmouseover="this.style.background='#4cd964'" onmouseout="this.style.background='#3fb950'">
+                            Отправить
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- Add Quiz Modal -->
+        <div id="addQuizModal" class="drawer-backdrop">
+            <div class="card-glass drawer-content" style="border-left: 3px solid rgba(255, 117, 143, 0.5) !important;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 16px;">
+                    <h3 class="font-mono" style="margin: 0; font-size: 1.3rem; color: #ff758f; font-weight: 700; display: flex; align-items: center; gap: 10px;">
+                        <i class="bi bi-patch-question-fill"></i> add_quiz()
+                    </h3>
+                    <button type="button" onclick="closeAddQuizModal()" style="background: none; border: none; color: var(--text-dim); font-size: 1.25rem; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'; this.style.color='var(--text-main)'" onmouseout="this.style.background='none'; this.style.color='var(--text-dim)'">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+                
+                <p style="color: var(--text-dim); font-size: 0.9rem; line-height: 1.6; margin-bottom: 24px;">
+                    Создать новый интерактивный тест (квиз) для выбранного курса.
+                </p>
+                
+                <form id="addQuizForm" method="POST" enctype="multipart/form-data" onsubmit="submitAddQuizForm(event)" style="margin: 0; display: flex; flex-direction: column; flex-grow: 1;">
+                    <div style="flex-grow: 1;">
+                        <!-- Course Select -->
+                        <div style="margin-bottom: 20px;">
+                            <label class="font-mono" style="font-size: 0.8rem; color: var(--text-dim); display: block; margin-bottom: 8px;">Курс</label>
+                            <select id="addQuizCourseSelect" required class="form-control"
+                                style="width: 100%; padding: 10px 14px; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-main); font-family: inherit; font-size: 0.95rem; outline: none; transition: border-color 0.2s;"
+                                onfocus="this.style.borderColor='#ff758f'"
+                                onblur="this.style.borderColor='var(--border-subtle)'">
+                                <option value="" disabled selected>Выберите курс...</option>
+                                <option th:each="course : ${courses}" th:value="${course.id}" th:text="${course.title}">Course Title</option>
+                            </select>
+                        </div>
+
+                        <!-- Quiz Title -->
+                        <div style="margin-bottom: 20px;">
+                            <label class="font-mono" style="font-size: 0.8rem; color: var(--text-dim); display: block; margin-bottom: 8px;">Название теста</label>
+                            <input type="text" name="title" placeholder="Например: Основы синтаксиса" required 
+                                style="width: 100%; padding: 10px 14px; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-main); font-family: inherit; font-size: 0.95rem; outline: none; transition: border-color 0.2s;"
+                                onfocus="this.style.borderColor='#ff758f'"
+                                onblur="this.style.borderColor='var(--border-subtle)'">
+                        </div>
+
+                        <!-- File import (optional) -->
+                        <div style="margin-bottom: 24px;">
+                            <label class="font-mono" style="font-size: 0.8rem; color: var(--text-dim); display: block; margin-bottom: 8px;">Импорт вопросов (необязательно)</label>
+                            <input type="file" name="file" accept=".gift,.md"
+                                style="font-size: 0.85rem; color: var(--text-dim); display: block; width: 100%;">
+                            <span style="font-size: 0.75rem; color: var(--text-dim); display: block; margin-top: 6px;">Поддерживаются форматы GIFT и Markdown</span>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 16px; margin-top: auto; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 20px;">
+                        <button type="button" class="btn btn-outline" style="border-radius: 20px; flex: 1; padding: 10px;" onclick="closeAddQuizModal()">
+                            Отмена
+                        </button>
+                        <button type="submit" class="btn" style="background: #ff758f; color: white; border-radius: 20px; flex: 1; padding: 10px; font-weight: 600; border: none; transition: background 0.2s;" onmouseover="this.style.background='#ff94a8'" onmouseout="this.style.background='#ff758f'">
+                            Создать
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Add Coding Task Modal -->
+        <div id="addCodingTaskModal" class="drawer-backdrop">
+            <div class="card-glass drawer-content" style="border-left: 3px solid rgba(88, 166, 255, 0.5) !important;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 16px;">
+                    <h3 class="font-mono" style="margin: 0; font-size: 1.3rem; color: var(--accent-blue); font-weight: 700; display: flex; align-items: center; gap: 10px;">
+                        <i class="bi bi-code-square"></i> add_coding_task()
+                    </h3>
+                    <button type="button" onclick="closeAddCodingTaskModal()" style="background: none; border: none; color: var(--text-dim); font-size: 1.25rem; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'; this.style.color='var(--text-main)'" onmouseout="this.style.background='none'; this.style.color='var(--text-dim)'">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+                
+                <p style="color: var(--text-dim); font-size: 0.9rem; line-height: 1.6; margin-bottom: 24px;">
+                    Выберите курс и модуль для размещения новой задачи по программированию.
+                </p>
+                
+                <form id="addCodingTaskForm" method="POST" enctype="multipart/form-data" onsubmit="submitAddCodingTaskForm(event)" style="margin: 0; display: flex; flex-direction: column; flex-grow: 1;">
+                    <div style="flex-grow: 1;">
+                        <!-- Course Select -->
+                        <div style="margin-bottom: 20px;">
+                            <label class="font-mono" style="font-size: 0.8rem; color: var(--text-dim); display: block; margin-bottom: 8px;">Курс</label>
+                            <select id="taskCourseSelect" required class="form-control" onchange="updateModulesDropdown('taskCourseSelect', 'taskModuleSelect')"
+                                style="width: 100%; padding: 10px 14px; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-main); font-family: inherit; font-size: 0.95rem; outline: none; transition: border-color 0.2s;"
+                                onfocus="this.style.borderColor='var(--accent-blue)'"
+                                onblur="this.style.borderColor='var(--border-subtle)'">
+                                <option value="" disabled selected>Выберите курс...</option>
+                                <option th:each="course : ${courses}" th:value="${course.id}" th:text="${course.title}">Course Title</option>
+                            </select>
+                        </div>
+
+                        <!-- Module Select -->
+                        <div style="margin-bottom: 24px;">
+                            <label class="font-mono" style="font-size: 0.8rem; color: var(--text-dim); display: block; margin-bottom: 8px;">Модуль курса</label>
+                            <select id="taskModuleSelect" required disabled class="form-control"
+                                style="width: 100%; padding: 10px 14px; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-main); font-family: inherit; font-size: 0.95rem; outline: none; transition: border-color 0.2s;"
+                                onfocus="this.style.borderColor='var(--accent-blue)'"
+                                onblur="this.style.borderColor='var(--border-subtle)'">
+                                <option value="">Сначала выберите курс...</option>
+                            </select>
+                        </div>
+
+                        <!-- Selection actions -->
+                        <div style="border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 20px; display: flex; flex-direction: column; gap: 20px;">
+                            <!-- Option A: Import from Markdown -->
+                            <div>
+                                <span class="font-mono" style="font-size: 0.8rem; color: var(--text-main); display: block; margin-bottom: 10px;">Вариант А: Быстрый импорт из Markdown</span>
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <input type="file" name="file" id="taskImportFileInput" accept=".md"
+                                        style="font-size: 0.85rem; color: var(--text-dim); flex-grow: 1;">
+                                    <button type="submit" class="btn" style="background: var(--accent-blue); color: white; border-radius: 20px; padding: 8px 18px; font-size: 0.85rem; border: none; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#58a6ff'" onmouseout="this.style.background='var(--accent-blue)'">
+                                        Импорт
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Divider -->
+                            <div style="text-align: center; color: var(--text-dim); font-size: 0.75rem; font-family: var(--font-mono); margin: 4px 0;">
+                                — ИЛИ —
+                            </div>
+
+                            <!-- Option B: Manual Creation link -->
+                            <div style="margin-bottom: 20px;">
+                                <span class="font-mono" style="font-size: 0.8rem; color: var(--text-main); display: block; margin-bottom: 10px;">Вариант Б: Конструктор задачи</span>
+                                <button type="button" id="manualCreateTaskBtn" class="btn btn-outline disabled" onclick="redirectToManualTaskCreation()"
+                                    style="width: 100%; border-radius: 20px; padding: 10px; font-size: 0.9rem; text-align: center; border-color: rgba(255,255,255,0.1); color: var(--text-main); background: transparent; transition: all 0.2s;">
+                                    <i class="bi bi-sliders"></i> Создать вручную через редактор
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: auto; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 20px; display: flex; justify-content: flex-end;">
+                        <button type="button" class="btn btn-outline" style="border-radius: 20px; padding: 8px 20px;" onclick="closeAddCodingTaskModal()">
+                            Закрыть
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- Hidden modules data for JS lookup -->
+        <div id="hiddenModulesData" style="display: none;">
+            <div th:each="course : ${courses}" th:id="'course-mods-' + ${course.id}">
+                <span th:each="module : ${course.modules}" 
+                      th:data-id="${module.id}" 
+                      th:data-title="${module.title}"></span>
             </div>
         </div>
     </div>
@@ -309,48 +573,208 @@
                 color: var(--accent-green);
                 font-weight: bold;
             }
+
+            .quick-action-btn {
+                display: flex;
+                align-items: center;
+                gap: 16px;
+                padding: 16px;
+                background: rgba(255, 255, 255, 0.02);
+                border: 1px solid rgba(255, 255, 255, 0.05);
+                border-radius: 12px;
+                color: var(--text-main);
+                text-decoration: none;
+                transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .quick-action-btn i {
+                font-size: 1.5rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 40px;
+                height: 40px;
+                border-radius: 8px;
+                background: rgba(255, 255, 255, 0.03);
+                transition: transform 0.2s ease;
+            }
+            .quick-action-btn:hover {
+                background: rgba(255, 255, 255, 0.05);
+                border-color: rgba(255, 255, 255, 0.15);
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+                color: var(--text-main);
+            }
+            .quick-action-btn:hover i {
+                transform: scale(1.1);
+            }
+            .quick-action-title {
+                display: block;
+                font-family: var(--font-mono);
+                font-size: 0.9rem;
+                font-weight: 600;
+                margin-bottom: 2px;
+            }
+            .quick-action-desc {
+                display: block;
+                font-size: 0.75rem;
+                color: var(--text-dim);
+            }
+            
+            /* Light theme adjustments */
+            .light-theme .quick-action-btn {
+                background: rgba(0, 0, 0, 0.02);
+                border-color: rgba(0, 0, 0, 0.05);
+            }
+            .light-theme .quick-action-btn i {
+                background: rgba(0, 0, 0, 0.03);
+            }
+            .light-theme .quick-action-btn:hover {
+                background: rgba(0, 0, 0, 0.04);
+                border-color: rgba(0, 0, 0, 0.12);
+            }
+            #manualCreateTaskBtn.disabled {
+                opacity: 0.5;
+                pointer-events: none;
+                cursor: not-allowed;
+            }
         </style>
+        <script>
+            function openResetModal() {
+                const modal = document.getElementById('resetModal');
+                modal.style.display = 'flex';
+                setTimeout(() => {
+                    modal.firstElementChild.style.transform = 'scale(1)';
+                }, 10);
+            }
+            function closeResetModal() {
+                const modal = document.getElementById('resetModal');
+                modal.firstElementChild.style.transform = 'scale(0.9)';
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 150);
+            }
+            function openBroadcastModal() {
+                const modal = document.getElementById('broadcastModal');
+                modal.style.display = 'flex';
+                setTimeout(() => {
+                    modal.firstElementChild.style.transform = 'translateX(0)';
+                }, 10);
+            }
+            function closeBroadcastModal() {
+                const modal = document.getElementById('broadcastModal');
+                modal.firstElementChild.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 350);
+            }
+            function openAddQuizModal() {
+                const modal = document.getElementById('addQuizModal');
+                modal.style.display = 'flex';
+                setTimeout(() => {
+                    modal.firstElementChild.style.transform = 'translateX(0)';
+                }, 10);
+            }
+            function closeAddQuizModal() {
+                const modal = document.getElementById('addQuizModal');
+                modal.firstElementChild.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 350);
+            }
+            function submitAddQuizForm(event) {
+                const courseSelect = document.getElementById('addQuizCourseSelect');
+                if (!courseSelect.value) {
+                    alert('Пожалуйста, выберите курс.');
+                    event.preventDefault();
+                    return false;
+                }
+                const form = document.getElementById('addQuizForm');
+                form.action = '/teacher/courses/' + courseSelect.value + '/quizzes';
+            }
+            function openAddCodingTaskModal() {
+                const modal = document.getElementById('addCodingTaskModal');
+                modal.style.display = 'flex';
+                setTimeout(() => {
+                    modal.firstElementChild.style.transform = 'translateX(0)';
+                }, 10);
+            }
+            function closeAddCodingTaskModal() {
+                const modal = document.getElementById('addCodingTaskModal');
+                modal.firstElementChild.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 350);
+            }
+            function submitAddCodingTaskForm(event) {
+                const moduleSelect = document.getElementById('taskModuleSelect');
+                if (!moduleSelect.value || moduleSelect.disabled) {
+                    alert('Пожалуйста, выберите курс и модуль.');
+                    event.preventDefault();
+                    return false;
+                }
+                const fileInput = document.getElementById('taskImportFileInput');
+                if (!fileInput.files || fileInput.files.length === 0) {
+                    alert('Пожалуйста, выберите файл Markdown (.md) для импорта.');
+                    event.preventDefault();
+                    return false;
+                }
+                const form = document.getElementById('addCodingTaskForm');
+                form.action = '/teacher/modules/' + moduleSelect.value + '/coding-tasks/import';
+            }
+            function redirectToManualTaskCreation() {
+                const moduleId = document.getElementById('taskModuleSelect').value;
+                if (moduleId) {
+                    window.location.href = '/teacher/modules/' + moduleId + '/coding-tasks/new';
+                }
+            }
+            function updateModulesDropdown(courseSelectId, moduleSelectId) {
+                const courseSelect = document.getElementById(courseSelectId);
+                const moduleSelect = document.getElementById(moduleSelectId);
+                const selectedCourseId = courseSelect.value;
+                
+                moduleSelect.innerHTML = '';
+                
+                const courseModsDiv = document.getElementById('course-mods-' + selectedCourseId);
+                if (courseModsDiv) {
+                    const spans = courseModsDiv.getElementsByTagName('span');
+                    if (spans.length > 0) {
+                        for (let i = 0; i < spans.length; i++) {
+                            const option = document.createElement('option');
+                            option.value = spans[i].getAttribute('data-id');
+                            option.textContent = spans[i].getAttribute('data-title');
+                            moduleSelect.appendChild(option);
+                        }
+                        moduleSelect.disabled = false;
+                        
+                        const submitBtn = moduleSelect.closest('form').querySelector('button[type="submit"]');
+                        if (submitBtn) submitBtn.disabled = false;
+                        
+                        const manualBtn = document.getElementById('manualCreateTaskBtn');
+                        if (manualBtn) {
+                            manualBtn.classList.remove('disabled');
+                            manualBtn.removeAttribute('disabled');
+                        }
+                        return;
+                    }
+                }
+                
+                const option = document.createElement('option');
+                option.textContent = 'Нет модулей в курсе';
+                option.disabled = true;
+                option.selected = true;
+                moduleSelect.appendChild(option);
+                moduleSelect.disabled = true;
+                
+                const submitBtn = moduleSelect.closest('form').querySelector('button[type="submit"]');
+                if (submitBtn) submitBtn.disabled = true;
+                
+                const manualBtn = document.getElementById('manualCreateTaskBtn');
+                if (manualBtn) {
+                    manualBtn.classList.add('disabled');
+                    manualBtn.setAttribute('disabled', 'true');
+                }
+            }
+        </script>
     </th:block>
-
-    <!-- Reset Stats Confirmation Modal -->
-    <div id="resetModal" class="modal-backdrop" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); z-index: 1050; align-items: center; justify-content: center;">
-        <div class="card-glass" style="width: 100%; max-width: 480px; padding: 32px; border-radius: 12px; border: 1px solid rgba(255, 110, 50, 0.3); background: rgba(20, 20, 20, 0.85); box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; transform: scale(0.9); transition: transform 0.3s ease;">
-            <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(255, 110, 50, 0.1); border: 2px solid rgba(255, 110, 50, 0.3); color: #ff6e32; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 20px;">
-                <i class="bi bi-exclamation-triangle-fill"></i>
-            </div>
-            <h3 class="font-mono" style="margin: 0 0 12px; font-size: 1.5rem; color: #ff6e32; font-weight: 700;">RESET ALL STUDENT STATS?</h3>
-            <p style="color: var(--text-dim); font-size: 0.95rem; line-height: 1.6; margin-bottom: 28px;">
-                Warning: This action will permanently erase all quiz results, experience points (XP), levels, and academic achievements for ALL students in the academy. This cannot be undone.
-            </p>
-            <div style="display: flex; gap: 16px; justify-content: center;">
-                <button type="button" class="btn btn-outline" style="border-radius: 20px; flex: 1; padding: 10px;" onclick="closeResetModal()">
-                    Cancel
-                </button>
-                <form th:action="@{/teacher/reset-stats}" method="POST" style="margin: 0; flex: 1;">
-                    <button type="submit" class="btn" style="background: #ff6e32; color: white; border-radius: 20px; width: 100%; padding: 10px; font-weight: 600; border: none; transition: background 0.2s;" onmouseover="this.style.background='#ff8c5a'" onmouseout="this.style.background='#ff6e32'">
-                        Confirm Reset All
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        function openResetModal() {
-            const modal = document.getElementById('resetModal');
-            modal.style.display = 'flex';
-            setTimeout(() => {
-                modal.firstElementChild.style.transform = 'scale(1)';
-            }, 10);
-        }
-        function closeResetModal() {
-            const modal = document.getElementById('resetModal');
-            modal.firstElementChild.style.transform = 'scale(0.9)';
-            setTimeout(() => {
-                modal.style.display = 'none';
-            }, 150);
-        }
-    </script>
 </body>
-
 </html>

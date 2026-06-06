@@ -16,69 +16,101 @@
     </style>
 </head>
 <body>
-    <div layout:fragment="content">
-        <div class="admin-header">
-            <h1>edit_post.py</h1>
-            <a th:href="@{/admin/dashboard}" class="btn btn-outline btn-orange">
-                <i class="bi bi-x-lg"></i> discard_changes()
-            </a>
-        </div>
-        
-        <div class="form-card mt-xl">
-            <form th:action="@{/admin/edit-post/{id}(id=${post.id})}" method="POST" enctype="multipart/form-data">
+    <div layout:fragment="content" class="container py-l">
+        <div class="admin-workspace">
+            <!-- Sidebar Navigation -->
+            <div class="admin-sidebar">
+                <div class="admin-sidebar-header">
+                    <i class="bi bi-shield-lock"></i> admin@academy:~$
+                </div>
                 
-                <div class="form-group">
-                    <label for="title" class="form-label">// STRING: title</label>
-                    <input type="text" id="title" name="title" th:value="${post.title}" placeholder="Post Title" class="form-control" required>
+                <a th:href="@{/admin/dashboard}" class="admin-sidebar-menu-item active">
+                    <i class="bi bi-terminal"></i> posts_manager()
+                </a>
+                <a th:href="@{/admin/categories}" class="admin-sidebar-menu-item">
+                    <i class="bi bi-folder2"></i> categories_manager()
+                </a>
+                <a th:href="@{/admin/courses}" class="admin-sidebar-menu-item">
+                    <i class="bi bi-book"></i> courses_manager()
+                </a>
+                
+                <div style="margin-top: auto; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.08); margin-top: 40px;">
+                    <form th:action="@{/logout}" method="POST" class="m-0">
+                        <button type="submit" class="admin-sidebar-menu-item" style="background: none; border: none; width: 100%; text-align: left; cursor: pointer; padding: 8px 12px;">
+                            <i class="bi bi-power" style="color: var(--accent-orange);"></i> exit()
+                        </button>
+                    </form>
                 </div>
+            </div>
 
-                <div class="form-group">
-                    <label for="image" class="form-label text-orange">// FILE: image (leave empty to keep current)</label>
-                    <input type="file" id="image" name="image" accept="image/*" class="form-control">
-                    <div th:if="${post.imageUrl}" class="mt-m flex items-center gap-m">
-                        <img th:src="${post.imageUrl}" class="rounded border-active" style="max-width: 120px;">
-                        <span class="hero-label m-0">Current asset path</span>
+            <!-- Main Workspace -->
+            <div class="admin-main" style="flex-grow: 1;">
+                <div class="admin-header" style="margin-bottom: 24px;">
+                    <h1>edit_post.py</h1>
+                    <div class="admin-actions">
+                        <a th:href="@{/admin/dashboard}" class="btn btn-outline btn-orange">
+                            <i class="bi bi-x-lg"></i> discard_changes()
+                        </a>
                     </div>
                 </div>
-
-                <div class="form-group">
-                    <label for="markdownFile" class="form-label text-blue">// FILE: markdown_import (.md)</label>
-                    <input type="file" id="markdownFile" name="markdownFile" accept=".md" class="form-control">
-                </div>
-
-                <div class="form-group">
-                    <label for="category" class="form-label">// SELECT: category</label>
-                    <select id="category" name="category.id" class="form-control">
-                        <option value="">-- No Category --</option>
-                        <option th:each="cat : ${categories}" 
-                                th:value="${cat.id}" 
-                                th:text="${cat.name}"
-                                th:selected="${post.category != null and post.category.id == cat.id}"></option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">// MULTI_SELECT: tags</label>
-                    <div class="tag-selector">
-                        <div th:each="tag : ${tags}" class="tag-option">
-                            <input type="checkbox" name="tagIds" th:value="${tag.id}" th:id="'tag-' + ${tag.id}"
-                                   th:checked="${post.tags != null and #lists.contains(post.tags.![id], tag.id)}">
-                            <label th:for="'tag-' + ${tag.id}" th:text="${tag.name}"></label>
+                
+                <div class="form-card card-glass" style="padding: 24px; border-radius: 12px;">
+                    <form th:action="@{/admin/edit-post/{id}(id=${post.id})}" method="POST" enctype="multipart/form-data">
+                        
+                        <div class="form-group">
+                            <label for="title" class="form-label">// STRING: title</label>
+                            <input type="text" id="title" name="title" th:value="${post.title}" placeholder="Post Title" class="form-control" required>
                         </div>
-                    </div>
-                </div>
 
-                <div class="form-group">
-                    <label for="body" class="form-label" style="color: var(--accent-purple);">// TEXT: body (markdown)</label>
-                    <textarea id="body" name="body" th:text="${post.body}" rows="15" placeholder="Content..." class="form-control"></textarea>
-                </div>
+                        <div class="form-group">
+                            <label for="image" class="form-label text-orange">// FILE: image (leave empty to keep current)</label>
+                            <input type="file" id="image" name="image" accept="image/*" class="form-control">
+                            <div th:if="${post.imageUrl}" class="mt-m flex items-center gap-m">
+                                <img th:src="${post.imageUrl}" class="rounded border-active" style="max-width: 120px;">
+                                <span class="hero-label m-0">Current asset path</span>
+                            </div>
+                        </div>
 
-                <div style="margin-top: 32px;">
-                    <button type="submit" class="btn btn-primary btn-large" style="width: 100%;">
-                        <i class="bi bi-check-lg"></i> push_updates()
-                    </button>
+                        <div class="form-group">
+                            <label for="markdownFile" class="form-label text-blue">// FILE: markdown_import (.md)</label>
+                            <input type="file" id="markdownFile" name="markdownFile" accept=".md" class="form-control">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="category" class="form-label">// SELECT: category</label>
+                            <select id="category" name="category.id" class="form-control">
+                                <option value="">-- No Category --</option>
+                                <option th:each="cat : ${categories}" 
+                                        th:value="${cat.id}" 
+                                        th:text="${cat.name}"
+                                        th:selected="${post.category != null and post.category.id == cat.id}"></option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">// MULTI_SELECT: tags</label>
+                            <div class="tag-selector">
+                                <div th:each="tag : ${tags}" class="tag-option">
+                                    <input type="checkbox" name="tagIds" th:value="${tag.id}" th:id="'tag-' + ${tag.id}"
+                                           th:checked="${post.tags != null and #lists.contains(post.tags.![id], tag.id)}">
+                                    <label th:for="'tag-' + ${tag.id}" th:text="${tag.name}"></label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="body" class="form-label" style="color: var(--accent-purple);">// TEXT: body (markdown)</label>
+                            <textarea id="body" name="body" th:text="${post.body}" rows="15" placeholder="Content..." class="form-control"></textarea>
+                        </div>
+
+                        <div style="margin-top: 32px;">
+                            <button type="submit" class="btn btn-primary btn-large" style="width: 100%;">
+                                <i class="bi bi-check-lg"></i> push_updates()
+                            </button>
+                        </div>
+                    </form>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 

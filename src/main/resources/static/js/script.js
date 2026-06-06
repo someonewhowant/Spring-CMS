@@ -324,5 +324,21 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     };
 
+    // --- Relocate Modals & Drawers to Body to avoid stacking context issues ---
+    const relocateModalsToBody = () => {
+        const backdrops = document.querySelectorAll('.modal-backdrop, .drawer-backdrop');
+        backdrops.forEach(backdrop => {
+            if (backdrop.parentNode !== document.body) {
+                document.body.appendChild(backdrop);
+            }
+        });
+    };
+
+    try {
+        relocateModalsToBody();
+    } catch (e) {
+        console.error('Failed to relocate modals to body', e);
+    }
+
     localizeTimes();
 });
