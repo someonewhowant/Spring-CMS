@@ -175,15 +175,12 @@
                 </h3>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px;">
                     <!-- Course Management Card -->
-                    <div class="card-glass" style="padding: 24px;">
-                        <div class="stat-icon orange"
-                            style="margin-bottom: 20px; width: 42px; height: 42px; font-size: 1.2rem;">
+                    <div class="exec-card orange">
+                        <div class="stat-icon">
                             <i class="bi bi-folder-symlink"></i>
                         </div>
-
-                        <h3 class="font-mono" style="margin: 0 0 10px; font-size: 1.1rem; color: var(--text-main);">
-                            manage_courses()</h3>
-                        <p style="margin-bottom: 24px; font-size: 0.85rem; color: var(--text-dim); flex-grow: 1;">
+                        <h3 class="font-mono text-gradient-orange">manage_courses()</h3>
+                        <p>
                             Structure syllabus, import articles, manage lessons, and bind quizzes.
                         </p>
                         <a th:href="@{/teacher/courses}" class="btn btn-outline btn-orange btn-xs font-mono w-full">
@@ -192,14 +189,12 @@
                     </div>
 
                     <!-- Coding Task Management Card -->
-                    <div class="card-glass" style="padding: 24px;">
-                        <div class="stat-icon blue"
-                            style="margin-bottom: 20px; width: 42px; height: 42px; font-size: 1.2rem; background: rgba(88, 166, 255, 0.15); color: var(--accent-blue); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                    <div class="exec-card blue">
+                        <div class="stat-icon">
                             <i class="bi bi-code-square"></i>
                         </div>
-                        <h3 class="font-mono" style="margin: 0 0 10px; font-size: 1.1rem; color: var(--text-main);">
-                            manage_coding_tasks()</h3>
-                        <p style="margin-bottom: 24px; font-size: 0.85rem; color: var(--text-dim); flex-grow: 1;">
+                        <h3 class="font-mono text-gradient-blue">manage_coding_tasks()</h3>
+                        <p>
                             Manage student coding challenges, view test cases, and edit starter code.
                         </p>
                         <a th:href="@{/teacher/coding-tasks}" class="btn btn-outline btn-blue btn-xs font-mono w-full">
@@ -208,18 +203,15 @@
                     </div>
 
                     <!-- Articles View Card -->
-                    <div class="card-glass" style="padding: 24px;">
-                        <div class="stat-icon purple"
-                            style="margin-bottom: 20px; width: 42px; height: 42px; font-size: 1.2rem; background: rgba(188, 140, 255, 0.15); color: #bc8cff; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                    <div class="exec-card purple">
+                        <div class="stat-icon">
                             <i class="bi bi-file-earmark-text"></i>
                         </div>
-                        <h3 class="font-mono" style="margin: 0 0 10px; font-size: 1.1rem; color: var(--text-main);">
-                            manage_articles()</h3>
-                        <p style="margin-bottom: 24px; font-size: 0.85rem; color: var(--text-dim); flex-grow: 1;">
+                        <h3 class="font-mono text-gradient-purple">manage_articles()</h3>
+                        <p>
                             Write new blog posts, manage knowledge base, and share expertise.
                         </p>
-                        <a th:href="@{/admin/dashboard}" class="btn btn-outline btn-purple btn-xs font-mono w-full"
-                            style="color: #bc8cff; border-color: rgba(188, 140, 255, 0.3);">
+                        <a th:href="@{/admin/dashboard}" class="btn btn-outline btn-purple btn-xs font-mono w-full">
                             OPEN_EDITOR <i class="bi bi-arrow-right-short"></i>
                         </a>
                     </div>
@@ -231,9 +223,9 @@
                     <i class="bi bi-lightning-charge-fill text-yellow" style="color: #ffd166;"></i> quick_actions()
                 </h3>
                 <div class="card-glass" style="padding: 24px;">
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+                    <div class="quick-action-grid">
                         <!-- Action 1: Add Course -->
-                        <a th:href="@{/teacher/add-course}" class="quick-action-btn">
+                        <a th:href="@{/teacher/add-course}" class="quick-action-btn btn-orange">
                             <i class="bi bi-journal-plus text-orange" style="color: var(--accent-orange);"></i>
                             <div>
                                 <span class="quick-action-title">Создать курс</span>
@@ -241,7 +233,7 @@
                             </div>
                         </a>
                         <!-- Action 2: Add Article -->
-                        <a th:href="@{/admin/add-post}" class="quick-action-btn">
+                        <a th:href="@{/admin/add-post}" class="quick-action-btn btn-purple">
                             <i class="bi bi-file-earmark-plus text-purple" style="color: #bc8cff;"></i>
                             <div>
                                 <span class="quick-action-title">Написать статью</span>
@@ -249,7 +241,7 @@
                             </div>
                         </a>
                         <!-- Action 3: Add Category -->
-                        <a th:href="@{/admin/categories}" class="quick-action-btn">
+                        <a th:href="@{/admin/categories}" class="quick-action-btn btn-blue">
                             <i class="bi bi-tags text-blue" style="color: var(--accent-blue);"></i>
                             <div>
                                 <span class="quick-action-title">Категории</span>
@@ -257,7 +249,7 @@
                             </div>
                         </a>
                         <!-- Action 4: Broadcast Announcement -->
-                        <button type="button" class="quick-action-btn" onclick="openBroadcastModal()" style="background: none; border: 1px solid rgba(255, 255, 255, 0.05); text-align: left; cursor: pointer; width: 100%;">
+                        <button type="button" class="quick-action-btn btn-green" onclick="openBroadcastModal()">
                             <i class="bi bi-megaphone text-green" style="color: #3fb950;"></i>
                             <div>
                                 <span class="quick-action-title">Объявление</span>
@@ -265,16 +257,16 @@
                             </div>
                         </button>
                         <!-- Action 5: Add Quiz -->
-                        <button type="button" class="quick-action-btn" onclick="openAddQuizModal()" style="background: none; border: 1px solid rgba(255, 255, 255, 0.05); text-align: left; cursor: pointer; width: 100%;">
-                            <i class="bi bi-patch-question-fill" style="color: #ff758f;"></i>
+                        <button type="button" class="quick-action-btn btn-pink" onclick="openAddQuizModal()">
+                            <i class="bi bi-patch-question-fill text-pink" style="color: #ff758f;"></i>
                             <div>
                                 <span class="quick-action-title">Добавить тест</span>
                                 <span class="quick-action-desc">Создать квиз для курса</span>
                             </div>
                         </button>
                         <!-- Action 6: Add Coding Task -->
-                        <button type="button" class="quick-action-btn" onclick="openAddCodingTaskModal()" style="background: none; border: 1px solid rgba(255, 255, 255, 0.05); text-align: left; cursor: pointer; width: 100%;">
-                            <i class="bi bi-code-square" style="color: #ffd166;"></i>
+                        <button type="button" class="quick-action-btn btn-yellow" onclick="openAddCodingTaskModal()">
+                            <i class="bi bi-code-square text-yellow" style="color: #ffd166;"></i>
                             <div>
                                 <span class="quick-action-title">Добавить задачу</span>
                                 <span class="quick-action-desc">Создать/импортировать код-задачу</span>
@@ -591,39 +583,210 @@
                 font-weight: bold;
             }
 
+            /* Executable Commands Redesign */
+            .exec-card {
+                position: relative;
+                background: var(--glass);
+                border: 1px solid var(--border-subtle);
+                border-radius: 16px;
+                padding: 28px 24px;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+                transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                box-shadow: var(--shadow);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+            }
+
+            .exec-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 4px;
+                transition: var(--transition);
+            }
+
+            .exec-card.orange::before { background: linear-gradient(90deg, var(--accent-orange), #ff9f43); }
+            .exec-card.blue::before { background: linear-gradient(90deg, var(--accent-blue), #00d2ff); }
+            .exec-card.purple::before { background: linear-gradient(90deg, var(--accent-purple), #ea7cfa); }
+
+            /* Glowing light leak on top left, visible on hover */
+            .exec-card::after {
+                content: '';
+                position: absolute;
+                width: 150px;
+                height: 150px;
+                border-radius: 50%;
+                filter: blur(40px);
+                opacity: 0;
+                top: -50px;
+                left: -50px;
+                transition: opacity 0.5s ease;
+                pointer-events: none;
+            }
+            .exec-card.orange::after { background: rgba(210, 153, 34, 0.12); }
+            .exec-card.blue::after { background: rgba(88, 166, 255, 0.12); }
+            .exec-card.purple::after { background: rgba(188, 140, 255, 0.12); }
+
+            .exec-card:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+            }
+            .exec-card.orange:hover { border-color: rgba(210, 153, 34, 0.4); }
+            .exec-card.blue:hover { border-color: rgba(88, 166, 255, 0.4); }
+            .exec-card.purple:hover { border-color: rgba(188, 140, 255, 0.4); }
+
+            .exec-card:hover::after {
+                opacity: 1;
+            }
+
+            .exec-card .stat-icon {
+                width: 48px;
+                height: 48px;
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.35rem;
+                margin-bottom: 24px;
+                transition: all 0.3s ease;
+            }
+            .exec-card.orange .stat-icon { background: rgba(210, 153, 34, 0.1); color: var(--accent-orange); border: 1px solid rgba(210, 153, 34, 0.2); }
+            .exec-card.blue .stat-icon { background: rgba(88, 166, 255, 0.1); color: var(--accent-blue); border: 1px solid rgba(88, 166, 255, 0.2); }
+            .exec-card.purple .stat-icon { background: rgba(188, 140, 255, 0.1); color: var(--accent-purple); border: 1px solid rgba(188, 140, 255, 0.2); }
+
+            .exec-card:hover .stat-icon {
+                transform: scale(1.08) rotate(-3deg);
+            }
+
+            .exec-card h3 {
+                font-size: 1.15rem;
+                font-weight: 700;
+                margin: 0 0 12px;
+                font-family: var(--font-mono);
+            }
+
+            .exec-card p {
+                font-size: 0.85rem;
+                line-height: 1.6;
+                color: var(--text-dim);
+                margin-bottom: 28px;
+                flex-grow: 1;
+            }
+
+            .text-gradient-orange {
+                background: linear-gradient(135deg, var(--accent-orange) 30%, #ffbe4b 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+            .text-gradient-blue {
+                background: linear-gradient(135deg, var(--accent-blue) 30%, #a5d6ff 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+            .text-gradient-purple {
+                background: linear-gradient(135deg, var(--accent-purple) 30%, #ea7cfa 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+
+            /* Quick Actions Redesign */
+            .quick-action-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                gap: 16px;
+            }
+
             .quick-action-btn {
                 display: flex;
                 align-items: center;
                 gap: 16px;
-                padding: 16px;
-                background: rgba(255, 255, 255, 0.02);
-                border: 1px solid rgba(255, 255, 255, 0.05);
+                padding: 16px 20px;
+                background: var(--glass);
+                border: 1px solid var(--border-subtle);
                 border-radius: 12px;
                 color: var(--text-main);
                 text-decoration: none;
                 transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+                position: relative;
+                overflow: hidden;
+                width: 100%;
+                text-align: left;
+                cursor: pointer;
             }
+
+            .quick-action-btn::before {
+                content: '';
+                position: absolute;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                width: 3px;
+                background: transparent;
+                transition: all 0.2s ease;
+            }
+
+            .quick-action-btn.btn-orange::before { background: var(--accent-orange); }
+            .quick-action-btn.btn-purple::before { background: var(--accent-purple); }
+            .quick-action-btn.btn-blue::before { background: var(--accent-blue); }
+            .quick-action-btn.btn-green::before { background: var(--accent-green); }
+            .quick-action-btn.btn-pink::before { background: #ff758f; }
+            .quick-action-btn.btn-yellow::before { background: #ffd166; }
+
             .quick-action-btn i {
-                font-size: 1.5rem;
+                font-size: 1.3rem;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                width: 40px;
-                height: 40px;
+                width: 38px;
+                height: 38px;
                 border-radius: 8px;
-                background: rgba(255, 255, 255, 0.03);
-                transition: transform 0.2s ease;
+                background: rgba(255, 255, 255, 0.02);
+                border: 1px solid rgba(255, 255, 255, 0.05);
+                transition: all 0.25s ease;
+                flex-shrink: 0;
             }
+
             .quick-action-btn:hover {
-                background: rgba(255, 255, 255, 0.05);
-                border-color: rgba(255, 255, 255, 0.15);
                 transform: translateY(-2px);
-                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+                border-color: var(--border-active);
+                background: rgba(255, 255, 255, 0.03);
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
                 color: var(--text-main);
             }
+
             .quick-action-btn:hover i {
-                transform: scale(1.1);
+                transform: scale(1.08) rotate(3deg);
             }
+
+            .quick-action-btn.btn-orange:hover i { background: rgba(210, 153, 34, 0.15); border-color: rgba(210, 153, 34, 0.3); }
+            .quick-action-btn.btn-purple:hover i { background: rgba(188, 140, 255, 0.15); border-color: rgba(188, 140, 255, 0.3); }
+            .quick-action-btn.btn-blue:hover i { background: rgba(88, 166, 255, 0.15); border-color: rgba(88, 166, 255, 0.3); }
+            .quick-action-btn.btn-green:hover i { background: rgba(63, 185, 80, 0.15); border-color: rgba(63, 185, 80, 0.3); }
+            .quick-action-btn.btn-pink:hover i { background: rgba(255, 117, 143, 0.15); border-color: rgba(255, 117, 143, 0.3); }
+            .quick-action-btn.btn-yellow:hover i { background: rgba(255, 209, 102, 0.15); border-color: rgba(255, 209, 102, 0.3); }
+
+            /* Add chevron > on hover */
+            .quick-action-btn::after {
+                content: '\F285';
+                font-family: 'bootstrap-icons';
+                position: absolute;
+                right: 16px;
+                font-size: 0.8rem;
+                color: var(--text-dim);
+                opacity: 0;
+                transform: translateX(-10px);
+                transition: all 0.25s ease;
+            }
+
+            .quick-action-btn:hover::after {
+                opacity: 1;
+                transform: translateX(0);
+            }
+
             .quick-action-title {
                 display: block;
                 font-family: var(--font-mono);
@@ -636,18 +799,20 @@
                 font-size: 0.75rem;
                 color: var(--text-dim);
             }
-            
+
             /* Light theme adjustments */
             .light-theme .quick-action-btn {
+                background: var(--glass);
+                border-color: var(--border-subtle);
+            }
+            .light-theme .quick-action-btn i {
                 background: rgba(0, 0, 0, 0.02);
                 border-color: rgba(0, 0, 0, 0.05);
             }
-            .light-theme .quick-action-btn i {
-                background: rgba(0, 0, 0, 0.03);
-            }
             .light-theme .quick-action-btn:hover {
-                background: rgba(0, 0, 0, 0.04);
-                border-color: rgba(0, 0, 0, 0.12);
+                background: rgba(0, 0, 0, 0.01);
+                border-color: var(--border-active);
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
             }
             #manualCreateTaskBtn.disabled {
                 opacity: 0.5;
