@@ -270,4 +270,17 @@ public class CodingTaskServiceImpl implements CodingTaskService {
 
         return createTask(moduleId, task);
     }
+
+    @Override
+    @Transactional
+    public CodingTask updateTask(Long id, CodingTask updatedTask) {
+        CodingTask existing = getTask(id);
+        existing.setTitle(updatedTask.getTitle());
+        existing.setDescription(updatedTask.getDescription());
+        existing.setLanguage(updatedTask.getLanguage());
+        existing.setStarterCode(updatedTask.getStarterCode());
+        existing.setTestCasesJson(updatedTask.getTestCasesJson());
+        existing.setPointsReward(updatedTask.getPointsReward());
+        return taskRepository.save(existing);
+    }
 }

@@ -250,8 +250,18 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CourseModule> getModulesByCourseId(Long courseId) {
-        return moduleRepository.findByCourseIdOrderByOrderIndexAsc(courseId);
+        List<CourseModule> modules = moduleRepository.findByCourseIdOrderByOrderIndexAsc(courseId);
+        modules.forEach(m -> {
+            if (m.getCodingTasks() != null) {
+                m.getCodingTasks().size();
+            }
+            if (m.getAssignments() != null) {
+                m.getAssignments().size();
+            }
+        });
+        return modules;
     }
 
     @Override

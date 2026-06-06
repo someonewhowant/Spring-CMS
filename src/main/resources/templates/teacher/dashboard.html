@@ -173,13 +173,14 @@
                     style="font-size: 0.85rem; text-transform: uppercase; margin-bottom: 0; letter-spacing: 0.08em;">
                     <i class="bi bi-terminal"></i> executable_commands
                 </h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px;">
                     <!-- Course Management Card -->
                     <div class="card-glass" style="padding: 24px;">
                         <div class="stat-icon orange"
                             style="margin-bottom: 20px; width: 42px; height: 42px; font-size: 1.2rem;">
                             <i class="bi bi-folder-symlink"></i>
                         </div>
+
                         <h3 class="font-mono" style="margin: 0 0 10px; font-size: 1.1rem; color: var(--text-main);">
                             manage_courses()</h3>
                         <p style="margin-bottom: 24px; font-size: 0.85rem; color: var(--text-dim); flex-grow: 1;">
@@ -187,6 +188,22 @@
                         </p>
                         <a th:href="@{/teacher/courses}" class="btn btn-outline btn-orange btn-xs font-mono w-full">
                             BUILD_CURRICULUM <i class="bi bi-arrow-right-short"></i>
+                        </a>
+                    </div>
+
+                    <!-- Coding Task Management Card -->
+                    <div class="card-glass" style="padding: 24px;">
+                        <div class="stat-icon blue"
+                            style="margin-bottom: 20px; width: 42px; height: 42px; font-size: 1.2rem; background: rgba(88, 166, 255, 0.15); color: var(--accent-blue); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-code-square"></i>
+                        </div>
+                        <h3 class="font-mono" style="margin: 0 0 10px; font-size: 1.1rem; color: var(--text-main);">
+                            manage_coding_tasks()</h3>
+                        <p style="margin-bottom: 24px; font-size: 0.85rem; color: var(--text-dim); flex-grow: 1;">
+                            Manage student coding challenges, view test cases, and edit starter code.
+                        </p>
+                        <a th:href="@{/teacher/coding-tasks}" class="btn btn-outline btn-blue btn-xs font-mono w-full">
+                            MANAGE_TASKS <i class="bi bi-arrow-right-short"></i>
                         </a>
                     </div>
 

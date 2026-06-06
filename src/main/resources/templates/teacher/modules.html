@@ -29,7 +29,30 @@
                 <tbody>
                     <tr th:each="module : ${modules}">
                         <td th:text="${module.orderIndex}">0</td>
-                        <td th:text="${module.title}">Module Title</td>
+                        <td>
+                            <div th:text="${module.title}" style="font-weight: 600; font-size: 1rem;">Module Title</div>
+                            
+                            <!-- Coding Tasks list -->
+                            <div th:if="${not #lists.isEmpty(module.codingTasks)}" style="margin-top: 10px; padding: 12px; background: rgba(0, 0, 0, 0.2); border-radius: 8px; border: 1px solid var(--border-subtle); max-width: 450px;">
+                                <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent-purple); margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                                    <i class="bi bi-terminal"></i> <span>coding_tasks:</span>
+                                </div>
+                                <div th:each="task : ${module.codingTasks}" style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px dashed rgba(255,255,255,0.05); font-size: 0.85rem;">
+                                    <span style="color: var(--text-main); font-weight: 500;">
+                                        <span th:text="${task.title}">Task Title</span>
+                                        <span class="text-dim" style="font-size: 0.75rem; font-family: var(--font-mono);" th:text="' (' + ${task.language} + ' | ' + ${task.pointsReward} + ' XP)'"></span>
+                                    </span>
+                                    <div style="display: flex; gap: 8px; margin-left: 12px;">
+                                        <a th:href="@{/teacher/coding-tasks/{id}/edit(id=${task.id})}" class="btn btn-outline btn-xs btn-blue" style="font-size: 0.7rem; padding: 2px 6px;">
+                                            <i class="bi bi-pencil"></i> EDIT
+                                        </a>
+                                        <a th:href="@{/teacher/coding-tasks/{id}/delete(id=${task.id})}" class="btn btn-outline btn-xs btn-delete" style="font-size: 0.7rem; padding: 2px 6px;" onclick="return confirm('Delete this coding task?')">
+                                            <i class="bi bi-trash"></i> DEL
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
                         <td>
                             <form th:action="@{/teacher/courses/{courseId}/modules/{moduleId}/quiz(courseId=${course.id}, moduleId=${module.id})}" 
                                   method="POST" style="display: flex; gap: 8px;">

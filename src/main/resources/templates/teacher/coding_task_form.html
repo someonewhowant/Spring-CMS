@@ -60,32 +60,32 @@
                 </div>
             </form>
 
-            <form id="manualForm" th:action="@{/teacher/modules/{moduleId}/coding-tasks/new(moduleId=${module.id})}" method="POST">
+            <form id="manualForm" th:action="${codingTask.id != null} ? @{/teacher/coding-tasks/{id}/edit(id=${codingTask.id})} : @{/teacher/modules/{moduleId}/coding-tasks/new(moduleId=${module.id})}" method="POST">
                 <div class="form-group">
                     <label for="title" class="form-label">// STRING: task_title</label>
-                    <input type="text" id="title" name="title" placeholder="FizzBuzz Challenge" class="form-control" required>
+                    <input type="text" id="title" name="title" th:value="${codingTask.title}" placeholder="FizzBuzz Challenge" class="form-control" required>
                 </div>
 
                 <div class="form-group">
                     <label for="description" class="form-label" style="color: var(--accent-purple);">// TEXT: task_description (markdown)</label>
-                    <textarea id="description" name="description" rows="6" placeholder="Write a function that returns..." class="form-control" required></textarea>
+                    <textarea id="description" name="description" th:text="${codingTask.description}" rows="6" placeholder="Write a function that returns..." class="form-control" required></textarea>
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
                     <div class="form-group">
                         <label for="language" class="form-label" style="color: var(--accent-blue);">// ENUM: language</label>
                         <select id="language" name="language" class="form-control" required>
-                            <option value="javascript">JavaScript</option>
-                            <option value="python">Python</option>
-                            <option value="java">Java</option>
-                            <option value="c">C</option>
-                            <option value="cpp">C++</option>
+                            <option value="javascript" th:selected="${codingTask.language == 'javascript'}">JavaScript</option>
+                            <option value="python" th:selected="${codingTask.language == 'python'}">Python</option>
+                            <option value="java" th:selected="${codingTask.language == 'java'}">Java</option>
+                            <option value="c" th:selected="${codingTask.language == 'c'}">C</option>
+                            <option value="cpp" th:selected="${codingTask.language == 'cpp'}">C++</option>
                         </select>
                     </div>
 
                     <div class="form-group">
                         <label for="pointsReward" class="form-label" style="color: var(--accent-orange);">// INT: xp_reward</label>
-                        <input type="number" id="pointsReward" name="pointsReward" value="50" min="10" max="500" class="form-control" required>
+                        <input type="number" id="pointsReward" name="pointsReward" th:value="${codingTask.pointsReward != 0 ? codingTask.pointsReward : 50}" min="10" max="500" class="form-control" required>
                     </div>
 
                     <div class="form-group" style="display: flex; align-items: flex-end;">
@@ -97,7 +97,7 @@
 
                 <div class="form-group">
                     <label for="starterCode" class="form-label" style="color: var(--accent-green);">// CODE: starter_code (pre-filled in editor)</label>
-                    <textarea id="starterCode" name="starterCode" rows="8" class="form-control" style="font-family: var(--font-mono); font-size: 0.85rem; background: var(--bg-dark);" placeholder="// Write your solution here"></textarea>
+                    <textarea id="starterCode" name="starterCode" th:text="${codingTask.starterCode}" rows="8" class="form-control" style="font-family: var(--font-mono); font-size: 0.85rem; background: var(--bg-dark);" placeholder="// Write your solution here"></textarea>
                 </div>
 
                 <div class="form-group">
@@ -109,12 +109,12 @@
                         <i class="bi bi-plus-circle"></i> ADD_TEST_CASE()
                     </button>
                     <!-- Hidden field for actual submission -->
-                    <textarea id="testCasesJson" name="testCasesJson" style="display: none;" required></textarea>
+                    <textarea id="testCasesJson" name="testCasesJson" th:text="${codingTask.testCasesJson}" style="display: none;" required></textarea>
                 </div>
 
                 <div style="margin-top: 32px;">
                     <button type="button" class="btn btn-primary btn-large" style="width: 100%;" onclick="submitForm()">
-                        <i class="bi bi-terminal"></i> deploy_coding_task()
+                        <i th:class="${codingTask.id != null} ? 'bi bi-shield-check' : 'bi bi-terminal'"></i> <span th:text="${codingTask.id != null} ? 'update_coding_task()' : 'deploy_coding_task()'">deploy_coding_task()</span>
                     </button>
                 </div>
             </form>
@@ -137,14 +137,19 @@
             const testCasesJsonInput = document.getElementById('testCasesJson');
 
             langSelect.addEventListener('change', () => {
-                starterCodeArea.value = defaultCodes[langSelect.value];
+                if (!starterCodeArea.value || starterCodeArea.value.trim() === '' || Object.values(defaultCodes).includes(starterCodeArea.value)) {
+                    starterCodeArea.value = defaultCodes[langSelect.value];
+                }
             });
 
-            // Initialize with first language
-            starterCodeArea.value = defaultCodes[langSelect.value];
+            // Initialize with first language only if empty
+            if (!starterCodeArea.value || starterCodeArea.value.trim() === '') {
+                starterCodeArea.value = defaultCodes[langSelect.value];
+            }
 
-            function addTestCase() {
+            function addTestCase(label = '', input = '', expectedOutput = '') {
                 const index = testCasesContainer.children.length;
+                const finalLabel = label || `Test Case ${index + 1}`;
                 const testCaseDiv = document.createElement('div');
                 testCaseDiv.className = 'card-glass test-case-item';
                 testCaseDiv.style.padding = '16px';
@@ -152,22 +157,22 @@
                 
                 testCaseDiv.innerHTML = `
                     <button type="button" class="btn btn-outline btn-xs btn-orange" style="position: absolute; top: 16px; right: 16px; border: none;" onclick="this.parentElement.remove()">
-                        <i class="bi bi-trash"></i>
+                         <i class="bi bi-trash"></i>
                     </button>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                         <div class="form-group" style="margin-bottom: 0;">
                             <label class="form-label" style="font-size: 0.75rem;">// STRING: label</label>
-                            <input type="text" class="form-control tc-label" placeholder="Test Case ${index + 1}" value="Test Case ${index + 1}" required>
+                            <input type="text" class="form-control tc-label" placeholder="Test Case ${index + 1}" value="${finalLabel}" required>
                         </div>
                     </div>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px;">
                         <div class="form-group" style="margin-bottom: 0;">
                             <label class="form-label" style="font-size: 0.75rem;">// TEXT: stdin_input</label>
-                            <textarea class="form-control tc-input" rows="2" placeholder="5" required></textarea>
+                            <textarea class="form-control tc-input" rows="2" placeholder="5" required>${input}</textarea>
                         </div>
                         <div class="form-group" style="margin-bottom: 0;">
                             <label class="form-label" style="font-size: 0.75rem;">// TEXT: expected_stdout</label>
-                            <textarea class="form-control tc-output" rows="2" placeholder="25" required></textarea>
+                            <textarea class="form-control tc-output" rows="2" placeholder="25" required>${expectedOutput}</textarea>
                         </div>
                     </div>
                 `;
@@ -179,10 +184,13 @@
                 const items = document.querySelectorAll('.test-case-item');
                 
                 items.forEach(item => {
+                    const labelVal = item.querySelector('.tc-label').value;
+                    const inputVal = item.querySelector('.tc-input').value;
+                    const outputVal = item.querySelector('.tc-output').value;
                     testCases.push({
-                        label: item.querySelector('.tc-label').value,
-                        input: item.querySelector('.tc-input').value,
-                        expectedOutput: item.querySelector('.tc-output').value
+                        label: labelVal,
+                        input: inputVal,
+                        expectedOutput: outputVal
                     });
                 });
 
@@ -192,11 +200,24 @@
                 }
 
                 testCasesJsonInput.value = JSON.stringify(testCases);
-                document.querySelector('form').submit();
+                document.getElementById('manualForm').submit();
             }
 
-            // Add one default test case on load
-            addTestCase();
+            // Load existing test cases or add default one
+            const existingJson = testCasesJsonInput.value;
+            if (existingJson && existingJson.trim() !== '' && existingJson !== '[]') {
+                try {
+                    const existingCases = JSON.parse(existingJson);
+                    existingCases.forEach(tc => {
+                        addTestCase(tc.label, tc.input, tc.expectedOutput);
+                    });
+                } catch (e) {
+                    console.error("Failed to parse existing test cases", e);
+                    addTestCase();
+                }
+            } else {
+                addTestCase();
+            }
         </script>
     </th:block>
 </body>

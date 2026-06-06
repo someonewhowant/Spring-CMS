@@ -15,6 +15,8 @@ public interface CodingTaskService {
 
     void deleteTask(Long id);
 
+    CodingTask updateTask(Long id, CodingTask task);
+
     /**
      * Executes user code against the task's test cases without saving a submission.
      * Returns a map with "passed" (boolean), "results" (list of test outcomes), "output" (console).

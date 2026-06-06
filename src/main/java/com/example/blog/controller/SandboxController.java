@@ -7,6 +7,9 @@ import com.example.blog.entity.User;
 import com.example.blog.repository.CourseModuleRepository;
 import com.example.blog.repository.UserRepository;
 import com.example.blog.service.CodingTaskService;
+import com.example.blog.entity.Course;
+import com.example.blog.repository.CourseRepository;
+import com.example.blog.repository.CodingTaskRepository;
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +29,9 @@ public class SandboxController {
     private final CodingTaskService codingTaskService;
     private final CourseModuleRepository moduleRepository;
     private final UserRepository userRepository;
+    private final CourseRepository courseRepository;
+    private final CodingTaskRepository codingTaskRepository;
+
 
     // ──────────────────────────────────────────────
     // REST API endpoints for code execution
@@ -130,7 +136,7 @@ public class SandboxController {
         }
         codingTaskService.createTask(moduleId, codingTask);
         redirectAttributes.addFlashAttribute("message", "Coding task created successfully!");
-        return "redirect:/teacher/courses/" + module.getCourse().getId() + "/modules";
+        return "redirect:/teacher/coding-tasks";
     }
 
     @PostMapping("/teacher/modules/{moduleId}/coding-tasks/import")
@@ -157,7 +163,31 @@ public class SandboxController {
             redirectAttributes.addFlashAttribute("error", "Failed to import coding task: " + e.getMessage());
         }
 
-        return "redirect:/teacher/courses/" + module.getCourse().getId() + "/modules";
+        return "redirect:/teacher/coding-tasks";
+    }
+
+    @GetMapping("/teacher/coding-tasks/{taskId}/edit")
+    public String showEditCodingTaskForm(@PathVariable Long taskId, Model model, Principal principal) {
+        CodingTask task = codingTaskService.getTask(taskId);
+        model.addAttribute("module", task.getModule());
+        model.addAttribute("codingTask", task);
+
+        User user = userRepository.findByUsername(principal.getName()).orElse(null);
+        model.addAttribute("currentUser", user != null ? user.getUsername() : "");
+        model.addAttribute("currentUserRole", user != null ? "ROLE_" + user.getRole().name() : "");
+        model.addAttribute("title", "Edit Coding Task: " + task.getTitle());
+
+        return "teacher/coding_task_form";
+    }
+
+    @PostMapping("/teacher/coding-tasks/{taskId}/edit")
+    public String editCodingTask(
+            @PathVariable Long taskId,
+            @ModelAttribute CodingTask codingTask,
+            RedirectAttributes redirectAttributes) {
+        CodingTask updated = codingTaskService.updateTask(taskId, codingTask);
+        redirectAttributes.addFlashAttribute("message", "Coding task updated successfully!");
+        return "redirect:/teacher/coding-tasks";
     }
 
     @GetMapping("/teacher/coding-tasks/{taskId}/delete")
@@ -166,6 +196,23 @@ public class SandboxController {
         Long courseId = task.getModule().getCourse().getId();
         codingTaskService.deleteTask(taskId);
         redirectAttributes.addFlashAttribute("message", "Coding task deleted.");
-        return "redirect:/teacher/courses/" + courseId + "/modules";
+        return "redirect:/teacher/coding-tasks";
+    }
+
+    @GetMapping("/teacher/coding-tasks")
+    public String listCodingTasks(Model model, Principal principal) {
+        User user = userRepository.findByUsername(principal.getName()).orElse(null);
+        model.addAttribute("currentUser", user != null ? user.getUsername() : "");
+        model.addAttribute("currentUserRole", user != null ? "ROLE_" + user.getRole().name() : "");
+        
+        List<Course> courses = courseRepository.findAll();
+        List<CodingTask> codingTasks = codingTaskRepository.findAll();
+        
+        model.addAttribute("courses", courses);
+        model.addAttribute("codingTasks", codingTasks);
+        model.addAttribute("title", "Manage Coding Tasks");
+        
+        return "teacher/coding_tasks";
     }
 }
+
