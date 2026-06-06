@@ -32,6 +32,23 @@ public class DataInitializer {
                 userRepository.save(admin);
             }
 
+            userRepository.findByUsername("teacher").ifPresentOrElse(
+                existingTeacher -> {
+                    existingTeacher.setPassword(passwordEncoder.encode("teacher"));
+                    existingTeacher.setRole(Role.TEACHER);
+                    userRepository.save(existingTeacher);
+                },
+                () -> {
+                    User teacher =
+                            User.builder()
+                                    .username("teacher")
+                                    .password(passwordEncoder.encode("teacher")) // Пароль: teacher
+                                    .role(Role.TEACHER)
+                                    .build();
+                    userRepository.save(teacher);
+                }
+            );
+
             // Инициализация категорий
             if (categoryRepository.count() == 0) {
                 categoryRepository.saveAll(
