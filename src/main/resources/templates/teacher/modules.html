@@ -7,124 +7,160 @@
 </head>
 <body>
     <div layout:fragment="content" class="container py-l">
-        <div class="admin-header">
-            <h1 class="text-green font-mono" th:text="'teacher@cabinet:~/courses/' + ${course.id} + '/modules$'">teacher@cabinet:~/courses/1/modules$</h1>
-            <div class="admin-actions">
-                <a th:href="@{/teacher/courses}" class="btn btn-outline btn-orange">
-                    <i class="bi bi-arrow-left"></i> back_to_courses()
+        <div class="admin-workspace">
+            <!-- Sidebar Navigation -->
+            <div class="admin-sidebar">
+                <div class="admin-sidebar-header">
+                    <i class="bi bi-person-workspace"></i> teacher@cabinet:~$
+                </div>
+                
+                <a th:href="@{/teacher/dashboard}" class="admin-sidebar-menu-item">
+                    <i class="bi bi-terminal"></i> dashboard()
                 </a>
+                <a th:href="@{/teacher/courses}" class="admin-sidebar-menu-item active">
+                    <i class="bi bi-book"></i> courses_manager()
+                </a>
+                <a th:href="@{/teacher/coding-tasks}" class="admin-sidebar-menu-item">
+                    <i class="bi bi-code-square"></i> coding_tasks()
+                </a>
+                <a th:href="@{/teacher/students}" class="admin-sidebar-menu-item">
+                    <i class="bi bi-people"></i> students_dir()
+                </a>
+                <a th:href="@{/teacher/analytics}" class="admin-sidebar-menu-item">
+                    <i class="bi bi-graph-up-arrow"></i> analytics()
+                </a>
+                
+                <div style="margin-top: auto; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.08); margin-top: 40px;">
+                    <form th:action="@{/logout}" method="POST" class="m-0">
+                        <button type="submit" class="admin-sidebar-menu-item" style="background: none; border: none; width: 100%; text-align: left; cursor: pointer; padding: 8px 12px;">
+                            <i class="bi bi-power" style="color: var(--accent-orange);"></i> exit()
+                        </button>
+                    </form>
+                </div>
             </div>
-        </div>
 
-        <div class="admin-table-wrapper mb-xl">
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th>ORDER</th>
-                        <th>MODULE_TITLE</th>
-                        <th>QUIZ_ASSOCIATION</th>
-                        <th style="text-align: right;">ACTIONS</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="module : ${modules}">
-                        <td th:text="${module.orderIndex}">0</td>
-                        <td>
-                            <div th:text="${module.title}" style="font-weight: 600; font-size: 1rem;">Module Title</div>
-                            
-                            <!-- Coding Tasks list -->
-                            <div th:if="${not #lists.isEmpty(module.codingTasks)}" style="margin-top: 10px; padding: 12px; background: rgba(0, 0, 0, 0.2); border-radius: 8px; border: 1px solid var(--border-subtle); max-width: 450px;">
-                                <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent-purple); margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-                                    <i class="bi bi-terminal"></i> <span>coding_tasks:</span>
-                                </div>
-                                <div th:each="task : ${module.codingTasks}" style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px dashed rgba(255,255,255,0.05); font-size: 0.85rem;">
-                                    <span style="color: var(--text-main); font-weight: 500;">
-                                        <span th:text="${task.title}">Task Title</span>
-                                        <span class="text-dim" style="font-size: 0.75rem; font-family: var(--font-mono);" th:text="' (' + ${task.language} + ' | ' + ${task.pointsReward} + ' XP)'"></span>
-                                    </span>
-                                    <div style="display: flex; gap: 8px; margin-left: 12px;">
-                                        <a th:href="@{/teacher/coding-tasks/{id}/edit(id=${task.id})}" class="btn btn-outline btn-xs btn-blue" style="font-size: 0.7rem; padding: 2px 6px;">
-                                            <i class="bi bi-pencil"></i> EDIT
-                                        </a>
-                                        <a th:href="@{/teacher/coding-tasks/{id}/delete(id=${task.id})}" class="btn btn-outline btn-xs btn-delete" style="font-size: 0.7rem; padding: 2px 6px;" onclick="return confirm('Delete this coding task?')">
-                                            <i class="bi bi-trash"></i> DEL
-                                        </a>
+            <!-- Main Workspace -->
+            <div class="admin-main" style="flex-grow: 1;">
+                <div class="admin-header">
+                    <h1 class="text-green font-mono" th:text="'teacher@cabinet:~/courses/' + ${course.id} + '/modules$'">teacher@cabinet:~/courses/1/modules$</h1>
+                    <div class="admin-actions">
+                        <a th:href="@{/teacher/courses}" class="btn btn-outline btn-orange">
+                            <i class="bi bi-arrow-left"></i> back_to_courses()
+                        </a>
+                    </div>
+                </div>
+
+                <div class="admin-table-wrapper card-glass mb-xl" style="padding: 12px; border-radius: 12px;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ORDER</th>
+                                <th>MODULE_TITLE</th>
+                                <th>QUIZ_ASSOCIATION</th>
+                                <th style="text-align: right;">ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="module : ${modules}">
+                                <td th:text="${module.orderIndex}">0</td>
+                                <td>
+                                    <div th:text="${module.title}" style="font-weight: 600; font-size: 1rem;">Module Title</div>
+                                    
+                                    <!-- Coding Tasks list -->
+                                    <div th:if="${not #lists.isEmpty(module.codingTasks)}" style="margin-top: 10px; padding: 12px; background: rgba(0, 0, 0, 0.2); border-radius: 8px; border: 1px solid var(--border-subtle); max-width: 450px;">
+                                        <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent-purple); margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                                            <i class="bi bi-terminal"></i> <span>coding_tasks:</span>
+                                        </div>
+                                        <div th:each="task : ${module.codingTasks}" style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px dashed rgba(255,255,255,0.05); font-size: 0.85rem;">
+                                            <span style="color: var(--text-main); font-weight: 500;">
+                                                <span th:text="${task.title}">Task Title</span>
+                                                <span class="text-dim" style="font-size: 0.75rem; font-family: var(--font-mono);" th:text="' (' + ${task.language} + ' | ' + ${task.pointsReward} + ' XP)'"></span>
+                                            </span>
+                                            <div style="display: flex; gap: 8px; margin-left: 12px;">
+                                                <a th:href="@{/teacher/coding-tasks/{id}/edit(id=${task.id})}" class="btn btn-outline btn-xs btn-blue" style="font-size: 0.7rem; padding: 2px 6px;">
+                                                    <i class="bi bi-pencil"></i> EDIT
+                                                </a>
+                                                <a th:href="@{/teacher/coding-tasks/{id}/delete(id=${task.id})}" class="btn btn-outline btn-xs btn-delete" style="font-size: 0.7rem; padding: 2px 6px;" onclick="return confirm('Delete this coding task?')">
+                                                    <i class="bi bi-trash"></i> DEL
+                                                </a>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <form th:action="@{/teacher/courses/{courseId}/modules/{moduleId}/quiz(courseId=${course.id}, moduleId=${module.id})}" 
-                                  method="POST" style="display: flex; gap: 8px;">
-                                <select name="quizId" class="form-control" style="padding: 4px 8px; font-size: 0.8rem; height: 32px; min-width: 150px;">
-                                    <option value="">-- No Quiz --</option>
-                                    <option th:each="q : ${quizzes}" 
-                                            th:value="${q.id}" 
-                                            th:text="${q.title}"
-                                            th:selected="${module.quiz != null and module.quiz.id == q.id}">
-                                        Quiz Title
-                                    </option>
-                                </select>
-                                <button type="submit" class="btn btn-outline btn-xs btn-blue">
-                                    UPDATE
-                                </button>
-                                <a th:href="@{/teacher/modules/{moduleId}/assignments/new(moduleId=${module.id})}"
-                                   class="btn btn-outline btn-xs btn-green" title="Add Practical Task">
-                                    <i class="bi bi-journal-plus"></i> ADD TASK
-                                </a>
-                                <a th:href="@{/teacher/modules/{moduleId}/coding-tasks/new(moduleId=${module.id})}"
-                                   class="btn btn-outline btn-xs btn-purple" title="Add Coding Challenge">
-                                    <i class="bi bi-terminal"></i> ADD CODE
-                                </a>
-                                <a th:href="@{/teacher/courses/{courseId}/modules/{moduleId}/edit(courseId=${course.id}, moduleId=${module.id})}" 
-                                   class="btn btn-outline btn-xs btn-orange">
-                                    EDIT
-                                </a>
-                            </form>
-                        </td>
-                        <td style="text-align: right;">
-                            <a th:href="@{/teacher/delete-module/{courseId}/{moduleId}(courseId=${course.id}, moduleId=${module.id})}" 
-                               class="btn btn-outline btn-delete btn-xs" 
-                               onclick="return confirm('rm -rf this_module?')">
-                                <i class="bi bi-trash3"></i> DELETE
-                            </a>
-                        </td>
-                    </tr>
-                    <tr th:if="${#lists.isEmpty(modules)}">
-                        <td colspan="4" style="text-align: center; padding: 40px; color: var(--text-dim);">
-                            No modules found. Use the form below to upload_module().
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="post-form-container fade-in mt-3xl">
-            <h2 class="mb-xl text-green font-mono text-l">
-                <i class="bi bi-plus-lg"></i> upload_new_module()
-            </h2>
-            <form th:action="@{/teacher/courses/{id}/modules(id=${course.id})}" method="POST" enctype="multipart/form-data">
-                <div class="form-group">
-                    <label for="title" class="form-label">// STRING: module_title</label>
-                    <input type="text" id="title" name="title" placeholder="Introduction to Spring Boot..." class="form-control" required>
+                                </td>
+                                <td>
+                                    <form th:action="@{/teacher/courses/{courseId}/modules/{moduleId}/quiz(courseId=${course.id}, moduleId=${module.id})}" 
+                                          method="POST" style="display: flex; gap: 8px;">
+                                        <select name="quizId" class="form-control" style="padding: 4px 8px; font-size: 0.8rem; height: 32px; min-width: 150px;">
+                                            <option value="">-- No Quiz --</option>
+                                            <option th:each="q : ${quizzes}" 
+                                                    th:value="${q.id}" 
+                                                    th:text="${q.title}"
+                                                    th:selected="${module.quiz != null and module.quiz.id == q.id}">
+                                                Quiz Title
+                                            </option>
+                                        </select>
+                                        <button type="submit" class="btn btn-outline btn-xs btn-blue">
+                                            UPDATE
+                                        </button>
+                                        <a th:href="@{/teacher/modules/{moduleId}/assignments/new(moduleId=${module.id})}"
+                                           class="btn btn-outline btn-xs btn-green" title="Add Practical Task">
+                                            <i class="bi bi-journal-plus"></i> ADD TASK
+                                        </a>
+                                        <a th:href="@{/teacher/modules/{moduleId}/coding-tasks/new(moduleId=${module.id})}"
+                                           class="btn btn-outline btn-xs btn-purple" title="Add Coding Challenge">
+                                            <i class="bi bi-terminal"></i> ADD CODE
+                                        </a>
+                                        <a th:href="@{/teacher/courses/{courseId}/modules/{moduleId}/edit(courseId=${course.id}, moduleId=${module.id})}" 
+                                           class="btn btn-outline btn-xs btn-orange">
+                                            EDIT
+                                        </a>
+                                    </form>
+                                </td>
+                                <td style="text-align: right;">
+                                    <a th:href="@{/teacher/delete-module/{courseId}/{moduleId}(courseId=${course.id}, moduleId=${module.id})}" 
+                                       class="btn btn-outline btn-delete btn-xs" 
+                                       onclick="return confirm('rm -rf this_module?')">
+                                        <i class="bi bi-trash3"></i> DELETE
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(modules)}">
+                                <td colspan="4" style="text-align: center; padding: 40px; color: var(--text-dim);">
+                                    No modules found. Use the form below to upload_module().
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
 
-                <div class="form-group">
-                    <label for="file" class="form-label" style="color: var(--accent-blue);">// FILE: content_import (.md)</label>
-                    <input type="file" id="file" name="file" accept=".md" class="form-control">
-                </div>
+                <div class="post-form-container fade-in mt-3xl">
+                    <h2 class="mb-xl text-green font-mono text-l">
+                        <i class="bi bi-plus-lg"></i> upload_new_module()
+                    </h2>
+                    <form th:action="@{/teacher/courses/{id}/modules(id=${course.id})}" method="POST" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label for="title" class="form-label">// STRING: module_title</label>
+                            <input type="text" id="title" name="title" placeholder="Introduction to Spring Boot..." class="form-control" required>
+                        </div>
 
-                <div class="form-group">
-                    <label for="content" class="form-label" style="color: var(--accent-purple);">// TEXT: module_content (markdown)</label>
-                    <textarea id="content" name="content" rows="10" placeholder="## Welcome..." class="form-control"></textarea>
-                </div>
+                        <div class="form-group">
+                            <label for="file" class="form-label" style="color: var(--accent-blue);">// FILE: content_import (.md)</label>
+                            <input type="file" id="file" name="file" accept=".md" class="form-control">
+                        </div>
 
-                <div style="margin-top: 32px;">
-                    <button type="submit" class="btn btn-primary btn-large" style="width: 100%;">
-                        <i class="bi bi-terminal"></i> upload_module()
-                    </button>
+                        <div class="form-group">
+                            <label for="content" class="form-label" style="color: var(--accent-purple);">// TEXT: module_content (markdown)</label>
+                            <textarea id="content" name="content" rows="10" placeholder="## Welcome..." class="form-control"></textarea>
+                        </div>
+
+                        <div style="margin-top: 32px;">
+                            <button type="submit" class="btn btn-primary btn-large" style="width: 100%;">
+                                <i class="bi bi-terminal"></i> upload_module()
+                            </button>
+                        </div>
+                    </form>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 
@@ -144,15 +180,7 @@
                 minHeight: "400px"
             });
         </script>
-        <style>
-            .EasyMDEContainer { background: var(--bg-dark); border-radius: var(--radius); margin-top: 8px; }
-            .editor-toolbar { border-color: var(--border-subtle) !important; background: var(--bg-surface) !important; border-radius: var(--radius) var(--radius) 0 0 !important; }
-            .editor-toolbar button { color: var(--text-main) !important; }
-            .editor-toolbar button:hover, .editor-toolbar button.active { background: var(--bg-dark) !important; border-color: var(--border-active) !important; }
-            .CodeMirror { background: var(--bg-dark) !important; color: var(--text-main) !important; border-color: var(--border-subtle) !important; border-radius: 0 0 var(--radius) var(--radius) !important; font-family: var(--font-mono) !important; }
-            .editor-preview-active { background: var(--bg-dark) !important; color: var(--text-main) !important; }
-            .editor-statusbar { color: var(--text-dim) !important; }
-        </style>
+
     </th:block>
 </body>
 </html>

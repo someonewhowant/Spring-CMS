@@ -7,82 +7,118 @@
 </head>
 <body>
     <div layout:fragment="content" class="container py-l fade-in">
-        <!-- Success/Error Messages -->
-        <div th:if="${message}" style="border-left:3px solid var(--accent-green);background:rgba(63,185,80,0.07);padding:14px 18px;border-radius:8px;font-family:var(--font-mono);font-size:0.85rem;color:var(--accent-green);margin-bottom:24px;">
-            <i class="bi bi-check-circle-fill"></i> <span th:text="${message}">Success</span>
-        </div>
-        <div th:if="${error}" style="border-left:3px solid #ff6e32;background:rgba(255,110,50,0.07);padding:14px 18px;border-radius:8px;font-family:var(--font-mono);font-size:0.85rem;color:#ff6e32;margin-bottom:24px;">
-            <i class="bi bi-exclamation-triangle-fill"></i> <span th:text="${error}">Error</span>
-        </div>
-
-        <div class="admin-header mb-xl">
-            <div>
-                <h1 class="text-green font-mono">teacher@cabinet:~/coding-tasks$</h1>
-                <p class="text-dim mt-xs">Manage interactive programming exercises, test cases, and starter code.</p>
-            </div>
-            <div class="admin-actions" style="display: flex; gap: 12px;">
-                <button type="button" class="btn btn-outline btn-blue" onclick="openAddCodingTaskModal()">
-                    <i class="bi bi-plus-lg"></i> create_coding_task()
-                </button>
-                <a th:href="@{/teacher/dashboard}" class="btn btn-outline btn-orange">
-                    <i class="bi bi-arrow-left"></i> back_to_dashboard()
+        <div class="admin-workspace">
+            <!-- Sidebar Navigation -->
+            <div class="admin-sidebar">
+                <div class="admin-sidebar-header">
+                    <i class="bi bi-person-workspace"></i> teacher@cabinet:~$
+                </div>
+                
+                <a th:href="@{/teacher/dashboard}" class="admin-sidebar-menu-item">
+                    <i class="bi bi-terminal"></i> dashboard()
                 </a>
+                <a th:href="@{/teacher/courses}" class="admin-sidebar-menu-item">
+                    <i class="bi bi-book"></i> courses_manager()
+                </a>
+                <a th:href="@{/teacher/coding-tasks}" class="admin-sidebar-menu-item active">
+                    <i class="bi bi-code-square"></i> coding_tasks()
+                </a>
+                <a th:href="@{/teacher/students}" class="admin-sidebar-menu-item">
+                    <i class="bi bi-people"></i> students_dir()
+                </a>
+                <a th:href="@{/teacher/analytics}" class="admin-sidebar-menu-item">
+                    <i class="bi bi-graph-up-arrow"></i> analytics()
+                </a>
+                
+                <div style="margin-top: auto; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.08); margin-top: 40px;">
+                    <form th:action="@{/logout}" method="POST" class="m-0">
+                        <button type="submit" class="admin-sidebar-menu-item" style="background: none; border: none; width: 100%; text-align: left; cursor: pointer; padding: 8px 12px;">
+                            <i class="bi bi-power" style="color: var(--accent-orange);"></i> exit()
+                        </button>
+                    </form>
+                </div>
             </div>
-        </div>
 
-        <div class="card-glass p-xl mb-2xl">
-            <h2 class="text-l mb-l text-blue font-mono">// Active Coding Challenges</h2>
-            <div class="admin-table-wrapper">
-                <table class="admin-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>TASK TITLE</th>
-                            <th>COURSE / MODULE</th>
-                            <th>LANGUAGE</th>
-                            <th>REWARD</th>
-                            <th style="text-align: right;">ACTIONS</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="task : ${codingTasks}">
-                            <td th:text="${task.id}" class="font-mono text-dim">1</td>
-                            <td>
-                                <div class="font-bold" th:text="${task.title}">Reverse String</div>
-                            </td>
-                            <td>
-                                <div style="font-size: 0.85rem; color: var(--text-main);" th:text="${task.module.course.title}">Course Name</div>
-                                <div style="font-size: 0.75rem; color: var(--text-dim);" th:text="${task.module.title}">Module Name</div>
-                            </td>
-                            <td>
-                                <span class="badge badge-blue font-mono" style="text-transform: uppercase;" th:text="${task.language}">python</span>
-                            </td>
-                            <td class="font-mono text-yellow" style="color: #ffd166;">
-                                <i class="bi bi-gem"></i> <span th:text="${task.pointsReward} + ' XP'">50 XP</span>
-                            </td>
-                            <td style="text-align: right;">
-                                <div style="display: inline-flex; gap: 8px;">
-                                    <a th:href="@{/student/sandbox/{id}(id=${task.id})}" class="btn btn-outline btn-xs btn-green" target="_blank" title="Test Sandbox">
-                                        <i class="bi bi-play-fill"></i> TRY
-                                    </a>
-                                    <a th:href="@{/teacher/coding-tasks/{id}/edit(id=${task.id})}" class="btn btn-outline btn-xs btn-orange" title="Edit Task">
-                                        <i class="bi bi-pencil"></i> EDIT
-                                    </a>
-                                    <a th:href="@{/teacher/coding-tasks/{id}/delete(id=${task.id})}" 
-                                       class="btn btn-outline btn-delete btn-xs" title="Delete Task"
-                                       onclick="return confirm('rm -rf this_coding_task?')">
-                                        <i class="bi bi-trash3"></i> DELETE
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr th:if="${#lists.isEmpty(codingTasks)}">
-                            <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-dim);">
-                                No coding tasks found. Click "create_coding_task()" to define one.
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <!-- Main Workspace -->
+            <div class="admin-main" style="flex-grow: 1;">
+                <!-- Success/Error Messages -->
+                <div th:if="${message}" style="border-left:3px solid var(--accent-green);background:rgba(63,185,80,0.07);padding:14px 18px;border-radius:8px;font-family:var(--font-mono);font-size:0.85rem;color:var(--accent-green);margin-bottom:24px;">
+                    <i class="bi bi-check-circle-fill"></i> <span th:text="${message}">Success</span>
+                </div>
+                <div th:if="${error}" style="border-left:3px solid #ff6e32;background:rgba(255,110,50,0.07);padding:14px 18px;border-radius:8px;font-family:var(--font-mono);font-size:0.85rem;color:#ff6e32;margin-bottom:24px;">
+                    <i class="bi bi-exclamation-triangle-fill"></i> <span th:text="${error}">Error</span>
+                </div>
+
+                <div class="admin-header mb-xl">
+                    <div>
+                        <h1 class="text-green font-mono">teacher@cabinet:~/coding-tasks$</h1>
+                        <p class="text-dim mt-xs">Manage interactive programming exercises, test cases, and starter code.</p>
+                    </div>
+                    <div class="admin-actions" style="display: flex; gap: 12px;">
+                        <button type="button" class="btn btn-outline btn-blue" onclick="openAddCodingTaskModal()">
+                            <i class="bi bi-plus-lg"></i> create_coding_task()
+                        </button>
+                        <a th:href="@{/teacher/dashboard}" class="btn btn-outline btn-orange">
+                            <i class="bi bi-arrow-left"></i> back_to_dashboard()
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card-glass p-xl mb-2xl" style="padding: 12px; border-radius: 12px;">
+                    <h2 class="text-l mb-l text-blue font-mono" style="padding: 12px 12px 0 12px;">// Active Coding Challenges</h2>
+                    <div class="admin-table-wrapper">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>TASK TITLE</th>
+                                    <th>COURSE / MODULE</th>
+                                    <th>LANGUAGE</th>
+                                    <th>REWARD</th>
+                                    <th style="text-align: right;">ACTIONS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="task : ${codingTasks}">
+                                    <td th:text="${task.id}" class="font-mono text-dim">1</td>
+                                    <td>
+                                        <div class="font-bold" th:text="${task.title}">Reverse String</div>
+                                    </td>
+                                    <td>
+                                        <div style="font-size: 0.85rem; color: var(--text-main);" th:text="${task.module.course.title}">Course Name</div>
+                                        <div style="font-size: 0.75rem; color: var(--text-dim);" th:text="${task.module.title}">Module Name</div>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-blue font-mono" style="text-transform: uppercase;" th:text="${task.language}">python</span>
+                                    </td>
+                                    <td class="font-mono text-yellow" style="color: #ffd166;">
+                                        <i class="bi bi-gem"></i> <span th:text="${task.pointsReward} + ' XP'">50 XP</span>
+                                    </td>
+                                    <td style="text-align: right;">
+                                        <div style="display: inline-flex; gap: 8px;">
+                                            <a th:href="@{/student/sandbox/{id}(id=${task.id})}" class="btn btn-outline btn-xs btn-green" target="_blank" title="Test Sandbox">
+                                                <i class="bi bi-play-fill"></i> TRY
+                                            </a>
+                                            <a th:href="@{/teacher/coding-tasks/{id}/edit(id=${task.id})}" class="btn btn-outline btn-xs btn-orange" title="Edit Task">
+                                                <i class="bi bi-pencil"></i> EDIT
+                                            </a>
+                                            <a th:href="@{/teacher/coding-tasks/{id}/delete(id=${task.id})}" 
+                                               class="btn btn-outline btn-delete btn-xs" title="Delete Task"
+                                               onclick="return confirm('rm -rf this_coding_task?')">
+                                                <i class="bi bi-trash3"></i> DELETE
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(codingTasks)}">
+                                    <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-dim);">
+                                        No coding tasks found. Click "create_coding_task()" to define one.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
 

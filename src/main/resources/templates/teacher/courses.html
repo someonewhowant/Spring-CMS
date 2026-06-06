@@ -7,67 +7,103 @@
 </head>
 <body>
     <div layout:fragment="content" class="container py-l">
-        <div class="admin-header">
-            <h1 class="text-green font-mono">teacher@cabinet:~/courses$</h1>
-            <div class="admin-actions">
-                <a th:href="@{/teacher/add-course}" class="btn btn-outline btn-orange">
-                    <i class="bi bi-plus-lg"></i> create_new_course()
+        <div class="admin-workspace">
+            <!-- Sidebar Navigation -->
+            <div class="admin-sidebar">
+                <div class="admin-sidebar-header">
+                    <i class="bi bi-person-workspace"></i> teacher@cabinet:~$
+                </div>
+                
+                <a th:href="@{/teacher/dashboard}" class="admin-sidebar-menu-item">
+                    <i class="bi bi-terminal"></i> dashboard()
                 </a>
+                <a th:href="@{/teacher/courses}" class="admin-sidebar-menu-item active">
+                    <i class="bi bi-book"></i> courses_manager()
+                </a>
+                <a th:href="@{/teacher/coding-tasks}" class="admin-sidebar-menu-item">
+                    <i class="bi bi-code-square"></i> coding_tasks()
+                </a>
+                <a th:href="@{/teacher/students}" class="admin-sidebar-menu-item">
+                    <i class="bi bi-people"></i> students_dir()
+                </a>
+                <a th:href="@{/teacher/analytics}" class="admin-sidebar-menu-item">
+                    <i class="bi bi-graph-up-arrow"></i> analytics()
+                </a>
+                
+                <div style="margin-top: auto; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.08); margin-top: 40px;">
+                    <form th:action="@{/logout}" method="POST" class="m-0">
+                        <button type="submit" class="admin-sidebar-menu-item" style="background: none; border: none; width: 100%; text-align: left; cursor: pointer; padding: 8px 12px;">
+                            <i class="bi bi-power" style="color: var(--accent-orange);"></i> exit()
+                        </button>
+                    </form>
+                </div>
             </div>
-        </div>
 
-        <div class="admin-table-wrapper">
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th>IMAGE</th>
-                        <th>TITLE</th>
-                        <th>LEVEL</th>
-                        <th>DURATION</th>
-                        <th style="text-align: right;">ACTIONS</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="course : ${courses}">
-                        <td>
-                            <div class="course-thumbnail" style="width: 80px; height: 50px; border-radius: var(--radius-s); overflow: hidden; background: var(--bg-dark); border: 1px solid var(--border-subtle);">
-                                <img th:if="${course.imageUrl}" th:src="${course.imageUrl}" alt="Course Thumbnail" style="width: 100%; height: 100%; object-fit: cover;">
-                                <div th:unless="${course.imageUrl}" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--text-dim);">
-                                    <i class="bi bi-code-slash"></i>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <a th:href="@{/courses/{id}(id=${course.id})}" th:text="${course.title}" class="link-hover text-bold" style="color: var(--text-main);">Course Title</a>
-                        </td>
-                        <td>
-                            <span class="badge" th:classappend="'badge-' + ${#strings.toLowerCase(course.level)}" th:text="${course.level}">Beginner</span>
-                        </td>
-                        <td th:text="${course.duration}">10 hours</td>
-                        <td style="text-align: right;">
-                            <div style="display: inline-flex; gap: 8px;">
-                                <a th:href="@{/teacher/courses/{id}/modules(id=${course.id})}" class="btn btn-outline btn-xs btn-blue">
-                                    <i class="bi bi-journal-text"></i> MODULES
-                                </a>
-                                <a th:href="@{/teacher/courses/{id}/quizzes(id=${course.id})}" class="btn btn-outline btn-xs btn-purple">
-                                    <i class="bi bi-question-circle"></i> QUIZZES
-                                </a>
-                                <a th:href="@{/teacher/edit-course/{id}(id=${course.id})}" class="btn btn-outline btn-xs btn-orange">
-                                    <i class="bi bi-pencil"></i> EDIT
-                                </a>
-                                <a th:href="@{/teacher/delete-course/{id}(id=${course.id})}" class="btn btn-outline btn-delete btn-xs" onclick="return confirm('rm -rf this_course?')">
-                                    <i class="bi bi-trash3"></i> DELETE
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr th:if="${#lists.isEmpty(courses)}">
-                        <td colspan="5" style="text-align: center; padding: 40px; color: var(--text-dim);">
-                            No courses found. Use the button above to create_new_course().
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <!-- Main Workspace -->
+            <div class="admin-main" style="flex-grow: 1;">
+                <div class="admin-header" style="margin-bottom: 24px;">
+                    <h1 class="text-green font-mono">teacher@cabinet:~/courses$</h1>
+                    <div class="admin-actions">
+                        <a th:href="@{/teacher/add-course}" class="btn btn-outline btn-orange">
+                            <i class="bi bi-plus-lg"></i> create_new_course()
+                        </a>
+                    </div>
+                </div>
+
+                <div class="admin-table-wrapper card-glass" style="padding: 12px; border-radius: 12px;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>IMAGE</th>
+                                <th>TITLE</th>
+                                <th>LEVEL</th>
+                                <th>DURATION</th>
+                                <th style="text-align: right;">ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="course : ${courses}">
+                                <td>
+                                    <div class="course-thumbnail" style="width: 80px; height: 50px; border-radius: var(--radius-s); overflow: hidden; background: var(--bg-dark); border: 1px solid var(--border-subtle);">
+                                        <img th:if="${course.imageUrl}" th:src="${course.imageUrl}" alt="Course Thumbnail" style="width: 100%; height: 100%; object-fit: cover;">
+                                        <div th:unless="${course.imageUrl}" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--text-dim);">
+                                            <i class="bi bi-code-slash"></i>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <a th:href="@{/courses/{id}(id=${course.id})}" th:text="${course.title}" class="link-hover text-bold" style="color: var(--text-main);">Course Title</a>
+                                </td>
+                                <td>
+                                    <span class="badge" th:classappend="'badge-' + ${#strings.toLowerCase(course.level)}" th:text="${course.level}">Beginner</span>
+                                </td>
+                                <td th:text="${course.duration}">10 hours</td>
+                                <td style="text-align: right;">
+                                    <div style="display: inline-flex; gap: 8px;">
+                                        <a th:href="@{/teacher/courses/{id}/modules(id=${course.id})}" class="btn btn-outline btn-xs btn-blue">
+                                            <i class="bi bi-journal-text"></i> MODULES
+                                        </a>
+                                        <a th:href="@{/teacher/courses/{id}/quizzes(id=${course.id})}" class="btn btn-outline btn-xs btn-purple">
+                                            <i class="bi bi-question-circle"></i> QUIZZES
+                                        </a>
+                                        <a th:href="@{/teacher/edit-course/{id}(id=${course.id})}" class="btn btn-outline btn-xs btn-orange">
+                                            <i class="bi bi-pencil"></i> EDIT
+                                        </a>
+                                        <a th:href="@{/teacher/delete-course/{id}(id=${course.id})}" class="btn btn-outline btn-delete btn-xs" onclick="return confirm('rm -rf this_course?')">
+                                            <i class="bi bi-trash3"></i> DELETE
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(courses)}">
+                                <td colspan="5" style="text-align: center; padding: 40px; color: var(--text-dim);">
+                                    No courses found. Use the button above to create_new_course().
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </body>

@@ -5035,4 +5035,35 @@ code[class*="language-"] {
   }
 }
 
-
+/* --- EasyMDE Editor Styling --- */
+.EasyMDEContainer {
+  background: var(--bg-dark);
+  border-radius: var(--radius);
+  margin-top: 8px;
+}
+.editor-toolbar {
+  border-color: var(--border-subtle) !important;
+  background: var(--bg-surface) !important;
+  border-radius: var(--radius) var(--radius) 0 0 !important;
+}
+.editor-toolbar button {
+  color: var(--text-main) !important;
+}
+.editor-toolbar button:hover, .editor-toolbar button.active {
+  background: var(--bg-dark) !important;
+  border-color: var(--border-active) !important;
+}
+.CodeMirror {
+  background: var(--bg-dark) !important;
+  color: var(--text-main) !important;
+  border-color: var(--border-subtle) !important;
+  border-radius: 0 0 var(--radius) var(--radius) !important;
+  font-family: var(--font-mono) !important;
+}
+.editor-preview-active {
+  background: var(--bg-dark) !important;
+  color: var(--text-main) !important;
+}
+.editor-statusbar {
+  color: var(--text-dim) !important;
+}

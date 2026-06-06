@@ -84,23 +84,57 @@
 
 <body>
     <div layout:fragment="content" class="container py-l fade-in">
-        <!-- Page Header -->
-        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 36px; flex-wrap: wrap; gap: 16px;">
-            <div>
-                <a th:href="@{/teacher/dashboard}" class="btn btn-outline btn-sm" style="border-radius: 8px; margin-bottom: 12px; font-size: 0.8rem;">
-                    <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
+        <div class="admin-workspace">
+            <!-- Sidebar Navigation -->
+            <div class="admin-sidebar">
+                <div class="admin-sidebar-header">
+                    <i class="bi bi-person-workspace"></i> teacher@cabinet:~$
+                </div>
+                
+                <a th:href="@{/teacher/dashboard}" class="admin-sidebar-menu-item">
+                    <i class="bi bi-terminal"></i> dashboard()
                 </a>
-                <h1 style="font-size: clamp(2rem, 5vw, 2.6rem); margin: 0 0 8px; font-weight: 800; letter-spacing: -0.02em;">
-                    Academy <span class="text-gradient-blue">Analytics</span>
-                </h1>
-                <p style="color: var(--text-dim); margin: 0; font-size: 1rem;">
-                    Comprehensive insights into student performance and curriculum effectiveness.
-                </p>
+                <a th:href="@{/teacher/courses}" class="admin-sidebar-menu-item">
+                    <i class="bi bi-book"></i> courses_manager()
+                </a>
+                <a th:href="@{/teacher/coding-tasks}" class="admin-sidebar-menu-item">
+                    <i class="bi bi-code-square"></i> coding_tasks()
+                </a>
+                <a th:href="@{/teacher/students}" class="admin-sidebar-menu-item">
+                    <i class="bi bi-people"></i> students_dir()
+                </a>
+                <a th:href="@{/teacher/analytics}" class="admin-sidebar-menu-item active">
+                    <i class="bi bi-graph-up-arrow"></i> analytics()
+                </a>
+                
+                <div style="margin-top: auto; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.08); margin-top: 40px;">
+                    <form th:action="@{/logout}" method="POST" class="m-0">
+                        <button type="submit" class="admin-sidebar-menu-item" style="background: none; border: none; width: 100%; text-align: left; cursor: pointer; padding: 8px 12px;">
+                            <i class="bi bi-power" style="color: var(--accent-orange);"></i> exit()
+                        </button>
+                    </form>
+                </div>
             </div>
-        </div>
 
-        <!-- Charts Grid -->
-        <div class="analytics-grid">
+            <!-- Main Workspace -->
+            <div class="admin-main" style="flex-grow: 1;">
+                <!-- Page Header -->
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 36px; flex-wrap: wrap; gap: 16px;">
+                    <div>
+                        <a th:href="@{/teacher/dashboard}" class="btn btn-outline btn-sm" style="border-radius: 8px; margin-bottom: 12px; font-size: 0.8rem;">
+                            <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
+                        </a>
+                        <h1 style="font-size: clamp(2rem, 5vw, 2.6rem); margin: 0 0 8px; font-weight: 800; letter-spacing: -0.02em;">
+                            Academy <span class="text-gradient-blue">Analytics</span>
+                        </h1>
+                        <p style="color: var(--text-dim); margin: 0; font-size: 1rem;">
+                            Comprehensive insights into student performance and curriculum effectiveness.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Charts Grid -->
+                <div class="analytics-grid">
 
             <!-- Student Level Distribution (Doughnut) -->
             <div class="card-glass chart-card">
@@ -390,6 +424,8 @@
                 .catch(err => console.error('Teacher analytics error:', err));
         </script>
     </div>
+</div>
+</div>
 </body>
 
 </html>

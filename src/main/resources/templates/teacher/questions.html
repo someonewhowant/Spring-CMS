@@ -7,17 +7,51 @@
 </head>
 <body>
     <div layout:fragment="content" class="container py-l">
-        <div class="admin-header mb-xl">
-            <div>
-                <h1 class="text-green font-mono" th:text="'teacher@cabinet:~/quizzes/' + ${quiz.id} + '/questions$'">teacher@cabinet:~/quizzes/1/questions$</h1>
-                <p class="text-dim mt-xs" th:text="'Quiz: ' + ${quiz.title} + ' (Course: ' + ${quiz.course.title} + ')'">Quiz Info</p>
-            </div>
-            <div class="admin-actions">
-                <a th:href="@{/teacher/courses/{id}/quizzes(id=${quiz.course.id})}" class="btn btn-outline btn-orange">
-                    <i class="bi bi-arrow-left"></i> back_to_quizzes()
+        <div class="admin-workspace">
+            <!-- Sidebar Navigation -->
+            <div class="admin-sidebar">
+                <div class="admin-sidebar-header">
+                    <i class="bi bi-person-workspace"></i> teacher@cabinet:~$
+                </div>
+                
+                <a th:href="@{/teacher/dashboard}" class="admin-sidebar-menu-item">
+                    <i class="bi bi-terminal"></i> dashboard()
                 </a>
+                <a th:href="@{/teacher/courses}" class="admin-sidebar-menu-item active">
+                    <i class="bi bi-book"></i> courses_manager()
+                </a>
+                <a th:href="@{/teacher/coding-tasks}" class="admin-sidebar-menu-item">
+                    <i class="bi bi-code-square"></i> coding_tasks()
+                </a>
+                <a th:href="@{/teacher/students}" class="admin-sidebar-menu-item">
+                    <i class="bi bi-people"></i> students_dir()
+                </a>
+                <a th:href="@{/teacher/analytics}" class="admin-sidebar-menu-item">
+                    <i class="bi bi-graph-up-arrow"></i> analytics()
+                </a>
+                
+                <div style="margin-top: auto; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.08); margin-top: 40px;">
+                    <form th:action="@{/logout}" method="POST" class="m-0">
+                        <button type="submit" class="admin-sidebar-menu-item" style="background: none; border: none; width: 100%; text-align: left; cursor: pointer; padding: 8px 12px;">
+                            <i class="bi bi-power" style="color: var(--accent-orange);"></i> exit()
+                        </button>
+                    </form>
+                </div>
             </div>
-        </div>
+
+            <!-- Main Workspace -->
+            <div class="admin-main" style="flex-grow: 1;">
+                <div class="admin-header mb-xl">
+                    <div>
+                        <h1 class="text-green font-mono" th:text="'teacher@cabinet:~/quizzes/' + ${quiz.id} + '/questions$'">teacher@cabinet:~/quizzes/1/questions$</h1>
+                        <p class="text-dim mt-xs" th:text="'Quiz: ' + ${quiz.title} + ' (Course: ' + ${quiz.course.title} + ')'">Quiz Info</p>
+                    </div>
+                    <div class="admin-actions">
+                        <a th:href="@{/teacher/courses/{id}/quizzes(id=${quiz.course.id})}" class="btn btn-outline btn-orange">
+                            <i class="bi bi-arrow-left"></i> back_to_quizzes()
+                        </a>
+                    </div>
+                </div>
 
         <div class="questions-list mb-2xl">
             <div th:each="question, qStat : ${quiz.questions}" class="card-glass mb-l p-l border-active" style="border: 1px solid var(--border-subtle); padding: 24px; margin-bottom: 24px; border-radius: var(--radius); background: var(--bg-surface);">
@@ -97,6 +131,8 @@
                 </form>
             </div>
         </div>
+    </div>
+</div>
     </div>
 </body>
 </html>
